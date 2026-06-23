@@ -78,7 +78,21 @@
     .doc-upfront{display:none;margin-top:10px;font-size:.82rem;color:#b88600;font-weight:800;border-top:1px dashed #bbb;padding-top:7px}
     .doc-legal{font-size:.74rem;color:#555;text-align:justify;margin-top:22px;border-top:2px solid #f5c400;padding-top:11px;line-height:1.42}
     .pdf-btn{width:100%;margin-top:12px;padding:12px;border:none;border-radius:8px;background:#111;color:white;font-size:1rem;font-weight:900;cursor:pointer}
-  </style>
+  
+/* V16.1 mejoras de uso interno */
+.page-home-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:900;width:54px;height:54px;border-radius:19px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.62);backdrop-filter:blur(14px);color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:1.35rem;box-shadow:0 14px 35px rgba(0,0,0,.45)}
+.page-home-btn:active{transform:scale(.94)}
+.worker-summary{margin:10px 0 8px;padding:12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--primary,#e30613),transparent 45%);background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.025));box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.worker-summary-title{font-size:.68rem;color:var(--text-dim,#aaa);font-weight:900;text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px}
+.worker-summary-line{font-size:.82rem;font-weight:750;color:var(--text,#fff);line-height:1.35;opacity:.94}
+.worker-summary-line strong{color:var(--primary,#e30613)}
+.adic-item.has-lines,.row.has-lines{border-color:var(--primary,#e30613)!important;background:color-mix(in srgb,var(--primary,#e30613),transparent 84%)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--primary,#e30613),transparent 70%) inset}
+.adic-item.has-lines .lines-display,.row.has-lines .lines-display{font-size:1.55rem;color:var(--primary,#e30613)}
+body{animation:v161PageIn .22s ease-out both}
+@keyframes v161PageIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+@media (display-mode: standalone){.install-hint,.footer{display:none!important}}
+
+    </style>
 
 <style>
   .mm-app-topbar{
@@ -207,6 +221,7 @@
     <div id="ahorro-mensual">Esperando precio</div>
     <div id="operador-info">Jazztel - Total: 39,75€/mes</div>
     <div id="upfront-info" class="upfront-info"></div>
+    <div id="worker-summary-jazztel" class="worker-summary"></div>
     <button class="action-btn" onclick="abrirDesglose()">Generar propuesta detallada</button>
   </div>
 
@@ -278,6 +293,8 @@
     futbol:false,
     segundaExtra:false
   };
+
+  try { const saved = JSON.parse(localStorage.getItem('mmv_jazztel_state') || 'null'); if (saved) estado = Object.assign(estado, saved); } catch(e) {}
 
   let dataReporte = {};
 
@@ -354,7 +371,7 @@
     if(!(estado.tipo==='convergente'||estado.tipo==='antidigi')) return;
     const grupo = (estado.tipo==='antidigi'||estado.perfil==='ilimitados') ? ADICIONALES.ilimitados : ADICIONALES.compartidos;
     grupo.forEach(l=>{
-      const row=document.createElement('div'); row.className='adic-item';
+      const row=document.createElement('div'); row.className='adic-item' + ((estado.cantidades[l.id]||0)>0 ? ' has-lines' : '');
       row.innerHTML=`<div class="adic-info"><span class="adic-title">${l.nombre}</span><span class="adic-price">${euro(l.precio)}/mes</span></div><div class="counter"><button class="btn-circle" onclick="modificarLinea('${l.id}',-1)">-</button><div class="lines-display">${estado.cantidades[l.id]}</div><button class="btn-circle" onclick="modificarLinea('${l.id}',1)">+</button></div>`;
       c.appendChild(row);
     });
@@ -487,6 +504,21 @@
         anual.innerText='0€'; anual.style.color='var(--error)'; mensual.innerText='No hay mejora económica';
       }
     } else { anual.innerText='0€'; anual.style.color='var(--success)'; mensual.innerText='Esperando precio'; }
+    renderWorkerSummaryJazztel();
+  }
+
+
+  function renderWorkerSummaryJazztel(){
+    const box=document.getElementById('worker-summary-jazztel');
+    if(!box||!dataReporte) return;
+    const tipoMap={convergente:'Fibra + móvil',antidigi:'Anti-DIGI',solofibra:'Solo fibra',segunda:'2ª residencia'};
+    const tvNames=(dataReporte.tv||[]).map(t=>t.nombre).join(', ') || 'Sin TV';
+    const adic=(dataReporte.lineas||[]).filter(l=>l.nota==='Línea adicional').length;
+    box.innerHTML=`<div class="worker-summary-title">Resumen interno</div>
+      <div class="worker-summary-line"><strong>${tipoMap[estado.tipo]||'Jazztel'}</strong> · ${estado.velocidad==='1000'?'1 GB':estado.velocidad+' MB'} · ${estado.perfil}</div>
+      <div class="worker-summary-line">Adicionales: ${adic}${estado.segundaExtra?' · incluye 2ª residencia':''}</div>
+      <div class="worker-summary-line">TV: ${tvNames}</div>`;
+    try{localStorage.setItem('mmv_jazztel_state',JSON.stringify(estado));}catch(e){}
   }
 
   function abrirDesglose(){
@@ -601,5 +633,6 @@
 
   renderAdicionales(); actualizar();
 </script>
+<a class="page-home-btn" href="../index.html" aria-label="Volver al inicio">🏠</a>
 </body>
 </html>

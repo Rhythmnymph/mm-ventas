@@ -7,6 +7,20 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { -webkit-tap-highlight-color: transparent; }
+    
+/* V16.1 mejoras de uso interno */
+.page-home-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:900;width:54px;height:54px;border-radius:19px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.62);backdrop-filter:blur(14px);color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:1.35rem;box-shadow:0 14px 35px rgba(0,0,0,.45)}
+.page-home-btn:active{transform:scale(.94)}
+.worker-summary{margin:10px 0 8px;padding:12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--primary,#e30613),transparent 45%);background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.025));box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.worker-summary-title{font-size:.68rem;color:var(--text-dim,#aaa);font-weight:900;text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px}
+.worker-summary-line{font-size:.82rem;font-weight:750;color:var(--text,#fff);line-height:1.35;opacity:.94}
+.worker-summary-line strong{color:var(--primary,#e30613)}
+.adic-item.has-lines,.row.has-lines{border-color:var(--primary,#e30613)!important;background:color-mix(in srgb,var(--primary,#e30613),transparent 84%)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--primary,#e30613),transparent 70%) inset}
+.adic-item.has-lines .lines-display,.row.has-lines .lines-display{font-size:1.55rem;color:var(--primary,#e30613)}
+body{animation:v161PageIn .22s ease-out both}
+@keyframes v161PageIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+@media (display-mode: standalone){.install-hint,.footer{display:none!important}}
+
     </style>
 
 <style>
@@ -34,6 +48,11 @@
   @keyframes mmPageIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
 </style>
 
+
+<style>
+  body{background:radial-gradient(circle at top,#fff5f5 0,#f5f5f5 45%,#ededed 100%)!important;padding-top:calc(env(safe-area-inset-top,0px) + 12px)!important}
+  body:before{content:'MM Ventas · Luz';display:block;width:100%;max-width:448px;margin:0 auto 10px;color:#e30613;font-weight:950;letter-spacing:.04em;text-transform:uppercase;font-size:.82rem}
+</style>
 </head>
 <body class="bg-gray-50 min-h-screen p-4 font-sans text-gray-800 flex flex-col items-center pb-10">
     <div class="w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden p-6 mt-2 border border-gray-100">
@@ -244,5 +263,6 @@
             document.getElementById('resultados').style.display = 'block';
         }
     </script>
+<a class="page-home-btn" href="../index.html" aria-label="Volver al inicio">🏠</a>
 </body>
 </html>

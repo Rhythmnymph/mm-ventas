@@ -79,6 +79,20 @@
         .doc-legal { font-size: 0.75rem; color: #555; text-align: justify; margin-top: 25px; border-top: 2px solid #e30613; padding-top: 12px; line-height: 1.4; }
         
         .pdf-btn { background-color: #000; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    
+/* V16.1 mejoras de uso interno */
+.page-home-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:900;width:54px;height:54px;border-radius:19px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.62);backdrop-filter:blur(14px);color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:1.35rem;box-shadow:0 14px 35px rgba(0,0,0,.45)}
+.page-home-btn:active{transform:scale(.94)}
+.worker-summary{margin:10px 0 8px;padding:12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--primary,#e30613),transparent 45%);background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.025));box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.worker-summary-title{font-size:.68rem;color:var(--text-dim,#aaa);font-weight:900;text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px}
+.worker-summary-line{font-size:.82rem;font-weight:750;color:var(--text,#fff);line-height:1.35;opacity:.94}
+.worker-summary-line strong{color:var(--primary,#e30613)}
+.adic-item.has-lines,.row.has-lines{border-color:var(--primary,#e30613)!important;background:color-mix(in srgb,var(--primary,#e30613),transparent 84%)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--primary,#e30613),transparent 70%) inset}
+.adic-item.has-lines .lines-display,.row.has-lines .lines-display{font-size:1.55rem;color:var(--primary,#e30613)}
+body{animation:v161PageIn .22s ease-out both}
+@keyframes v161PageIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
+@media (display-mode: standalone){.install-hint,.footer{display:none!important}}
+
     </style>
 
 <style>
@@ -208,6 +222,7 @@
         <div id="ahorro-anual">0€</div>
         <div id="ahorro-mensual">0€ al mes</div>
         <div style="font-weight: bold; margin-top: 5px; color: #fff;" id="operador-info">Introduce precio</div>
+        <div id="worker-summary-multi" class="worker-summary"></div>
         <button class="action-btn" onclick="abrirDesglose()">Ver Desglose de Oferta</button>
     </div>
 
@@ -276,6 +291,8 @@
             tvSeleccionada: { lowi: {}, simyo: {}, jazz: {} }
         };
 
+        try { const saved = JSON.parse(localStorage.getItem('mmv_multi_state') || 'null'); if (saved) estado = Object.assign(estado, saved); } catch(e) {}
+
         let dataReporte = {};
 
         function setOp(operador) {
@@ -332,6 +349,7 @@
             document.getElementById('section-adic').style.display = (estado.soloMovil) ? 'none' : 'flex';
             
             document.getElementById('display-base').innerText = estado.baseLines;
+            document.getElementById('section-adic')?.classList.toggle('has-lines', estado.adicLines > 0);
             document.getElementById('panel-tv').style.display = estado.tvPanel ? 'block' : 'none';
             document.getElementById('grid-lowi').style.display = (estado.op === 'lowi') ? 'flex' : 'none';
             document.getElementById('grid-simyo').style.display = (estado.op === 'simyo') ? 'flex' : 'none';
@@ -389,6 +407,7 @@
             estado.adicLines += val;
             if (estado.adicLines < 0) estado.adicLines = 0;
             document.getElementById('display-adic').innerText = estado.adicLines;
+            document.getElementById('section-adic')?.classList.toggle('has-lines', estado.adicLines > 0);
             actualizar();
         }
 
@@ -562,6 +581,21 @@
                 txtAnual.innerText = "0€";
                 txtMensual.innerHTML = "Esperando precio";
             }
+            renderWorkerSummaryMulti();
+        }
+
+
+        function renderWorkerSummaryMulti() {
+            const box = document.getElementById('worker-summary-multi');
+            if (!box || !dataReporte) return;
+            const tvNames = (dataReporte.tv || []).map(t => t.nombre).join(', ') || 'Sin TV/plataformas';
+            const adic = estado.soloMovil ? `${estado.baseLines} línea(s) móvil(es)` : `${estado.adicLines} adicional(es)`;
+            const modo = estado.soloMovil ? 'Solo móvil' : (estado.antiDigi ? 'Anti-DIGI' : (estado.isUnlimited ? 'Ilimitados' : 'Normal'));
+            box.innerHTML = `<div class="worker-summary-title">Resumen interno</div>
+                <div class="worker-summary-line"><strong>${dataReporte.operador}</strong> · ${modo} · ${adic}</div>
+                <div class="worker-summary-line">${dataReporte.fibraVelocidad}</div>
+                <div class="worker-summary-line">TV: ${tvNames}</div>`;
+            try { localStorage.setItem('mmv_multi_state', JSON.stringify(estado)); } catch(e) {}
         }
 
         function abrirDesglose() {
@@ -667,5 +701,6 @@
         actualizarUIOpciones();
         actualizar();
     </script>
+<a class="page-home-btn" href="../index.html" aria-label="Volver al inicio">🏠</a>
 </body>
 </html>
