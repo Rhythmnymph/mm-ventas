@@ -67,10 +67,10 @@
 <body>
   <main class="app">
     <section class="hero">
-      <div class="badge">V16 PWA</div>
+      <div class="badge">V16.1</div>
       <div class="kicker">MediaMarkt Añaza</div>
       <h1>MM Ventas</h1>
-      <div class="sub">Calculadoras de operadores, Simyo, Jazztel y luz en formato app instalable.</div>
+      <div class="sub">Herramientas internas de venta: operadores, Simyo, Jazztel y luz.</div>
     </section>
 
     <section class="grid">
@@ -88,11 +88,12 @@
       </a>
     </section>
 
-    <div class="footer">Instálala desde Chrome: menú ⋮ → Añadir a pantalla de inicio</div>
+    <div class="footer install-hint">Instálala desde Chrome: menú ⋮ → Añadir a pantalla de inicio</div>
   </main>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(()=>{}));
+    if (window.matchMedia('(display-mode: standalone)').matches) document.querySelector('.install-hint')?.remove();
     }
   </script>
 </body>

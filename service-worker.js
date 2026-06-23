@@ -1,9 +1,10 @@
-const CACHE_NAME = 'mm-ventas-v16-1';
+const CACHE_NAME = 'mm-ventas-v16-1b';
 const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
   './assets/icon.svg',
+  './assets/app-shell.css',
   './pages/multi.html',
   './pages/simyo.html',
   './pages/jazztel.html',
