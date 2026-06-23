@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora Simyo Pro (V10)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        :root {
+            --bg: #0d0601; 
+            --card: #1c0a02;
+            --primary: #ff6600; 
+            --primary-hover: #ff8533;
+            --success: #00ff66;
+            --warning: #ffcc00;
+            --error: #ff4444;
+            --text: #ffffff;
+            --text-dim: #aaaaaa;
+            --border: #4a2005;
+        }
+
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 8px; display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        .header { text-align: center; padding: 5px 0 15px 0; font-weight: 900; font-size: 1.1rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
+        .section { background-color: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid var(--border); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .label { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; display: block; font-weight: bold; }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .row:last-child { margin-bottom: 0; }
+        
+        .counter { display: flex; align-items: center; gap: 12px; }
+        .btn-circle { width: 36px; height: 36px; border-radius: 50%; border: 1px solid #662b00; background-color: #2a1100; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.1s; }
+        .btn-circle:active { background-color: var(--primary); border-color: var(--primary); transform: scale(0.9); }
+        .lines-display { font-size: 1.3rem; font-weight: 900; min-width: 20px; text-align: center; }
+        
+        .toggle-group { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+        .toggle-btn { flex: 1; padding: 10px 5px; background-color: #2a1100; color: #888; border: 1px solid var(--border); border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center; min-width: 30%; }
+        .toggle-btn.active { border-color: var(--primary); color: white; background-color: var(--primary); }
+        .toggle-btn.active-warning { border-color: var(--warning); color: #000; background-color: var(--warning); }
+        
+        .tv-panel { display: none; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+        .tv-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tv-btn { background-color: #1a0a02; border: 1px solid var(--border); color: var(--text-dim); padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; flex-grow: 1; text-align: center; }
+        .tv-btn.selected { background-color: rgba(255, 102, 0, 0.15); border-color: var(--primary); color: var(--primary); }
+
+        .adic-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; }
+        .adic-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(0,0,0,0.4); border: 1px solid #331500; border-radius: 8px; }
+        .adic-info { display: flex; flex-direction: column; }
+        .adic-title { font-weight: bold; font-size: 0.85rem; color: #fff; }
+        .adic-price { font-size: 0.75rem; color: var(--primary); font-weight: 900; }
+        
+        .input-container { text-align: center; padding: 5px 0; }
+        .price-input { width: 70%; background: transparent; border: none; border-bottom: 2px solid var(--border); color: white; font-size: 2.5rem; font-weight: 800; text-align: center; outline: none; padding: 2px; }
+        .price-input:focus { border-bottom-color: var(--primary); }
+        
+        .result-zone { margin-top: auto; text-align: center; padding-bottom: 10px; }
+        #ahorro-anual { font-size: 3.5rem; font-weight: 900; line-height: 1; margin: 5px 0; color: var(--success); text-shadow: 0 0 15px rgba(0, 255, 102, 0.2); }
+        #ahorro-mensual { color: var(--text-dim); font-size: 1rem; }
+        
+        .action-btn { background-color: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .action-btn:active { background-color: var(--primary-hover); }
+
+        /* Estructura Modal copiada exactamente de la Multiplataforma (V15) */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: flex-start; padding: 10px; box-sizing: border-box; overflow-y: auto; }
+        .modal-content { background-color: #fff; color: #333; width: 100%; max-width: 650px; border-radius: 12px; padding: 25px; position: relative; margin: 20px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 1.8rem; font-weight: bold; cursor: pointer; color: #666; border: none; background: transparent; }
+        
+        .doc-proposal { padding: 10px; background: #fff; color: #222; font-family: Arial, sans-serif; }
+        .doc-header { border-bottom: 4px solid var(--primary); padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .doc-brand { font-size: 1.5rem; font-weight: 900; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+        .doc-title { font-size: 0.9rem; font-weight: bold; color: #666; text-align: right; text-transform: uppercase; }
+        
+        .doc-section { margin-bottom: 22px; }
+        .doc-section-title { font-size: 0.85rem; color: var(--primary); text-transform: uppercase; font-weight: 800; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-bottom: 10px; letter-spacing: 0.5px; }
+        
+        .doc-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+        .doc-table th { text-align: left; font-size: 0.75rem; color: #777; text-transform: uppercase; padding: 6px 0; border-bottom: 1px solid #eee; }
+        .doc-table td { padding: 9px 0; font-size: 0.9rem; border-bottom: 1px solid #f9f9f9; line-height: 1.3; }
+        .doc-table td.price { text-align: right; font-weight: bold; color: #000; width: 80px; }
+        
+        .doc-footer-summary { background: #fff0e6; border: 1px solid #ffd1b3; border-radius: 6px; padding: 15px; margin-top: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .doc-total-label { font-size: 1.1rem; font-weight: 900; color: #000; }
+        .doc-total-price { font-size: 1.6rem; font-weight: 900; color: var(--primary); }
+        .doc-legal { font-size: 0.75rem; color: #555; text-align: justify; margin-top: 25px; border-top: 2px solid var(--primary); padding-top: 12px; line-height: 1.4; }
+        
+        .pdf-btn { background-color: #000; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    </style>
+
+<style>
+  .mm-app-topbar{
+    position: sticky; top: 0; z-index: 9999;
+    display:flex; align-items:center; gap:10px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px;
+    background: rgba(10,0,0,.92);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  .mm-back{
+    width:42px;height:42px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    text-decoration:none;color:#fff;font-size:24px;font-weight:900;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mm-back:active{transform:scale(.94); background:#ff6600;}
+  .mm-title-wrap{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+  .mm-title{font-size:1rem;font-weight:950;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mm-subtitle{font-size:.72rem;color:rgba(255,255,255,.62);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+  body{animation:mmPageIn .24s ease both;}
+  @keyframes mmPageIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+</style>
+
+</head>
+<body>
+
+<div class="mm-app-topbar">
+  <a class="mm-back" href="../index.html" aria-label="Volver">‹</a>
+  <div class="mm-title-wrap">
+    <div class="mm-subtitle">Calculadora dedicada</div>
+    <div class="mm-title">Simyo Pro</div>
+  </div>
+</div>
+
+    <div class="header">Calculadora Simyo Pro (V10)</div>
+
+    <div class="section">
+        <span class="label">Tipo de Contrato</span>
+        <div class="toggle-group" style="margin-bottom: 15px;">
+            <button id="btn-tipo-fibra" class="toggle-btn active" onclick="setTipoContrato(false)">Fibra + Móvil</button>
+            <button id="btn-tipo-movil" class="toggle-btn" onclick="setTipoContrato(true)">Solo Móvil</button>
+        </div>
+
+        <span class="label">Perfil de Cliente</span>
+        <div class="toggle-group">
+            <button id="btn-estandar" class="toggle-btn active" onclick="setModo(false)">Tarifa Estándar</button>
+            <button id="btn-digi" class="toggle-btn" onclick="setModo(true)">Origen DIGI (Promo)</button>
+        </div>
+
+        <div id="sec-fibra-vel">
+            <span class="label" style="margin-top: 15px;">Velocidad de Fibra</span>
+            <div class="toggle-group">
+                <button id="btn-fibra-600" class="toggle-btn" onclick="setFibra('600')">600 MB</button>
+                <button id="btn-fibra-1000" class="toggle-btn active" onclick="setFibra('1000')">1 GB</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="sec-linea-prin">
+        <span class="label">Línea Móvil Principal</span>
+        <div id="grid-principal-estandar" class="toggle-group">
+            <button id="btn-prin-50" class="toggle-btn active" onclick="setLineaPrin('50')">50 GB</button>
+            <button id="btn-prin-120" class="toggle-btn" onclick="setLineaPrin('120')">120 GB</button>
+            <button id="btn-prin-300" class="toggle-btn" onclick="setLineaPrin('300')">300 GB</button>
+        </div>
+        <div id="grid-principal-digi" class="toggle-group" style="display: none;">
+            <button class="toggle-btn active-warning" style="cursor: default;">250 GB (Bloqueado por Promo)</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <span class="label" id="title-list-lineas">Líneas Adicionales</span>
+        <div class="adic-list" id="lista-lineas">
+            </div>
+    </div>
+
+    <div class="section">
+        <div class="toggle-group" id="btn-container-tv">
+            <button id="tgl-tv" class="toggle-btn" onclick="toggleTVPanel()">+ Opciones de TV</button>
+        </div>
+
+        <div id="panel-tv" class="tv-panel">
+            <span class="label">TV / Streaming (Precios con IGIC)</span>
+            <div class="tv-grid">
+                <div class="tv-btn" id="btn-simyo-tv_sky" onclick="toggleTV('tv_sky', 5.30)">TV + SkyShowtime (5.30€)</div>
+                <div class="tv-btn" id="btn-simyo-netflix" onclick="toggleTV('netflix', 7.07)">Netflix c/anuncios (7.07€)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" style="padding-bottom: 5px;">
+        <span class="label" style="text-align: center;">¿Cuánto pagas actualmente?</span>
+        <div class="input-container">
+            <input type="number" id="input-cliente" class="price-input" placeholder="0" oninput="actualizar()" inputmode="decimal">
+            <span style="font-size: 1.5rem; font-weight: bold; color: var(--primary);">€</span>
+        </div>
+    </div>
+
+    <div class="result-zone">
+        <span class="label">Ahorro estimado al año</span>
+        <div id="ahorro-anual">0€</div>
+        <div id="ahorro-mensual">0€ al mes</div>
+        <div style="font-weight: bold; margin-top: 5px; color: #fff;" id="operador-info">Configurando paquete...</div>
+        <button class="action-btn" onclick="abrirDesglose()">Generar Reporte Detallado</button>
+    </div>
+
+    <div id="modal-desglose" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="cerrarDesglose()">×</button>
+            <div id="contenido-pdf" class="doc-proposal">
+                <div class="doc-header">
+                    <div class="doc-brand">Simyo by MediaMarkt</div>
+                    <div class="doc-title">Propuesta de Servicios<br>Personalizada</div>
+                </div>
+                
+                <div class="doc-section" id="pdf-section-fibra">
+                    <div class="doc-section-title">1. Conexión de Fibra Óptica</div>
+                    <table class="doc-table">
+                        <thead><tr><th>Concepto</th><th>Detalle Técnico</th><th style="text-align:right">Estado</th></tr></thead>
+                        <tbody id="pdf-fibra-rows"></tbody>
+                    </table>
+                </div>
+
+                <div class="doc-section">
+                    <div class="doc-section-title" id="title-movil-pdf">2. Telefonía Móvil (Llamadas Ilimitadas incl.)</div>
+                    <table class="doc-table">
+                        <thead><tr><th>Línea</th><th>Paquete de Datos</th><th style="text-align:right">Importe</th></tr></thead>
+                        <tbody id="pdf-movil-rows"></tbody>
+                    </table>
+                </div>
+
+                <div class="doc-section" id="pdf-section-tv" style="display:none;">
+                    <div class="doc-section-title">3. Opciones de Televisión</div>
+                    <table class="doc-table">
+                        <thead><tr><th>Servicio</th><th>Detalle</th><th style="text-align:right">Importe</th></tr></thead>
+                        <tbody id="pdf-tv-rows"></tbody>
+                    </table>
+                </div>
+
+                <div class="doc-footer-summary">
+                    <div>
+                        <div class="doc-total-label">Presupuesto Mensual Total</div>
+                        <div style="font-size:0.75rem; color:#666; font-weight:bold; margin-top:2px;" id="pdf-ahorro-nota"></div>
+                    </div>
+                    <div class="doc-total-price" id="ticket-total-precio">0.00€</div>
+                </div>
+
+                <div class="doc-legal" id="pdf-legal-text"></div>
+            </div>
+            <button class="pdf-btn" onclick="generarPDF()">Guardar Propuesta PDF</button>
+        </div>
+    </div>
+
+    <script>
+        const TARIFAS_BASE = {
+            estandar: {
+                '600': { '50': 28.29, '120': 31.83, '300': 37.13 },
+                '1000': { '50': 30.06, '120': 33.59, '300': 38.90 }
+            },
+            digi: {
+                '600': { '250': 22.54 },
+                '1000': { '250': 24.31 }
+            }
+        };
+
+        const LINEAS = {
+            convergente: [
+                { id: '8', gb: 8, precio: 2.65, tipo: 'estandar', desc: '8 GB' },
+                { id: '50', gb: 50, precio: 4.42, tipo: 'estandar', desc: '50 GB' },
+                { id: '75', gb: 75, precio: 2.65, tipo: 'digi', desc: '75 GB (Origen DIGI)' },
+                { id: '100', gb: 100, precio: 7.07, tipo: 'estandar', desc: '100 GB' },
+                { id: '150', gb: 150, precio: 8.84, tipo: 'estandar', desc: '150 GB' },
+                { id: '250', gb: 250, precio: 6.63, tipo: 'digi', desc: '250 GB (Promo)' },
+                { id: '300', gb: 300, precio: 10.61, tipo: 'estandar', desc: '300 GB' }
+            ],
+            solomovil: [
+                { id: '8', gb: 8, precio: 4.42, tipo: 'estandar', desc: '8 GB' },
+                { id: '50', gb: 50, precio: 6.63, tipo: 'estandar', desc: '50 GB' },
+                { id: '75', gb: 75, precio: 2.65, tipo: 'digi', desc: '75 GB (Origen DIGI)' },
+                { id: '100', gb: 100, precio: 8.84, tipo: 'estandar', desc: '100 GB' },
+                { id: '150', gb: 150, precio: 12.38, tipo: 'estandar', desc: '150 GB' },
+                { id: '250', gb: 250, precio: 6.63, tipo: 'digi', desc: '250 GB (Promo)' },
+                { id: '300', gb: 300, precio: 17.69, tipo: 'estandar', desc: '300 GB' }
+            ]
+        };
+
+        let estado = {
+            isSoloMovil: false,
+            isDigi: false,
+            fibra: '1000',
+            prinGB: '50',
+            cantidades: { '8':0, '50':0, '75':0, '100':0, '150':0, '250':0, '300':0 },
+            tvPanel: false,
+            tvSeleccionada: {}
+        };
+
+        let dataReporte = {};
+
+        function renderListasLineas() {
+            const container = document.getElementById('lista-lineas');
+            if(!container) return;
+            container.innerHTML = '';
+            
+            const arrayActivo = estado.isSoloMovil ? LINEAS.solomovil : LINEAS.convergente;
+            
+            arrayActivo.forEach(linea => {
+                if (linea.tipo === 'digi' && !estado.isDigi) return;
+
+                let row = document.createElement('div');
+                row.className = 'adic-item';
+                let prefijo = estado.isSoloMovil ? "Línea Suelta" : "Adicional";
+                row.innerHTML = `
+                    <div class="adic-info">
+                        <span class="adic-title">${prefijo} ${linea.desc}</span>
+                        <span class="adic-price">${linea.precio.toFixed(2)}€/mes</span>
+                    </div>
+                    <div class="counter">
+                        <button class="btn-circle" onclick="modificarLinea('${linea.id}', -1)">-</button>
+                        <div class="lines-display">${estado.cantidades[linea.id]}</div>
+                        <button class="btn-circle" onclick="modificarLinea('${linea.id}', 1)">+</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function setTipoContrato(isSoloMovil) {
+            estado.isSoloMovil = isSoloMovil;
+            document.getElementById('btn-tipo-fibra').classList.toggle('active', !isSoloMovil);
+            document.getElementById('btn-tipo-movil').classList.toggle('active', isSoloMovil);
+            
+            if (isSoloMovil) {
+                document.getElementById('sec-fibra-vel').style.display = 'none';
+                document.getElementById('sec-linea-prin').style.display = 'none';
+                document.getElementById('title-list-lineas').innerText = "Configuración de Líneas Móviles";
+            } else {
+                document.getElementById('sec-fibra-vel').style.display = 'block';
+                document.getElementById('sec-linea-prin').style.display = 'block';
+                document.getElementById('title-list-lineas').innerText = "Líneas Adicionales";
+            }
+            
+            estado.cantidades = { '8':0, '50':0, '75':0, '100':0, '150':0, '250':0, '300':0 };
+            renderListasLineas();
+            actualizar();
+        }
+
+        function setModo(isDigi) {
+            estado.isDigi = isDigi;
+            document.getElementById('btn-estandar').classList.toggle('active', !isDigi);
+            document.getElementById('btn-digi').classList.toggle('active', isDigi);
+            
+            if (isDigi) {
+                estado.prinGB = '250';
+                document.getElementById('grid-principal-estandar').style.display = 'none';
+                document.getElementById('grid-principal-digi').style.display = 'flex';
+            } else {
+                estado.prinGB = '50'; 
+                document.getElementById('btn-prin-50').classList.add('active');
+                document.getElementById('btn-prin-120').classList.remove('active');
+                document.getElementById('btn-prin-300').classList.remove('active');
+                document.getElementById('grid-principal-estandar').style.display = 'flex';
+                document.getElementById('grid-principal-digi').style.display = 'none';
+            }
+            
+            estado.cantidades = { '8':0, '50':0, '75':0, '100':0, '150':0, '250':0, '300':0 };
+            renderListasLineas();
+            actualizar();
+        }
+
+        function setFibra(vel) {
+            estado.fibra = vel;
+            document.getElementById('btn-fibra-600').classList.toggle('active', vel === '600');
+            document.getElementById('btn-fibra-1000').classList.toggle('active', vel === '1000');
+            actualizar();
+        }
+
+        function setLineaPrin(gb) {
+            if (estado.isDigi) return;
+            estado.prinGB = gb;
+            document.getElementById('btn-prin-50').classList.toggle('active', gb === '50');
+            document.getElementById('btn-prin-120').classList.toggle('active', gb === '120');
+            document.getElementById('btn-prin-300').classList.toggle('active', gb === '300');
+            actualizar();
+        }
+
+        function modificarLinea(id, val) {
+            estado.cantidades[id] += val;
+            if (estado.cantidades[id] < 0) estado.cantidades[id] = 0;
+            renderListasLineas();
+            actualizar();
+        }
+
+        function toggleTVPanel() {
+            estado.tvPanel = !estado.tvPanel;
+            document.getElementById('panel-tv').style.display = estado.tvPanel ? 'block' : 'none';
+        }
+
+        function toggleTV(service, price) {
+            if (estado.tvSeleccionada[service]) {
+                delete estado.tvSeleccionada[service];
+                document.getElementById(`btn-simyo-${service}`).classList.remove('selected');
+            } else {
+                estado.tvSeleccionada[service] = { precio: price, nombre: document.getElementById(`btn-simyo-${service}`).innerText.split('(')[0].trim() };
+                document.getElementById(`btn-simyo-${service}`).classList.add('selected');
+            }
+            actualizar();
+        }
+
+        function actualizar() {
+            dataReporte = {
+                fibraVelocidad: estado.fibra === '1000' ? '1 Gbps Simétrica' : '600 Mbps Simétrica',
+                lineas: [],
+                tv: [],
+                cuotaTotal: 0
+            };
+
+            let precioTotal = 0;
+
+            if (!estado.isSoloMovil) {
+                let precioBase = 0;
+                if (estado.isDigi) {
+                    precioBase = TARIFAS_BASE.digi[estado.fibra][estado.prinGB];
+                    dataReporte.lineas.push({ tipo: "Principal (Anti-DIGI)", datos: "250 GB", precio: precioBase, nota: "Precio bloque Fibra+Móvil" });
+                } else {
+                    precioBase = TARIFAS_BASE.estandar[estado.fibra][estado.prinGB];
+                    dataReporte.lineas.push({ tipo: "Principal (Estándar)", datos: `${estado.prinGB} GB`, precio: precioBase, nota: "Precio bloque Fibra+Móvil" });
+                }
+                precioTotal += precioBase;
+            }
+
+            const arrayActivo = estado.isSoloMovil ? LINEAS.solomovil : LINEAS.convergente;
+            
+            arrayActivo.forEach(linea => {
+                let cantidad = estado.cantidades[linea.id];
+                if (cantidad > 0) {
+                    precioTotal += (linea.precio * cantidad);
+                    for(let i=0; i<cantidad; i++) {
+                        let txtTipo = estado.isSoloMovil ? `Línea Suelta` : `Línea Adicional`;
+                        let txtNota = estado.isSoloMovil ? `Sin permanencia` : `Tarifa combinada`;
+                        dataReporte.lineas.push({ tipo: txtTipo, datos: linea.desc, precio: linea.precio, nota: txtNota });
+                    }
+                }
+            });
+
+            for (let s in estado.tvSeleccionada) {
+                precioTotal += estado.tvSeleccionada[s].precio;
+                dataReporte.tv.push({ nombre: estado.tvSeleccionada[s].nombre, precio: estado.tvSeleccionada[s].precio });
+            }
+
+            dataReporte.cuotaTotal = precioTotal;
+
+            let encabezadoVisual = estado.isSoloMovil ? `Simyo Sólo Móvil` : `Simyo Convergencia`;
+            document.getElementById('operador-info').innerText = `${encabezadoVisual} - Total: ${dataReporte.cuotaTotal.toFixed(2)}€/mes`;
+
+            const valCliente = parseFloat(document.getElementById('input-cliente').value) || 0;
+            const txtAnual = document.getElementById('ahorro-anual');
+            const txtMensual = document.getElementById('ahorro-mensual');
+
+            if (valCliente > 0) {
+                const ahorroMensual = valCliente - dataReporte.cuotaTotal;
+                if (ahorroMensual > 0) {
+                    txtAnual.innerText = Math.round(ahorroMensual * 12) + "€";
+                    txtAnual.style.color = "var(--success)";
+                    txtMensual.innerText = Math.round(ahorroMensual) + "€ ahorro/mes";
+                } else {
+                    txtAnual.innerText = "0€";
+                    txtAnual.style.color = "var(--error)";
+                    txtMensual.innerText = "No hay mejora económica";
+                }
+            } else {
+                txtAnual.innerText = "0€";
+                txtMensual.innerText = "Esperando precio";
+            }
+        }
+
+        function abrirDesglose() {
+            if(estado.isSoloMovil) {
+                document.getElementById('pdf-section-fibra').style.display = 'none';
+                document.getElementById('title-movil-pdf').innerText = '1. Telefonía Móvil (Llamadas Ilimitadas incl.)';
+            } else {
+                document.getElementById('pdf-section-fibra').style.display = 'block';
+                document.getElementById('title-movil-pdf').innerText = '2. Telefonía Móvil (Llamadas Ilimitadas incl.)';
+                
+                const tbodyFibra = document.getElementById('pdf-fibra-rows');
+                tbodyFibra.innerHTML = `
+                    <tr>
+                        <td><b>Acceso Internet</b></td>
+                        <td>${dataReporte.fibraVelocidad}</td>
+                        <td style="text-align:right; font-weight:bold; color:#222;">Activada</td>
+                    </tr>
+                `;
+            }
+
+            const tbodyMovil = document.getElementById('pdf-movil-rows');
+            tbodyMovil.innerHTML = "";
+            if (dataReporte.lineas.length === 0) {
+                tbodyMovil.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#888;">No se han seleccionado líneas móviles</td></tr>`;
+            } else {
+                dataReporte.lineas.forEach(l => {
+                    tbodyMovil.innerHTML += `
+                        <tr>
+                            <td><b>${l.tipo}</b><br><span style="font-size:0.75rem; color:#666;">${l.nota}</span></td>
+                            <td>${l.datos} ${estado.isDigi ? "(No acumulan)" : "(Acumulables)"}</td>
+                            <td class="price">${l.precio > 0 ? l.precio.toFixed(2) + '€' : 'Incluida'}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const secTV = document.getElementById('pdf-section-tv');
+            const tbodyTV = document.getElementById('pdf-tv-rows');
+            tbodyTV.innerHTML = "";
+            
+            if (dataReporte.tv.length > 0) {
+                secTV.style.display = "block";
+                dataReporte.tv.forEach(t => {
+                    tbodyTV.innerHTML += `
+                        <tr>
+                            <td><b>${t.nombre}</b></td>
+                            <td>Servicio de Contenidos Digitales</td>
+                            <td class="price">${t.precio.toFixed(2)}€</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                secTV.style.display = "none";
+            }
+
+            const valCliente = parseFloat(document.getElementById('input-cliente').value) || 0;
+            const divAhorroNota = document.getElementById('pdf-ahorro-nota');
+            if (valCliente > 0 && valCliente > dataReporte.cuotaTotal) {
+                let mensual = valCliente - dataReporte.cuotaTotal;
+                divAhorroNota.innerText = `Ahorro para el cliente: ${mensual.toFixed(2)}€/mes (${Math.round(mensual * 12)}€ al año respecto a su tarifa actual)`;
+            } else {
+                divAhorroNota.innerText = "Simulación de tarifa optimizada Simyo.";
+            }
+
+            let txtLegal = "<b>Condiciones legales y compromisos:</b> Estudio personalizado en MediaMarkt Añaza (Tenerife). Precios finales con IGIC vigente. Oferta sujeta a cobertura. ";
+            
+            if (estado.isSoloMovil) {
+                txtLegal += "Las líneas móviles sueltas no generan compromiso de permanencia. ";
+                if (estado.isDigi) {
+                    txtLegal += "Las líneas promocionales Anti-DIGI permiten compartir los gigas, pero no son acumulables para el mes siguiente.";
+                } else {
+                    txtLegal += "Gigas acumulables y compatibles entre líneas Simyo.";
+                }
+            } else {
+                if (estado.isDigi) {
+                    txtLegal += "Al acogerse a la promoción de fibra con tarifa reducida Anti-DIGI, el servicio queda sujeto a permanencia de 12 meses. Los gigas permiten compartirse, pero no son acumulables.";
+                } else {
+                    txtLegal += "El paquete estándar de Fibra + Móvil de Simyo incluye compromiso de permanencia de 3 meses. Sus gigas son acumulables y se pueden compartir.";
+                }
+            }
+            
+            document.getElementById('pdf-legal-text').innerHTML = txtLegal;
+            document.getElementById('ticket-total-precio').innerText = dataReporte.cuotaTotal.toFixed(2) + "€";
+            document.getElementById('modal-desglose').style.display = "flex";
+        }
+
+        function cerrarDesglose() {
+            document.getElementById('modal-desglose').style.display = "none";
+        }
+
+        function generarPDF() {
+            // Generación vectorial real: no captura el modal ni usa html2canvas.
+            const jspdfGlobal = window.jspdf;
+
+            if (!jspdfGlobal || !jspdfGlobal.jsPDF) {
+                alert('No se ha podido cargar jsPDF. Comprueba la conexión a Internet e inténtalo de nuevo.');
+                return;
+            }
+
+            const { jsPDF } = jspdfGlobal;
+            const doc = new jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+
+            if (typeof doc.autoTable !== 'function') {
+                alert('No se ha podido cargar el módulo de tablas del PDF. Comprueba la conexión e inténtalo de nuevo.');
+                return;
+            }
+
+            const naranja = [255, 102, 0];
+            const grisOscuro = [34, 34, 34];
+            const gris = [105, 105, 105];
+            const grisClaro = [225, 225, 225];
+            const naranjaClaro = [255, 240, 230];
+
+            const anchoPagina = doc.internal.pageSize.getWidth();
+            const altoPagina = doc.internal.pageSize.getHeight();
+            const margenX = 16;
+            const anchoContenido = anchoPagina - (margenX * 2);
+            const paginasConCabecera = new Set();
+
+            const precio = valor => `${Number(valor).toFixed(2)} €`;
+
+            function dibujarCabeceraPagina() {
+                const numeroPagina = doc.internal.getCurrentPageInfo().pageNumber;
+                if (paginasConCabecera.has(numeroPagina)) return;
+                paginasConCabecera.add(numeroPagina);
+
+                if (numeroPagina === 1) {
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(17);
+                    doc.setTextColor(...naranja);
+                    doc.text('SIMYO BY MEDIAMARKT', margenX, 20);
+
+                    doc.setFontSize(10);
+                    doc.setTextColor(...gris);
+                    doc.text(
+                        ['PROPUESTA DE SERVICIOS', 'PERSONALIZADA'],
+                        anchoPagina - margenX,
+                        16,
+                        { align: 'right', lineHeightFactor: 1.05 }
+                    );
+
+                    doc.setDrawColor(...naranja);
+                    doc.setLineWidth(1.2);
+                    doc.line(margenX, 27, anchoPagina - margenX, 27);
+                } else {
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(9);
+                    doc.setTextColor(...naranja);
+                    doc.text('SIMYO BY MEDIAMARKT', margenX, 13);
+
+                    doc.setFont('helvetica', 'normal');
+                    doc.setTextColor(...gris);
+                    doc.text('Propuesta personalizada - continuación', anchoPagina - margenX, 13, { align: 'right' });
+
+                    doc.setDrawColor(...naranja);
+                    doc.setLineWidth(0.6);
+                    doc.line(margenX, 17, anchoPagina - margenX, 17);
+                }
+            }
+
+            function nuevaPagina() {
+                doc.addPage();
+                dibujarCabeceraPagina();
+                return 25;
+            }
+
+            function asegurarEspacio(y, minimo) {
+                return (y + minimo > altoPagina - 18) ? nuevaPagina() : y;
+            }
+
+            function dibujarTituloSeccion(titulo, y) {
+                y = asegurarEspacio(y, 30);
+                doc.setFont('helvetica', 'bold');
+                doc.setFontSize(11);
+                doc.setTextColor(...naranja);
+                doc.text(titulo.toUpperCase(), margenX, y);
+
+                doc.setDrawColor(...grisClaro);
+                doc.setLineWidth(0.35);
+                doc.line(margenX, y + 3, anchoPagina - margenX, y + 3);
+                return y + 7;
+            }
+
+            const configuracionTabla = {
+                theme: 'plain',
+                margin: { left: margenX, right: margenX, top: 24, bottom: 18 },
+                styles: {
+                    font: 'helvetica',
+                    fontSize: 9.5,
+                    textColor: grisOscuro,
+                    cellPadding: { top: 3.3, right: 1.5, bottom: 3.3, left: 0 },
+                    lineColor: [242, 242, 242],
+                    lineWidth: { bottom: 0.25 },
+                    valign: 'middle',
+                    overflow: 'linebreak'
+                },
+                headStyles: {
+                    font: 'helvetica',
+                    fontStyle: 'bold',
+                    fontSize: 8,
+                    textColor: gris,
+                    fillColor: [255, 255, 255],
+                    lineColor: grisClaro,
+                    lineWidth: { bottom: 0.35 },
+                    cellPadding: { top: 2.3, right: 1.5, bottom: 2.3, left: 0 }
+                },
+                alternateRowStyles: { fillColor: [255, 255, 255] },
+                showHead: 'everyPage',
+                rowPageBreak: 'avoid',
+                didDrawPage: dibujarCabeceraPagina
+            };
+
+            dibujarCabeceraPagina();
+            let y = 38;
+            let numeroSeccion = 1;
+
+            if (!estado.isSoloMovil) {
+                y = dibujarTituloSeccion(`${numeroSeccion}. Conexión de Fibra Óptica`, y);
+                doc.autoTable({
+                    ...configuracionTabla,
+                    startY: y,
+                    head: [['CONCEPTO', 'DETALLE TÉCNICO', 'ESTADO']],
+                    body: [['Acceso Internet', dataReporte.fibraVelocidad, 'Activada']],
+                    columnStyles: {
+                        0: { cellWidth: 69, fontStyle: 'bold' },
+                        1: { cellWidth: 72 },
+                        2: { cellWidth: anchoContenido - 141, halign: 'right', fontStyle: 'bold' }
+                    }
+                });
+                y = doc.lastAutoTable.finalY + 11;
+                numeroSeccion++;
+            }
+
+            y = dibujarTituloSeccion(`${numeroSeccion}. Telefonía Móvil (Llamadas Ilimitadas incl.)`, y);
+
+            const filasMovil = dataReporte.lineas.length > 0
+                ? dataReporte.lineas.map(linea => [
+                    `${linea.tipo}\n${linea.nota}`,
+                    `${linea.datos} ${estado.isDigi ? '(No acumulan)' : '(Acumulables)'}`,
+                    linea.precio > 0 ? precio(linea.precio) : 'Incluida'
+                ])
+                : [['Sin líneas seleccionadas', '-', '-']];
+
+            doc.autoTable({
+                ...configuracionTabla,
+                startY: y,
+                head: [['LÍNEA', 'PAQUETE DE DATOS', 'IMPORTE']],
+                body: filasMovil,
+                columnStyles: {
+                    0: { cellWidth: 77, fontStyle: 'bold' },
+                    1: { cellWidth: 72 },
+                    2: { cellWidth: anchoContenido - 149, halign: 'right', fontStyle: 'bold' }
+                },
+                didParseCell: function(datos) {
+                    if (datos.section === 'body' && datos.column.index === 0 && datos.cell.raw) {
+                        const texto = String(datos.cell.raw);
+                        if (texto.includes('\n')) {
+                            datos.cell.styles.fontStyle = 'normal';
+                        }
+                    }
+                },
+                didDrawCell: function(datos) {
+                    if (datos.section !== 'body' || datos.column.index !== 0) return;
+                    const texto = String(datos.cell.raw || '');
+                    if (!texto.includes('\n')) return;
+
+                    const [titulo, nota] = texto.split('\n');
+                    const x = datos.cell.x;
+                    const yCelda = datos.cell.y;
+
+                    doc.setFillColor(255, 255, 255);
+                    doc.rect(x, yCelda, datos.cell.width, datos.cell.height, 'F');
+
+                    doc.setFont('helvetica', 'bold');
+                    doc.setFontSize(9.5);
+                    doc.setTextColor(...grisOscuro);
+                    doc.text(titulo, x, yCelda + 5.2);
+
+                    doc.setFont('helvetica', 'normal');
+                    doc.setFontSize(7.8);
+                    doc.setTextColor(...gris);
+                    doc.text(nota, x, yCelda + 9.7);
+
+                    doc.setDrawColor(242, 242, 242);
+                    doc.setLineWidth(0.25);
+                    doc.line(x, yCelda + datos.cell.height, x + datos.cell.width, yCelda + datos.cell.height);
+                }
+            });
+            y = doc.lastAutoTable.finalY + 11;
+            numeroSeccion++;
+
+            if (dataReporte.tv.length > 0) {
+                y = dibujarTituloSeccion(`${numeroSeccion}. Opciones de Televisión`, y);
+                const filasTV = dataReporte.tv.map(servicio => [
+                    servicio.nombre,
+                    'Servicio de contenidos digitales',
+                    precio(servicio.precio)
+                ]);
+
+                doc.autoTable({
+                    ...configuracionTabla,
+                    startY: y,
+                    head: [['SERVICIO', 'DETALLE', 'IMPORTE']],
+                    body: filasTV,
+                    columnStyles: {
+                        0: { cellWidth: 67, fontStyle: 'bold' },
+                        1: { cellWidth: 82 },
+                        2: { cellWidth: anchoContenido - 149, halign: 'right', fontStyle: 'bold' }
+                    }
+                });
+                y = doc.lastAutoTable.finalY + 11;
+            }
+
+            const precioActual = parseFloat(document.getElementById('input-cliente').value) || 0;
+            let notaAhorro = 'Simulación de tarifa optimizada Simyo.';
+
+            if (precioActual > dataReporte.cuotaTotal) {
+                const ahorroMensual = precioActual - dataReporte.cuotaTotal;
+                notaAhorro = `Ahorro para el cliente: ${ahorroMensual.toFixed(2)} €/mes (${Math.round(ahorroMensual * 12)} € al año respecto a su tarifa actual)`;
+            }
+
+            const altoResumen = 25;
+            y = asegurarEspacio(y, altoResumen + 42);
+
+            doc.setFillColor(...naranjaClaro);
+            doc.setDrawColor(255, 209, 179);
+            doc.setLineWidth(0.35);
+            doc.roundedRect(margenX, y, anchoContenido, altoResumen, 2, 2, 'FD');
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(11);
+            doc.setTextColor(0, 0, 0);
+            doc.text('Presupuesto Mensual Total', margenX + 5, y + 8);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(...gris);
+            const lineasAhorro = doc.splitTextToSize(notaAhorro, anchoContenido - 65);
+            doc.text(lineasAhorro, margenX + 5, y + 13.5, { lineHeightFactor: 1.2 });
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(17);
+            doc.setTextColor(...naranja);
+            doc.text(precio(dataReporte.cuotaTotal), anchoPagina - margenX - 5, y + 15, { align: 'right' });
+
+            y += altoResumen + 12;
+
+            let condiciones = 'Estudio personalizado en MediaMarkt Añaza (Tenerife). Precios finales con IGIC vigente. Oferta sujeta a cobertura. ';
+
+            if (estado.isSoloMovil) {
+                condiciones += 'Las líneas móviles sueltas no generan compromiso de permanencia. ';
+                condiciones += estado.isDigi
+                    ? 'Las líneas promocionales Anti-DIGI permiten compartir los gigas, pero no son acumulables para el mes siguiente.'
+                    : 'Gigas acumulables y compatibles entre líneas Simyo.';
+            } else {
+                condiciones += estado.isDigi
+                    ? 'Al acogerse a la promoción de fibra con tarifa reducida Anti-DIGI, el servicio queda sujeto a permanencia de 12 meses. Los gigas permiten compartirse, pero no son acumulables.'
+                    : 'El paquete estándar de Fibra + Móvil de Simyo incluye compromiso de permanencia de 3 meses. Sus gigas son acumulables y se pueden compartir.';
+            }
+
+            const lineasCondiciones = doc.splitTextToSize(condiciones, anchoContenido);
+            const altoCondiciones = 13 + (lineasCondiciones.length * 4);
+            y = asegurarEspacio(y, altoCondiciones);
+
+            doc.setDrawColor(...naranja);
+            doc.setLineWidth(0.6);
+            doc.line(margenX, y, anchoPagina - margenX, y);
+
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(8);
+            doc.setTextColor(...grisOscuro);
+            doc.text('Condiciones legales y compromisos:', margenX, y + 6);
+
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(7.5);
+            doc.setTextColor(85, 85, 85);
+            doc.text(lineasCondiciones, margenX, y + 11, {
+                maxWidth: anchoContenido,
+                lineHeightFactor: 1.25,
+                align: 'left'
+            });
+
+            const totalPaginas = doc.getNumberOfPages();
+            for (let pagina = 1; pagina <= totalPaginas; pagina++) {
+                doc.setPage(pagina);
+                dibujarCabeceraPagina();
+
+                doc.setDrawColor(225, 225, 225);
+                doc.setLineWidth(0.25);
+                doc.line(margenX, altoPagina - 12, anchoPagina - margenX, altoPagina - 12);
+
+                doc.setFont('helvetica', 'normal');
+                doc.setFontSize(7);
+                doc.setTextColor(...gris);
+                doc.text(`Página ${pagina} de ${totalPaginas}`, anchoPagina - margenX, altoPagina - 7.5, { align: 'right' });
+            }
+
+            doc.save(`Propuesta_Simyo_MM_${Date.now()}.pdf`);
+        }
+
+        // Arranque de la app
+        renderListasLineas();
+        actualizar();
+    </script>
+</body>
+</html>

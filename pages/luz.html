@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora TotalEnergies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+    </style>
+
+<style>
+  .mm-app-topbar{
+    position: sticky; top: 0; z-index: 9999;
+    display:flex; align-items:center; gap:10px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px;
+    background: rgba(10,0,0,.92);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  .mm-back{
+    width:42px;height:42px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    text-decoration:none;color:#fff;font-size:24px;font-weight:900;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mm-back:active{transform:scale(.94); background:#e30613;}
+  .mm-title-wrap{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+  .mm-title{font-size:1rem;font-weight:950;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mm-subtitle{font-size:.72rem;color:rgba(255,255,255,.62);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+  body{animation:mmPageIn .24s ease both;}
+  @keyframes mmPageIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+</style>
+
+</head>
+<body class="bg-gray-50 min-h-screen p-4 font-sans text-gray-800 flex flex-col items-center pb-10">
+    <div class="w-full max-w-md bg-white rounded-2xl shadow-lg overflow-hidden p-6 mt-2 border border-gray-100">
+        <!-- Cabecera -->
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-red-600 tracking-tight">Estudio de Ahorro</h2>
+            <p class="text-sm text-gray-500">Tarifa TotalEnergies</p>
+        </div>
+
+        <!-- Inputs de Venta -->
+        <div class="space-y-4">
+            <!-- Potencia y Días -->
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Potencia (kW)</label>
+                    <input type="number" id="potencia" value="3.45" step="0.01" class="mt-1 block w-full text-lg border-gray-300 rounded-lg shadow-sm p-3 border focus:ring-red-500 focus:border-red-500 bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700">Días Factura</label>
+                    <input type="number" id="dias" value="31" class="mt-1 block w-full text-lg border-gray-300 rounded-lg shadow-sm p-3 border focus:ring-red-500 focus:border-red-500 bg-gray-50">
+                </div>
+            </div>
+
+            <!-- Tramos de Energía -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Consumo (kWh)</label>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <input type="number" id="ene_p1" placeholder="P1" class="block w-full text-center text-lg border-gray-300 rounded-lg shadow-sm p-2 border focus:ring-red-500 focus:border-red-500 bg-gray-50">
+                    </div>
+                    <div>
+                        <input type="number" id="ene_p2" placeholder="P2" class="block w-full text-center text-lg border-gray-300 rounded-lg shadow-sm p-2 border focus:ring-red-500 focus:border-red-500 bg-gray-50">
+                    </div>
+                    <div>
+                        <input type="number" id="ene_p3" placeholder="P3" class="block w-full text-center text-lg border-gray-300 rounded-lg shadow-sm p-2 border focus:ring-red-500 focus:border-red-500 bg-gray-50">
+                    </div>
+                </div>
+                <p class="text-xs text-gray-400 mt-1 text-right" id="total_energia_preview">Suma total: 0 kWh</p>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Comparativa -->
+            <div>
+                <label class="block text-sm font-bold text-gray-800">¿Cuánto paga en su factura actual? (€)</label>
+                <input type="number" id="factura_actual" placeholder="Ej: 75.50" step="0.01" class="mt-1 block w-full text-xl font-bold text-gray-800 border-gray-400 rounded-lg shadow-sm p-3 border-2 focus:ring-blue-500 focus:border-blue-500 bg-blue-50">
+            </div>
+
+            <!-- Precios (Desplegable) -->
+            <details class="text-sm text-gray-500 bg-gray-50 p-3 rounded-lg border mt-2">
+                <summary class="cursor-pointer font-medium select-none">Configurar Precios / Tarifas</summary>
+                <div class="mt-3 space-y-3">
+                    <div class="flex justify-between items-center bg-white p-2 rounded border">
+                        <label class="font-bold text-gray-700">Incluir Facilita:</label>
+                        <input type="checkbox" id="check_facilita" checked class="w-5 h-5 rounded border-gray-300 text-red-600 focus:ring-red-500">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <label>Servicio Facilita (€):</label>
+                        <input type="number" id="precio_facilita" value="6.11" step="0.01" class="border rounded p-1 w-24 text-center">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <label>Potencia (€/kW/día):</label>
+                        <input type="number" id="precio_pot" value="0.156" step="0.001" class="border rounded p-1 w-24 text-center">
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <label>Luz (€/kWh):</label>
+                        <input type="number" id="precio_luz" value="0.134" step="0.001" class="border rounded p-1 w-24 text-center">
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- Botón de acción -->
+        <button onclick="calcular()" class="mt-6 w-full bg-red-600 text-white text-lg font-bold py-3 px-4 rounded-xl hover:bg-red-700 active:bg-red-800 transition transform active:scale-95 shadow-md">
+            Calcular Oferta
+        </button>
+
+        <!-- Resultados -->
+        <div class="mt-6 border-t border-gray-200 pt-6" id="resultados" style="display:none;">
+            <!-- Cierre de Venta (Ahorro) -->
+            <div id="caja_ahorro" class="mb-6 p-4 rounded-xl text-center border-2 border-green-500 bg-green-50">
+                <p class="text-sm font-bold text-gray-700 uppercase tracking-wide">Ahorro Estimado</p>
+                <p id="res_ahorro" class="text-4xl font-extrabold text-green-600 mt-1"></p>
+                <p class="text-xs text-gray-500 mt-2">Comparado con su factura actual</p>
+            </div>
+
+            <div class="flex justify-between items-center text-lg mb-2 text-gray-600" id="bloque_sin_facilita" style="display:none;">
+                <span>Factura Sin Facilita:</span>
+                <span id="res_total" class="font-bold"></span>
+            </div>
+            
+            <div class="flex justify-between items-center text-xl text-red-600 font-extrabold mb-4 bg-red-50 p-3 rounded-lg border border-red-100" id="bloque_con_facilita">
+                <span id="texto_total_final">Total con Facilita:</span>
+                <span id="res_facilita"></span>
+            </div>
+
+            <details class="text-xs text-gray-500 mt-4">
+                <summary class="cursor-pointer select-none font-medium">Ver Desglose Completo</summary>
+                <div class="mt-2 space-y-2 bg-gray-50 p-3 rounded border">
+                    <div class="flex justify-between"><span>Coste Potencia:</span> <span id="des_pot"></span></div>
+                    <div class="flex justify-between"><span>Coste Energía (<span id="des_kwh_totales"></span> kWh):</span> <span id="des_ene"></span></div>
+                    <div class="flex justify-between"><span>Impuesto Eléctrico (5.11%):</span> <span id="des_imp"></span></div>
+                    <div class="flex justify-between"><span>Alquiler Contador:</span> <span id="des_alq"></span></div>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <script>
+        // Lógica del Facilita y cambio de precio
+        const checkFacilita = document.getElementById('check_facilita');
+        const precioLuzInput = document.getElementById('precio_luz');
+
+        checkFacilita.addEventListener('change', function() {
+            if (this.checked) {
+                precioLuzInput.value = "0.134";
+            } else {
+                precioLuzInput.value = "0.137";
+            }
+        });
+
+        // Suma en tiempo real
+        function actualizarSumaEnergia() {
+            const p1 = parseFloat(document.getElementById('ene_p1').value) || 0;
+            const p2 = parseFloat(document.getElementById('ene_p2').value) || 0;
+            const p3 = parseFloat(document.getElementById('ene_p3').value) || 0;
+            const total = p1 + p2 + p3;
+            document.getElementById('total_energia_preview').innerText = `Suma total: ${total.toFixed(2)} kWh`;
+        }
+
+        document.getElementById('ene_p1').addEventListener('input', actualizarSumaEnergia);
+        document.getElementById('ene_p2').addEventListener('input', actualizarSumaEnergia);
+        document.getElementById('ene_p3').addEventListener('input', actualizarSumaEnergia);
+
+        function calcular() {
+            const pot = parseFloat(document.getElementById('potencia').value) || 0;
+            const dias = parseFloat(document.getElementById('dias').value) || 0;
+            
+            const p1 = parseFloat(document.getElementById('ene_p1').value) || 0;
+            const p2 = parseFloat(document.getElementById('ene_p2').value) || 0;
+            const p3 = parseFloat(document.getElementById('ene_p3').value) || 0;
+            const ene = p1 + p2 + p3; 
+
+            const facturaActual = parseFloat(document.getElementById('factura_actual').value) || 0;
+
+            const p_pot = parseFloat(document.getElementById('precio_pot').value) || 0;
+            const p_luz = parseFloat(document.getElementById('precio_luz').value) || 0;
+            
+            // Ver si el Facilita está activo
+            const isFacilitaActivo = document.getElementById('check_facilita').checked;
+            const p_fac_base = parseFloat(document.getElementById('precio_facilita').value) || 0;
+            const p_fac = isFacilitaActivo ? p_fac_base : 0;
+
+            const coste_pot = pot * p_pot * dias;
+            const coste_ene = ene * p_luz;
+            const subtotal = coste_pot + coste_ene;
+
+            const imp_elec = subtotal * 0.0511269;
+            const alquiler = dias * 0.026667;
+
+            const total_sin = subtotal + imp_elec + alquiler;
+            const total_con = total_sin + p_fac;
+
+            const total_final = isFacilitaActivo ? total_con : total_sin;
+            const ahorro = facturaActual - total_final;
+
+            // Mostrar u ocultar el "Factura Sin Facilita" si está activo
+            const bloqueSin = document.getElementById('bloque_sin_facilita');
+            const textoFinal = document.getElementById('texto_total_final');
+
+            if (isFacilitaActivo) {
+                bloqueSin.style.display = 'flex';
+                document.getElementById('res_total').innerText = total_sin.toFixed(2) + ' €';
+                textoFinal.innerText = "Total con Facilita:";
+                document.getElementById('res_facilita').innerText = total_con.toFixed(2) + ' €';
+            } else {
+                bloqueSin.style.display = 'none';
+                textoFinal.innerText = "Total (Sin Facilita):";
+                document.getElementById('res_facilita').innerText = total_sin.toFixed(2) + ' €';
+            }
+
+            // Ahorro
+            const cajaAhorro = document.getElementById('caja_ahorro');
+            const resAhorro = document.getElementById('res_ahorro');
+            
+            if (facturaActual > 0) {
+                cajaAhorro.style.display = 'block';
+                if (ahorro > 0) {
+                    resAhorro.innerText = ahorro.toFixed(2) + ' €';
+                    cajaAhorro.className = 'mb-6 p-4 rounded-xl text-center border-2 border-green-500 bg-green-50';
+                    resAhorro.className = 'text-4xl font-extrabold text-green-600 mt-1';
+                } else {
+                    resAhorro.innerText = ahorro.toFixed(2) + ' €';
+                    cajaAhorro.className = 'mb-6 p-4 rounded-xl text-center border-2 border-red-500 bg-red-50';
+                    resAhorro.className = 'text-4xl font-extrabold text-red-600 mt-1';
+                }
+            } else {
+                cajaAhorro.style.display = 'none'; 
+            }
+
+            // Desglose
+            document.getElementById('des_kwh_totales').innerText = ene.toFixed(2);
+            document.getElementById('des_pot').innerText = coste_pot.toFixed(2) + ' €';
+            document.getElementById('des_ene').innerText = coste_ene.toFixed(2) + ' €';
+            document.getElementById('des_imp').innerText = imp_elec.toFixed(2) + ' €';
+            document.getElementById('des_alq').innerText = alquiler.toFixed(2) + ' €';
+
+            document.getElementById('resultados').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

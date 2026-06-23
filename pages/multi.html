@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora Operadores (V15)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        :root {
+            --bg: #0d0101;
+            --card: #1c0505;
+            --primary: #e30613;
+            --primary-hover: #ff1a27;
+            --success: #00ff66;
+            --warning: #ffcc00;
+            --blue: #00ccff;
+            --error: #ff4444;
+            --text: #ffffff;
+            --text-dim: #aaaaaa;
+        }
+
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 8px; display: flex; flex-direction: column; min-height: 100vh; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+        .header { text-align: center; padding: 5px 0; font-weight: 800; font-size: 0.9rem; color: var(--primary); text-transform: uppercase; letter-spacing: 2px; }
+        .section { background-color: var(--card); padding: 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #3a0a0a; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .label { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; display: block; }
+        .row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .row:last-child { margin-bottom: 0; }
+        
+        .counter { display: flex; align-items: center; gap: 15px; }
+        .btn-circle { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #551515; background-color: #2a0808; color: white; font-size: 1.2rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .btn-circle:active { background-color: var(--primary); border-color: var(--primary); transform: scale(0.9); }
+        .lines-display { font-size: 1.5rem; font-weight: 900; min-width: 20px; text-align: center; }
+        
+        .toggle-group { display: flex; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+        .toggle-btn { flex: 1; padding: 10px 5px; background-color: #2a0808; color: #888; border: 1px solid #4a1010; border-radius: 8px; font-size: 0.8rem; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: center; min-width: 30%; }
+        .toggle-btn.active { border-color: var(--primary); color: white; background-color: var(--primary); }
+        .toggle-btn.active-blue { border-color: var(--blue); color: #fff; background-color: var(--blue); }
+        .toggle-btn.active-warning { border-color: var(--warning); color: #000; background-color: var(--warning); }
+        .toggle-btn.active-movistar { border-color: #92d050; color: #000; background-color: #92d050; }
+
+        .tv-panel { display: none; margin-top: 10px; border-top: 1px solid #3a0a0a; padding-top: 10px; }
+        .tv-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+        .tv-btn { background-color: #1a0505; border: 1px solid #4a1010; color: var(--text-dim); padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; flex-grow: 1; text-align: center; }
+        .tv-btn.selected { background-color: rgba(255, 204, 0, 0.2); border-color: var(--warning); color: var(--warning); }
+        
+        .input-container { text-align: center; padding: 5px 0; }
+        .price-input { width: 70%; background: transparent; border: none; border-bottom: 2px solid #4a1010; color: white; font-size: 2.5rem; font-weight: 800; text-align: center; outline: none; padding: 2px; }
+        .price-input:focus { border-bottom-color: var(--primary); }
+        
+        .result-zone { margin-top: auto; text-align: center; padding-bottom: 10px; }
+        #ahorro-anual { font-size: 3.5rem; font-weight: 900; line-height: 1; margin: 5px 0; color: var(--success); text-shadow: 0 0 15px rgba(0, 255, 102, 0.2); }
+        #ahorro-mensual { color: var(--text-dim); font-size: 0.9rem; line-height: 1.2; }
+        
+        .action-btn { background-color: var(--primary); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; width: 100%; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .action-btn:active { background-color: var(--primary-hover); }
+
+        /* Modal Pantalla Completa para Propuesta */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: flex-start; padding: 10px; box-sizing: border-box; overflow-y: auto; }
+        .modal-content { background-color: #fff; color: #333; width: 100%; max-width: 650px; border-radius: 12px; padding: 25px; position: relative; margin: 20px auto; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .modal-close { position: absolute; top: 15px; right: 15px; font-size: 1.8rem; font-weight: bold; cursor: pointer; color: #666; border: none; background: transparent; }
+        
+        /* Estilos del Documento PDF Oficial */
+        .doc-proposal { padding: 10px; background: #fff; color: #222; font-family: Arial, sans-serif; }
+        .doc-header { border-bottom: 4px solid #e30613; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .doc-brand { font-size: 1.5rem; font-weight: 900; color: #e30613; text-transform: uppercase; letter-spacing: 1px; }
+        .doc-title { font-size: 0.9rem; font-weight: bold; color: #666; text-align: right; text-transform: uppercase; }
+        
+        .doc-section { margin-bottom: 22px; }
+        .doc-section-title { font-size: 0.85rem; color: #e30613; text-transform: uppercase; font-weight: 800; border-bottom: 1px solid #ddd; padding-bottom: 4px; margin-bottom: 10px; letter-spacing: 0.5px; }
+        
+        .doc-table { width: 100%; border-collapse: collapse; margin-bottom: 5px; }
+        .doc-table th { text-align: left; font-size: 0.75rem; color: #777; text-transform: uppercase; padding: 6px 0; border-bottom: 1px solid #eee; }
+        .doc-table td { padding: 9px 0; font-size: 0.9rem; border-bottom: 1px solid #f9f9f9; line-height: 1.3; }
+        .doc-table td.price { text-align: right; font-weight: bold; color: #000; width: 80px; }
+        
+        .doc-footer-summary { background: #fef2f2; border: 1px solid #fee2e2; border-radius: 6px; padding: 15px; margin-top: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .doc-total-label { font-size: 1.1rem; font-weight: 900; color: #000; }
+        .doc-total-price { font-size: 1.6rem; font-weight: 900; color: #e30613; }
+        .doc-legal { font-size: 0.75rem; color: #555; text-align: justify; margin-top: 25px; border-top: 2px solid #e30613; padding-top: 12px; line-height: 1.4; }
+        
+        .pdf-btn { background-color: #000; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+    </style>
+
+<style>
+  .mm-app-topbar{
+    position: sticky; top: 0; z-index: 9999;
+    display:flex; align-items:center; gap:10px;
+    padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px;
+    background: rgba(10,0,0,.92);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255,255,255,.10);
+    box-shadow: 0 8px 24px rgba(0,0,0,.35);
+  }
+  .mm-back{
+    width:42px;height:42px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    text-decoration:none;color:#fff;font-size:24px;font-weight:900;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mm-back:active{transform:scale(.94); background:#e30613;}
+  .mm-title-wrap{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+  .mm-title{font-size:1rem;font-weight:950;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mm-subtitle{font-size:.72rem;color:rgba(255,255,255,.62);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+  body{animation:mmPageIn .24s ease both;}
+  @keyframes mmPageIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+</style>
+
+</head>
+<body>
+
+<div class="mm-app-topbar">
+  <a class="mm-back" href="../index.html" aria-label="Volver">‹</a>
+  <div class="mm-title-wrap">
+    <div class="mm-subtitle">MediaMarkt Añaza</div>
+    <div class="mm-title">Multioperador</div>
+  </div>
+</div>
+
+    <div class="header">Calculadora Operadores (V15)</div>
+
+    <div class="section">
+        <span class="label">Operador Principal</span>
+        <div class="toggle-group">
+            <button id="op-lowi" class="toggle-btn active" onclick="setOp('lowi')">Lowi</button>
+            <button id="op-simyo" class="toggle-btn" onclick="setOp('simyo')">Simyo</button>
+            <button id="op-jazztel" class="toggle-btn" onclick="setOp('jazztel')">Jazztel</button>
+        </div>
+
+        <div id="opciones-extra" class="toggle-group" style="margin-top: 10px;">
+            <button id="tgl-solomovil" class="toggle-btn" style="display:none;" onclick="toggleSoloMovil()">Solo Móvil</button>
+            <button id="tgl-antidigi" class="toggle-btn" style="display:none;" onclick="toggleAntiDigi()">Cliente DIGI</button>
+            <button id="tgl-velocidad" class="toggle-btn" style="display:none;" onclick="toggleVelocidad()">Fibra 1Gb</button>
+            <button id="tgl-ilimitados" class="toggle-btn" style="display:none;" onclick="toggleIlimitados()">Ilimitados</button>
+            <button id="tgl-movistar" class="toggle-btn" onclick="toggleMovistar()">+ Movistar+ (9.99€)</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="row" id="row-base">
+            <span id="label-base" class="label" style="margin:0;">Líneas Principales</span>
+            <div class="counter">
+                <button class="btn-circle" onclick="cambiarBase(-1)">-</button>
+                <div class="lines-display" id="display-base">1</div>
+                <button class="btn-circle" onclick="cambiarBase(1)">+</button>
+            </div>
+        </div>
+
+        <div id="section-adic" class="row" style="margin-top: 10px;">
+            <span class="label" style="margin:0; color: var(--text-dim);">+ Líneas Adicionales</span>
+            <div class="counter">
+                <button class="btn-circle" onclick="cambiarAdic(-1)">-</button>
+                <div class="lines-display" id="display-adic" style="color: var(--text-dim);">0</div>
+                <button class="btn-circle" onclick="cambiarAdic(1)">+</button>
+            </div>
+        </div>
+
+        <div id="simyo-movil-options" style="display:none; margin-top: 10px;">
+            <span class="label">Plan Móvil Simyo</span>
+            <div class="tv-grid">
+                <div class="tv-btn selected" id="plan-50" onclick="selectSimyoPlan(6.63, '50GB', 'plan-50')">50GB (6.63€)</div>
+                <div class="tv-btn" id="plan-100" onclick="selectSimyoPlan(8.84, '100GB', 'plan-100')">100GB (8.84€)</div>
+                <div class="tv-btn" id="plan-150" onclick="selectSimyoPlan(12.38, '150GB', 'plan-150')">150GB (12.38€)</div>
+                <div class="tv-btn" id="plan-300" onclick="selectSimyoPlan(17.69, '300GB', 'plan-300')">300GB (17.69€)</div>
+            </div>
+        </div>
+
+        <div class="toggle-group" style="margin-top: 10px;" id="btn-container-tv">
+            <button id="tgl-tv" class="toggle-btn" onclick="toggleTVPanel()">+ Plataformas / TV</button>
+        </div>
+
+        <div id="panel-tv" class="tv-panel">
+            <span class="label">Opciones de TV (Precios IGIC Canarias)</span>
+            <div id="grid-lowi" class="tv-grid" style="display:none;">
+                <div class="tv-btn" id="btn-lowi-tv" onclick="toggleTV('lowi', 'tv', 4.42)">TV Canales (4.42€)</div>
+                <div class="tv-btn" id="btn-lowi-netflix" onclick="toggleTV('lowi', 'netflix', 7.07)">Netflix c/anuncios (7.07€)</div>
+                <div class="tv-btn" id="btn-lowi-prime" onclick="toggleTV('lowi', 'prime', 3.54)">Prime c/anuncios (3.54€)</div>
+                <div class="tv-btn" id="btn-lowi-disney" onclick="toggleTV('lowi', 'disney', 5.31)">Disney+ c/anuncios (5.31€)</div>
+                <div class="tv-btn" id="btn-lowi-max" onclick="toggleTV('lowi', 'max', 5.31)">Max c/anuncios (5.31€)</div>
+            </div>
+            <div id="grid-simyo" class="tv-grid" style="display:none;">
+                <div class="tv-btn" id="btn-simyo-tv_sky" onclick="toggleTV('simyo', 'tv_sky', 5.30)">TV + SkyShowtime (5.30€)</div>
+                <div class="tv-btn" id="btn-simyo-netflix" onclick="toggleTV('simyo', 'netflix', 7.07)">Netflix c/anuncios (7.07€)</div>
+            </div>
+            <div id="grid-jazztel" class="tv-grid" style="display:none;">
+                <div class="tv-btn" id="btn-jazz-base" onclick="toggleTV('jazz', 'base', 4.38)">JazzTV Base (4.38€)</div>
+                <div class="tv-btn" id="btn-jazz-netflix" onclick="toggleTV('jazz', 'netflix', 7.95)">Netflix c/anuncios (7.95€)</div>
+                <div class="tv-btn" id="btn-jazz-prime" onclick="toggleTV('jazz', 'prime', 8.83)">Prime + Max (8.83€)</div>
+                <div class="tv-btn" id="btn-jazz-disney" onclick="toggleTV('jazz', 'disney', 6.18)">Disney+ c/anuncios (6.18€)</div>
+                <div class="tv-btn" id="btn-jazz-daznmotor" onclick="toggleTV('jazz', 'daznmotor', 8.83)">DAZN Motor (8.83€)</div>
+                <div class="tv-btn" id="btn-jazz-daznbasket" onclick="toggleTV('jazz', 'daznbasket', 8.83)">DAZN Basket (8.83€)</div>
+                <div class="tv-btn" id="btn-jazz-orange" onclick="toggleTV('jazz', 'orange', 8.80)">Orange TV (8.80€)</div>
+                <div class="tv-btn" id="btn-jazz-futbol" onclick="toggleFutbolPromo()">Promo Fútbol (Pago único)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" style="padding-bottom: 5px;">
+        <span class="label" style="text-align: center;">¿Cuánto pagas actualmente?</span>
+        <div class="input-container">
+            <input type="number" id="input-cliente" class="price-input" placeholder="0" oninput="actualizar()" inputmode="decimal">
+            <span style="font-size: 1.5rem; font-weight: bold;">€</span>
+        </div>
+    </div>
+
+    <div class="result-zone">
+        <span class="label">Ahorro estimado al año</span>
+        <div id="ahorro-anual">0€</div>
+        <div id="ahorro-mensual">0€ al mes</div>
+        <div style="font-weight: bold; margin-top: 5px; color: #fff;" id="operador-info">Introduce precio</div>
+        <button class="action-btn" onclick="abrirDesglose()">Ver Desglose de Oferta</button>
+    </div>
+
+    <!-- Modal Reporte Ejecutivo -->
+    <div id="modal-desglose" class="modal-overlay">
+        <div class="modal-content">
+            <button class="modal-close" onclick="cerrarDesglose()">×</button>
+            <div id="contenido-pdf" class="doc-proposal">
+                <div class="doc-header">
+                    <div class="doc-brand">MediaMarkt Añaza</div>
+                    <div class="doc-title">Estudio de Servicios<br>y Propuesta Económica</div>
+                </div>
+                
+                <div class="doc-section">
+                    <div class="doc-section-title">1. Conexión de Fibra Óptica</div>
+                    <table class="doc-table">
+                        <thead><tr><th>Concepto</th><th>Detalle Técnico</th><th style="text-align:right">Estado</th></tr></thead>
+                        <tbody id="pdf-fibra-rows"></tbody>
+                    </table>
+                </div>
+
+                <div class="doc-section">
+                    <div class="doc-section-title">2. Telefonía Móvil</div>
+                    <table class="doc-table">
+                        <thead><tr><th>Línea</th><th>Características y Datos</th><th style="text-align:right">Importe</th></tr></thead>
+                        <tbody id="pdf-movil-rows"></tbody>
+                    </table>
+                </div>
+
+                <div class="doc-section" id="pdf-section-tv" style="display:none;">
+                    <div class="doc-section-title">3. Plataformas de Contenidos y Televisión</div>
+                    <table class="doc-table">
+                        <thead><tr><th>Servicio</th><th>Detalle del Plan Contratado</th><th style="text-align:right">Importe</th></tr></thead>
+                        <tbody id="pdf-tv-rows"></tbody>
+                    </table>
+                </div>
+
+                <div class="doc-footer-summary">
+                    <div>
+                        <div class="doc-total-label">Presupuesto Mensual Total</div>
+                        <div style="font-size:0.75rem; color:#666; font-weight:bold; margin-top:2px;" id="pdf-ahorro-nota"></div>
+                    </div>
+                    <div class="doc-total-price" id="ticket-total-precio">0.00€</div>
+                </div>
+                
+                <div id="pdf-upfront-costs" style="display:none; margin-top: 10px; font-size: 0.85rem; color: #e30613; font-weight: bold; border-top: 1px dashed #ccc; padding-top: 5px;"></div>
+
+                <div class="doc-legal" id="pdf-legal-text"></div>
+            </div>
+            <button class="pdf-btn" onclick="generarPDF()">Guardar Propuesta PDF</button>
+        </div>
+    </div>
+
+    <script>
+        let estado = {
+            op: 'lowi',
+            soloMovil: false,
+            simyoPlan: { precio: 6.63, nombre: '50GB', id: 'plan-50' },
+            antiDigi: false,
+            jazzVelocidad1Gb: false,
+            isUnlimited: false,
+            hasMovistar: false,
+            baseLines: 1,
+            adicLines: 0,
+            tvPanel: false,
+            tvSeleccionada: { lowi: {}, simyo: {}, jazz: {} }
+        };
+
+        let dataReporte = {};
+
+        function setOp(operador) {
+            estado.op = operador;
+            estado.soloMovil = false;
+            estado.antiDigi = false; 
+            estado.isUnlimited = false;
+            estado.tvPanel = false;
+            
+            document.querySelectorAll('#op-lowi, #op-simyo, #op-jazztel').forEach(b => b.classList.remove('active'));
+            document.getElementById(`op-${operador}`).classList.add('active');
+
+            if (operador === 'lowi' || operador === 'simyo') {
+                estado.baseLines = 1;
+            } else if (operador === 'jazztel') {
+                estado.baseLines = 2;
+            }
+            
+            actualizarUIOpciones();
+            actualizar();
+        }
+
+        function toggleSoloMovil() {
+            estado.soloMovil = !estado.soloMovil;
+            if (estado.soloMovil) {
+                estado.antiDigi = false;
+                estado.adicLines = 0;
+            }
+            actualizarUIOpciones();
+            actualizar();
+        }
+
+        function selectSimyoPlan(precio, nombre, id) {
+            estado.simyoPlan = { precio, nombre, id };
+            document.querySelectorAll('#simyo-movil-options .tv-btn').forEach(b => b.classList.remove('selected'));
+            document.getElementById(id).classList.add('selected');
+            actualizar();
+        }
+
+        function actualizarUIOpciones() {
+            document.getElementById('tgl-solomovil').style.display = (estado.op === 'simyo') ? 'block' : 'none';
+            document.getElementById('tgl-solomovil').classList.toggle('active-warning', estado.soloMovil);
+
+            document.getElementById('tgl-antidigi').style.display = ((estado.op === 'simyo' && !estado.soloMovil) || estado.op === 'jazztel') ? 'block' : 'none';
+            document.getElementById('tgl-antidigi').classList.toggle('active-warning', estado.antiDigi);
+            
+            document.getElementById('tgl-velocidad').style.display = (estado.op === 'jazztel' && estado.antiDigi) ? 'block' : 'none';
+            document.getElementById('tgl-velocidad').classList.toggle('active-blue', estado.jazzVelocidad1Gb);
+            
+            document.getElementById('tgl-ilimitados').style.display = (estado.op === 'jazztel' && !estado.antiDigi) ? 'block' : 'none';
+            document.getElementById('tgl-ilimitados').classList.toggle('active-blue', estado.isUnlimited);
+            
+            document.getElementById('simyo-movil-options').style.display = (estado.op === 'simyo' && estado.soloMovil) ? 'block' : 'none';
+            document.getElementById('section-adic').style.display = (estado.soloMovil) ? 'none' : 'flex';
+            
+            document.getElementById('display-base').innerText = estado.baseLines;
+            document.getElementById('panel-tv').style.display = estado.tvPanel ? 'block' : 'none';
+            document.getElementById('grid-lowi').style.display = (estado.op === 'lowi') ? 'flex' : 'none';
+            document.getElementById('grid-simyo').style.display = (estado.op === 'simyo') ? 'flex' : 'none';
+            document.getElementById('grid-jazztel').style.display = (estado.op === 'jazztel') ? 'flex' : 'none';
+        }
+
+        function toggleAntiDigi() {
+            estado.antiDigi = !estado.antiDigi;
+            if (estado.antiDigi && estado.op === 'jazztel') {
+                estado.baseLines = 2;
+                estado.isUnlimited = true;
+            }
+            actualizarUIOpciones();
+            actualizar();
+        }
+
+        function toggleVelocidad() {
+            estado.jazzVelocidad1Gb = !estado.jazzVelocidad1Gb;
+            actualizarUIOpciones();
+            actualizar();
+        }
+
+        function toggleIlimitados() {
+            estado.isUnlimited = !estado.isUnlimited;
+            actualizarUIOpciones();
+            actualizar();
+        }
+
+        function toggleMovistar() {
+            estado.hasMovistar = !estado.hasMovistar;
+            document.getElementById('tgl-movistar').classList.toggle('active-movistar', estado.hasMovistar);
+            actualizar();
+        }
+
+        function cambiarBase(val) {
+            estado.baseLines += val;
+            if (estado.op === 'lowi' || (estado.op === 'simyo' && !estado.soloMovil)) {
+                estado.baseLines = 1; 
+            } else if (estado.op === 'simyo' && estado.soloMovil) {
+                if (estado.baseLines < 1) estado.baseLines = 1;
+            } else if (estado.op === 'jazztel') {
+                if (estado.antiDigi || !estado.isUnlimited) {
+                    estado.baseLines = 2;
+                } else {
+                    if (estado.baseLines < 1) estado.baseLines = 1;
+                    if (estado.baseLines > 2) estado.baseLines = 2;
+                }
+            }
+            actualizarUIOpciones();
+            actualizar();
+        }
+
+        function cambiarAdic(val) {
+            if (estado.soloMovil) return; 
+            estado.adicLines += val;
+            if (estado.adicLines < 0) estado.adicLines = 0;
+            document.getElementById('display-adic').innerText = estado.adicLines;
+            actualizar();
+        }
+
+        function toggleTVPanel() {
+            estado.tvPanel = !estado.tvPanel;
+            actualizarUIOpciones();
+        }
+
+        // Función exclusiva para la Promo de Fútbol
+        function toggleFutbolPromo() {
+            const op = 'jazz';
+            const currentObj = estado.tvSeleccionada[op];
+            if (currentObj['futbol']) {
+                delete currentObj['futbol'];
+            } else {
+                for (let key in currentObj) delete currentObj[key]; // Desmarca incompatibles
+                currentObj['futbol'] = { precio: 0, nombre: "Promo Todo el Fútbol + Deporte", nota: "Pago Único (Promo + Deco)" };
+            }
+            actualizar();
+        }
+
+        function toggleTV(op, service, price) {
+            const currentObj = estado.tvSeleccionada[op];
+            if (currentObj[service]) {
+                delete currentObj[service];
+            } else {
+                if (op === 'jazz') {
+                    if (currentObj['futbol']) delete currentObj['futbol']; // Desmarca futbol si metes otra tv
+                }
+                currentObj[service] = { precio: price, nombre: document.getElementById(`btn-${op}-${service}`).innerText.split('(')[0].trim() };
+            }
+            actualizar();
+        }
+
+        function actualizar() {
+            dataReporte = {
+                operador: estado.op.toUpperCase(),
+                fibraVelocidad: "1 Gbps Simétrica",
+                fibraPrecioText: "Incluida en el paquete base",
+                lineas: [],
+                tv: [],
+                cuotaTotal: 0,
+                upfrontCost: 0,
+                upfrontDetails: []
+            };
+
+            let precioBasePaquete = 0;
+
+            if (estado.op === 'lowi') {
+                precioBasePaquete = 29.18;
+                dataReporte.fibraVelocidad = "1 Gbps (Fibra Alta Velocidad Lowi)";
+                dataReporte.lineas.push({ tipo: "Línea Principal (Paquete)", datos: "100 GB Acumulables + Llamadas Ilimitadas", precio: 29.18, nota: "Precio del conjunto Fibra + Móvil" });
+                
+                for(let i=0; i<estado.adicLines; i++) {
+                    dataReporte.lineas.push({ tipo: "Línea Adicional Lowi", datos: "50 GB Acumulables + Llamadas Ilimitadas", precio: 4.42, nota: "Tarifa plana reducida" });
+                }
+                
+            } else if (estado.op === 'simyo') {
+                if (estado.soloMovil) {
+                    dataReporte.fibraVelocidad = "Sin servicio de Fibra asociado";
+                    dataReporte.fibraPrecioText = "N/A";
+                    for(let i=0; i<estado.baseLines; i++) {
+                        dataReporte.lineas.push({ tipo: `Línea Móvil Suelta #${i+1}`, datos: `${estado.simyoPlan.nombre} + Llamadas Ilimitadas`, precio: estado.simyoPlan.precio, nota: "Sin compromiso de permanencia" });
+                    }
+                    precioBasePaquete = estado.baseLines * estado.simyoPlan.precio;
+                } else if (estado.antiDigi) {
+                    precioBasePaquete = 24.31;
+                    dataReporte.fibraVelocidad = "1 Gbps (Promoción Fibra Simyo)";
+                    dataReporte.lineas.push({ tipo: "Línea Principal (Paquete Especial)", datos: "250 GB Acumulables + Llamadas Ilimitadas", precio: 24.31, nota: "Tarifa Anti-DIGI exclusiva" });
+                    for(let i=0; i<estado.adicLines; i++) {
+                        dataReporte.lineas.push({ tipo: "Línea Adicional Especial", datos: "250 GB Acumulables + Llamadas Ilimitadas", precio: 6.63, nota: "Precio promocional asociado" });
+                    }
+                } else {
+                    precioBasePaquete = 30.06; // Ajuste a V14
+                    dataReporte.fibraVelocidad = "1 Gbps (Fibra Estándar Simyo)";
+                    dataReporte.lineas.push({ tipo: "Línea Principal (Paquete)", datos: "50 GB Acumulables + Llamadas Ilimitadas", precio: 30.06, nota: "Precio del conjunto Fibra + Móvil" });
+                    for(let i=0; i<estado.adicLines; i++) {
+                        dataReporte.lineas.push({ tipo: "Línea Adicional Simyo", datos: "50 GB Acumulables + Llamadas Ilimitadas", precio: 4.42, nota: "Precio de línea extra" });
+                    }
+                }
+            } else if (estado.op === 'jazztel') {
+                if (estado.antiDigi) {
+                    const vel = estado.jazzVelocidad1Gb ? "1 Gbps Simétrica" : "600 Mbps Simétrica";
+                    precioBasePaquete = estado.jazzVelocidad1Gb ? 37.98 : 30.91;
+                    dataReporte.fibraVelocidad = `${vel} (Oferta Especial Anti-DIGI Jazztel)`;
+                    dataReporte.lineas.push({ tipo: "Línea Principal 1 (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: precioBasePaquete, nota: "Precio de todo el bloque combinado" });
+                    dataReporte.lineas.push({ tipo: "Línea Principal 2 (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 0, nota: "Incluida en precio base" });
+                    for(let i=0; i<estado.adicLines; i++) {
+                        dataReporte.lineas.push({ tipo: "Línea Adicional Ilimitada", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 8.84, nota: "Línea extra promocional" });
+                    }
+                } else {
+                    if (estado.isUnlimited) {
+                        dataReporte.fibraVelocidad = "1 Gbps (Fibra Óptica Jazztel)";
+                        if (estado.baseLines === 1) {
+                            precioBasePaquete = 51.25;
+                            dataReporte.lineas.push({ tipo: "Línea Principal (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 51.25, nota: "Fibra + 1 Ilimitada" });
+                        } else {
+                            precioBasePaquete = 60.09;
+                            dataReporte.lineas.push({ tipo: "Línea Principal 1 (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 60.09, nota: "Fibra + 2 Ilimitadas" });
+                            dataReporte.lineas.push({ tipo: "Línea Principal 2 (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 0, nota: "Incluida en precio base" });
+                        }
+                        for(let i=0; i<estado.adicLines; i++) {
+                            dataReporte.lineas.push({ tipo: "Línea Adicional Ilimitada", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 8.84, nota: "Línea extra" });
+                        }
+                    } else {
+                        precioBasePaquete = 39.75;
+                        dataReporte.fibraVelocidad = "1 Gbps (Fibra Óptica Jazztel)";
+                        dataReporte.lineas.push({ tipo: "Línea Principal 1 (Paquete)", datos: "Gigas Compartidos + Llamadas Ilimitadas", precio: 39.75, nota: "Pack Ahorro Combinado" });
+                        dataReporte.lineas.push({ tipo: "Línea Principal 2 (Paquete)", datos: "Gigas Compartidos + Llamadas Ilimitadas", precio: 0, nota: "Incluida en precio base" });
+                        for(let i=0; i<estado.adicLines; i++) {
+                            dataReporte.lineas.push({ tipo: "Línea Adicional Compartida", datos: "Llamadas Ilimitadas (Acceso al depósito común)", precio: 5.31, nota: "Línea extra" });
+                        }
+                    }
+                }
+            }
+
+            const familiaTV = estado.op === 'jazztel' ? 'jazz' : estado.op;
+            let totalTV = 0;
+            
+            document.querySelectorAll('.tv-btn').forEach(b => b.classList.remove('selected'));
+            
+            for (let s in estado.tvSeleccionada[familiaTV]) {
+                const btnTV = document.getElementById(`btn-${familiaTV}-${s}`);
+                if (btnTV) btnTV.classList.add('selected');
+                
+                let itemTV = estado.tvSeleccionada[familiaTV][s];
+                
+                // Lógica de Pago Único de Fútbol
+                if (s === 'futbol') {
+                    dataReporte.upfrontCost += 26.53 + 8.80;
+                    dataReporte.upfrontDetails.push("Promo Fútbol Verano (26.53€) + Cuota Alta Deco (8.80€)");
+                    dataReporte.tv.push({ nombre: itemTV.nombre, precio: 0, nota: "Servicio de Pago Único Inicial" });
+                } else {
+                    totalTV += itemTV.precio;
+                    dataReporte.tv.push({ nombre: itemTV.nombre, precio: itemTV.precio, nota: "Cuota recurrente mensual" });
+                }
+            }
+
+            if (estado.hasMovistar) {
+                totalTV += 9.99;
+                dataReporte.tv.push({ nombre: "Movistar+ (Plataforma Premium)", precio: 9.99, nota: "Cuota recurrente mensual" });
+            }
+
+            let totalLineasExtra = dataReporte.lineas.reduce((acc, current) => acc + (current.nota.includes("extra") || current.tipo.includes("Adicional") ? current.precio : 0), 0);
+            dataReporte.cuotaTotal = precioBasePaquete + totalLineasExtra + totalTV;
+
+            let txtOperadorLabel = estado.soloMovil ? `Simyo Móvil` : `${estado.op.toUpperCase()} Fibra`;
+            document.getElementById('operador-info').innerText = `${txtOperadorLabel} - Total: ${dataReporte.cuotaTotal.toFixed(2)}€/mes`;
+
+            const valCliente = parseFloat(document.getElementById('input-cliente').value) || 0;
+            const txtAnual = document.getElementById('ahorro-anual');
+            const txtMensual = document.getElementById('ahorro-mensual');
+
+            if (valCliente > 0) {
+                const ahorroMensual = valCliente - dataReporte.cuotaTotal;
+                if (ahorroMensual > 0) {
+                    let ahorroNetoAnual = (ahorroMensual * 12) - dataReporte.upfrontCost;
+                    
+                    txtAnual.innerText = Math.round(ahorroNetoAnual) + "€";
+                    txtAnual.style.color = ahorroNetoAnual > 0 ? "var(--success)" : "var(--warning)";
+                    
+                    let txtInfoMensual = `${Math.round(ahorroMensual)}€ ahorro/mes`;
+                    if (dataReporte.upfrontCost > 0) txtInfoMensual += `<br><span style="color:#ffcc00; font-size:0.75rem;">(Restado pago inicial deco de ${dataReporte.upfrontCost.toFixed(2)}€ al anual)</span>`;
+                    txtMensual.innerHTML = txtInfoMensual;
+                } else {
+                    txtAnual.innerText = "0€";
+                    txtAnual.style.color = "var(--error)";
+                    txtMensual.innerHTML = "No hay mejora económica";
+                }
+            } else {
+                txtAnual.innerText = "0€";
+                txtMensual.innerHTML = "Esperando precio";
+            }
+        }
+
+        function abrirDesglose() {
+            const tbodyFibra = document.getElementById('pdf-fibra-rows');
+            tbodyFibra.innerHTML = `
+                <tr>
+                    <td><b>Acceso Internet</b></td>
+                    <td>${dataReporte.fibraVelocidad}</td>
+                    <td style="text-align:right; font-weight:bold; color:#222;">${estado.soloMovil ? 'N/A' : 'Activada'}</td>
+                </tr>
+            `;
+
+            const tbodyMovil = document.getElementById('pdf-movil-rows');
+            tbodyMovil.innerHTML = "";
+            dataReporte.lineas.forEach(l => {
+                tbodyMovil.innerHTML += `
+                    <tr>
+                        <td><b>${l.tipo}</b><br><span style="font-size:0.75rem; color:#666;">${l.nota}</span></td>
+                        <td>${l.datos}</td>
+                        <td class="price">${l.precio > 0 ? l.precio.toFixed(2) + '€' : 'Incluida'}</td>
+                    </tr>
+                `;
+            });
+
+            const secTV = document.getElementById('pdf-section-tv');
+            const tbodyTV = document.getElementById('pdf-tv-rows');
+            tbodyTV.innerHTML = "";
+            
+            if (dataReporte.tv.length > 0) {
+                secTV.style.display = "block";
+                dataReporte.tv.forEach(t => {
+                    tbodyTV.innerHTML += `
+                        <tr>
+                            <td><b>${t.nombre}</b></td>
+                            <td>${t.nota || 'Plan Oficial'}</td>
+                            <td class="price" style="${t.precio === 0 ? 'color:#e30613;' : ''}">${t.precio === 0 ? 'Pago único' : t.precio.toFixed(2) + '€'}</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                secTV.style.display = "none";
+            }
+            
+            // Visualizar el pago único si existe en el reporte
+            const upfrontDiv = document.getElementById('pdf-upfront-costs');
+            if (dataReporte.upfrontCost > 0) {
+                upfrontDiv.style.display = 'block';
+                upfrontDiv.innerHTML = `* Nota: Existen pagos únicos iniciales obligatorios no incluidos en la cuota mensual: ${dataReporte.upfrontCost.toFixed(2)}€ (${dataReporte.upfrontDetails.join(' | ')})`;
+            } else {
+                upfrontDiv.style.display = 'none';
+            }
+
+            const valCliente = parseFloat(document.getElementById('input-cliente').value) || 0;
+            const divAhorroNota = document.getElementById('pdf-ahorro-nota');
+            if (valCliente > 0 && valCliente > dataReporte.cuotaTotal) {
+                let mensual = valCliente - dataReporte.cuotaTotal;
+                let textoAhorro = `Ahorro mensual cliente: ${mensual.toFixed(2)}€/mes (${Math.round(mensual * 12)}€ al año brutos)`;
+                if (dataReporte.upfrontCost > 0) textoAhorro += ` - Descontando pagos iniciales el ahorro neto primer año es ${Math.round((mensual * 12) - dataReporte.upfrontCost)}€`;
+                divAhorroNota.innerText = textoAhorro;
+            } else {
+                divAhorroNota.innerText = "Simulación de tarifa optimizada sin costes mensuales ocultos.";
+            }
+
+            let txtLegal = "<b>Condiciones legales y compromisos:</b> Estudio personalizado realizado en MediaMarkt Añaza (Tenerife). Precios finales calculados con el IGIC vigente de Canarias. Oferta sujeta a cobertura geográfica del operador. ";
+            
+            if (estado.soloMovil) {
+                txtLegal += "Las líneas móviles independientes sueltas no generan ningún tipo de compromiso de permanencia en ninguna de las compañías ofertadas.";
+            } else {
+                if (estado.op === 'lowi') {
+                    txtLegal += "El paquete combinado de Fibra + Móvil de Lowi conlleva un compromiso de permanencia mínimo de 3 meses en el servicio de fibra óptica.";
+                } else if (estado.op === 'simyo') {
+                    if (estado.antiDigi) {
+                        txtLegal += "Al acogerse a la promoción especial de tarifa reducida Anti-DIGI de Simyo, el servicio queda sujeto a un compromiso de permanencia obligatorio de 12 meses.";
+                    } else {
+                        txtLegal += "El paquete estándar de Fibra + Móvil de Simyo incluye un compromiso de permanencia de 3 meses. Nota aclaratoria: Durante el volcado de la solicitud en la plataforma de tramitación, el sistema puede lanzar ofertas promocionales puntuales con un precio mejorado; en este escenario excepcional, el cliente tendrá siempre el derecho absoluto de elegir si prefiere aceptar dicha promoción (asumiendo la permanencia que lleve asociada) o conservar la tarifa regular manteniendo el compromiso estándar de 3 meses.";
+                    }
+                } else if (estado.op === 'jazztel') {
+                    txtLegal += "Toda contratación de paquetes combinados de Fibra + Móvil de Jazztel incluye de forma regular un compromiso de permanencia fijado en 12 meses. Promociones de pago único exentas de prorrateo mensual.";
+                }
+            }
+            
+            document.getElementById('pdf-legal-text').innerHTML = txtLegal;
+            document.getElementById('ticket-total-precio').innerText = dataReporte.cuotaTotal.toFixed(2) + "€";
+            document.getElementById('modal-desglose').style.display = "flex";
+        }
+
+        function cerrarDesglose() {
+            document.getElementById('modal-desglose').style.display = "none";
+        }
+
+        function generarPDF() {
+            const elemento = document.getElementById('contenido-pdf');
+            const opt = {
+                margin:       [0.4, 0.4, 0.4, 0.4],
+                filename:     `Propuesta_MediaMarkt_Anaza_${Date.now()}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2.5, logging: false, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(elemento).save();
+        }
+
+        actualizarUIOpciones();
+        actualizar();
+    </script>
+</body>
+</html>
