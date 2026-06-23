@@ -1,0 +1,19 @@
+{
+  "name": "MM Ventas",
+  "short_name": "MM Ventas",
+  "description": "Calculadoras de venta MediaMarkt Añaza",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#070003",
+  "theme_color": "#090003",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
