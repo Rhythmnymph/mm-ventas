@@ -84,46 +84,55 @@
         
         .pdf-btn { background-color: #000; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
     
-/* V16.1 mejoras de uso interno */
-.page-home-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:900;width:54px;height:54px;border-radius:19px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.62);backdrop-filter:blur(14px);color:#fff;text-decoration:none;display:flex;align-items:center;justify-content:center;font-size:1.35rem;box-shadow:0 14px 35px rgba(0,0,0,.45)}
-.page-home-btn:active{transform:scale(.94)}
-.worker-summary{margin:10px 0 8px;padding:12px;border-radius:14px;border:1px solid color-mix(in srgb,var(--primary,#e30613),transparent 45%);background:linear-gradient(135deg,rgba(255,255,255,.07),rgba(255,255,255,.025));box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
-.worker-summary-title{font-size:.68rem;color:var(--text-dim,#aaa);font-weight:900;text-transform:uppercase;letter-spacing:.12em;margin-bottom:7px}
-.worker-summary-line{font-size:.82rem;font-weight:750;color:var(--text,#fff);line-height:1.35;opacity:.94}
-.worker-summary-line strong{color:var(--primary,#e30613)}
-.adic-item.has-lines,.row.has-lines{border-color:var(--primary,#e30613)!important;background:color-mix(in srgb,var(--primary,#e30613),transparent 84%)!important;box-shadow:0 0 0 1px color-mix(in srgb,var(--primary,#e30613),transparent 70%) inset}
-.adic-item.has-lines .lines-display,.row.has-lines .lines-display{font-size:1.55rem;color:var(--primary,#e30613)}
-body{animation:v161PageIn .22s ease-out both}
-@keyframes v161PageIn{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:none}}
-@media (display-mode: standalone){.install-hint,.footer{display:none!important}}
-
-    </style>
-
-<style>
-  .mm-app-topbar{
-    position: sticky; top: 0; z-index: 9999;
-    display:flex; align-items:center; gap:10px;
-    padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px;
-    background: rgba(10,0,0,.92);
-    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid rgba(255,255,255,.10);
-    box-shadow: 0 8px 24px rgba(0,0,0,.35);
-  }
-  .mm-back{
+.mm-app-topbar{
+    position:sticky;top:0;z-index:9999;
+    display:flex;align-items:center;gap:10px;
+    padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px;
+    margin:-8px -8px 8px;
+    background:rgba(10,0,0,.92);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid rgba(255,255,255,.10);
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+}
+.mm-back{
     width:42px;height:42px;border-radius:14px;
     display:flex;align-items:center;justify-content:center;
     text-decoration:none;color:#fff;font-size:24px;font-weight:900;
-    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
-    -webkit-tap-highlight-color: transparent;
-  }
-  .mm-back:active{transform:scale(.94); background:#ff6600;}
-  .mm-title-wrap{display:flex;flex-direction:column;line-height:1.1;min-width:0}
-  .mm-title{font-size:1rem;font-weight:950;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .mm-subtitle{font-size:.72rem;color:rgba(255,255,255,.62);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
-  body{animation:mmPageIn .24s ease both;}
-  @keyframes mmPageIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
-</style>
+    background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);
+}
+.mm-title-wrap{display:flex;flex-direction:column;line-height:1.1;min-width:0}
+.mm-title{font-size:1rem;font-weight:950;color:#fff}
+.mm-subtitle{font-size:.72rem;color:rgba(255,255,255,.62);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
 
+
+/* Corrección global V16.2: el modal queda por encima de la barra superior */
+.modal-overlay{
+    z-index:20000 !important;
+    padding-top:calc(env(safe-area-inset-top,0px) + 12px) !important;
+}
+.modal-content{
+    margin-top:0 !important;
+}
+.modal-close{
+    position:sticky !important;
+    float:right !important;
+    top:0 !important;
+    right:auto !important;
+    z-index:5 !important;
+    width:44px !important;
+    height:44px !important;
+    margin:-8px -8px 4px 10px !important;
+    border-radius:50% !important;
+    background:#eeeeee !important;
+    color:#444 !important;
+    display:flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    line-height:1 !important;
+    box-shadow:0 3px 12px rgba(0,0,0,.18) !important;
+}
+
+</style>
 </head>
 <body>
 
@@ -204,7 +213,6 @@ body{animation:v161PageIn .22s ease-out both}
         <div id="ahorro-anual">0€</div>
         <div id="ahorro-mensual">0€ al mes</div>
         <div style="font-weight: bold; margin-top: 5px; color: #fff;" id="operador-info">Configurando paquete...</div>
-        <div id="worker-summary-simyo" class="worker-summary"></div>
         <button class="action-btn" onclick="abrirDesglose()">Generar Reporte Detallado</button>
     </div>
 
@@ -298,8 +306,6 @@ body{animation:v161PageIn .22s ease-out both}
             tvSeleccionada: {}
         };
 
-        try { const saved = JSON.parse(localStorage.getItem('mmv_simyo_state') || 'null'); if (saved) estado = Object.assign(estado, saved); } catch(e) {}
-
         let dataReporte = {};
 
         function renderListasLineas() {
@@ -313,7 +319,7 @@ body{animation:v161PageIn .22s ease-out both}
                 if (linea.tipo === 'digi' && !estado.isDigi) return;
 
                 let row = document.createElement('div');
-                row.className = 'adic-item' + ((estado.cantidades[linea.id]||0)>0 ? ' has-lines' : '');
+                row.className = 'adic-item';
                 let prefijo = estado.isSoloMovil ? "Línea Suelta" : "Adicional";
                 row.innerHTML = `
                     <div class="adic-info">
@@ -477,22 +483,6 @@ body{animation:v161PageIn .22s ease-out both}
                 txtAnual.innerText = "0€";
                 txtMensual.innerText = "Esperando precio";
             }
-            renderWorkerSummarySimyo();
-        }
-
-
-        function renderWorkerSummarySimyo() {
-            const box = document.getElementById('worker-summary-simyo');
-            if (!box || !dataReporte) return;
-            const lineCount = (dataReporte.lineas || []).length;
-            const tvNames = (dataReporte.tv || []).map(t => t.nombre).join(', ') || 'Sin TV';
-            const tipo = estado.isSoloMovil ? 'Solo móvil' : `Fibra ${dataReporte.fibraVelocidad}`;
-            const perfil = estado.isDigi ? 'Origen DIGI / promo' : 'Tarifa estándar';
-            box.innerHTML = `<div class="worker-summary-title">Resumen interno</div>
-                <div class="worker-summary-line"><strong>${tipo}</strong> · ${perfil}</div>
-                <div class="worker-summary-line">Líneas seleccionadas: ${lineCount}</div>
-                <div class="worker-summary-line">TV: ${tvNames}</div>`;
-            try { localStorage.setItem('mmv_simyo_state', JSON.stringify(estado)); } catch(e) {}
         }
 
         function abrirDesglose() {
@@ -902,6 +892,5 @@ body{animation:v161PageIn .22s ease-out both}
         renderListasLineas();
         actualizar();
     </script>
-<a class="page-home-btn" href="../index.html" aria-label="Volver al inicio">🏠</a>
 </body>
 </html>
