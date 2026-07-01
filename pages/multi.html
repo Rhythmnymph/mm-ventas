@@ -140,36 +140,6 @@
 .doc-promo-title{font-size:.74rem;text-transform:uppercase;font-weight:900;color:#e30613;letter-spacing:.05em}
 .doc-promo-value{font-size:1.05rem;font-weight:900;color:#222;margin-top:4px}
 
-
-/* V17 completa */
-.v17-tools{
-  display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:0 0 10px;
-}
-.v17-tool{
-  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.07);
-  color:#fff;border-radius:10px;padding:9px 5px;font-size:.72rem;font-weight:900;
-}
-.v17-tool:active{transform:scale(.96)}
-.v17-sticky{
-  position:sticky;bottom:8px;z-index:850;padding:10px 8px 8px;
-  border-radius:16px;background:rgba(12,3,1,.92);backdrop-filter:blur(15px);
-  box-shadow:0 10px 30px rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.12);
-}
-.v17-validation{
-  display:none;margin:8px 0;padding:10px;border-radius:10px;
-  border:1px solid rgba(255,77,77,.55);background:rgba(255,77,77,.12);
-  color:#ffd7d7;font-size:.78rem;font-weight:750;line-height:1.4;text-align:left;
-}
-.v17-saved{
-  display:none;margin:8px 0;padding:9px;border-radius:10px;
-  border:1px solid rgba(0,255,102,.45);background:rgba(0,255,102,.10);
-  color:#bfffd7;font-size:.76rem;font-weight:800;text-align:center;
-}
-.doc-meta-v17{font-size:.72rem;color:#666;margin:-10px 0 16px;display:flex;justify-content:space-between;gap:10px}
-.doc-summary-v17{margin:12px 0;padding:12px;border-radius:8px;background:#f7f7f7;border:1px solid #e2e2e2}
-.doc-summary-v17 b{color:#222}
-@media(max-width:430px){.v17-tools{grid-template-columns:repeat(2,1fr)}}
-
 </style>
 </head>
 <body>
@@ -182,16 +152,7 @@
   </div>
 </div>
 
-    <div class="header">Calculadora Multioperador · V17</div>
-<div class="v17-tools" id="v17-tools-multi">
-  <button class="v17-tool" id="v17-save-multi">Guardar</button>
-  <button class="v17-tool" id="v17-restore-multi">Recuperar</button>
-  <button class="v17-tool" id="v17-new-multi">Nueva</button>
-  <button class="v17-tool" id="v17-clear-multi">Limpiar</button>
-</div>
-<div class="v17-saved" id="v17-saved-multi">Propuesta guardada</div>
-<div class="v17-validation" id="v17-validation-multi"></div>
-
+    <div class="header">Calculadora Operadores (V15)</div>
 
     <div class="section">
         <span class="label">Operador Principal</span>
@@ -277,7 +238,7 @@
         </div>
     </div>
 
-    <div class="result-zone v17-sticky">
+    <div class="result-zone">
         <span class="label">Ahorro estimado al año</span>
         <div id="ahorro-anual">0€</div>
         <div id="ahorro-mensual">0€ al mes</div>
@@ -743,67 +704,5 @@
         actualizarUIOpciones();
         actualizar();
     </script>
-
-<script id="v17-multi-tools">
-(() => {
-  const KEY_AUTO='mmv_multi_v17_auto', KEY_MANUAL='mmv_multi_v17_manual';
-  const input=document.getElementById('input-cliente');
-  const msg=document.getElementById('v17-validation-multi');
-  const saved=document.getElementById('v17-saved-multi');
-
-  function snapshot(){
-    return {estado:JSON.parse(JSON.stringify(estado)),precio:input?.value||''};
-  }
-  function applySnapshot(x){
-    if(!x||!x.estado)return false;
-    Object.assign(estado,x.estado);
-    if(input) input.value=x.precio||'';
-    document.querySelectorAll('#op-lowi,#op-simyo,#op-jazztel').forEach(b=>b.classList.remove('active'));
-    document.getElementById('op-'+estado.op)?.classList.add('active');
-    actualizarUIOpciones();
-    renderTVButtons();
-    actualizar();
-    return true;
-  }
-  function flash(text='Propuesta guardada'){
-    saved.textContent=text;saved.style.display='block';
-    setTimeout(()=>saved.style.display='none',1600);
-  }
-  function validate(){
-    const errors=[];
-    if(estado.soloMovil && estado.baseLines+estado.adicLines<=0) errors.push('Añade al menos una línea móvil.');
-    if(!Number.isFinite(dataReporte.cuotaTotal)) errors.push('No se ha podido calcular correctamente la cuota.');
-    msg.innerHTML=errors.join('<br>');msg.style.display=errors.length?'block':'none';
-    return errors.length===0;
-  }
-
-  const originalActualizar=actualizar;
-  actualizar=function(){
-    originalActualizar();
-    try{localStorage.setItem(KEY_AUTO,JSON.stringify(snapshot()))}catch(e){}
-  };
-
-  const originalAbrir=abrirDesglose;
-  abrirDesglose=function(){
-    if(!validate())return;
-    document.getElementById('v17-date-multi').textContent=new Date().toLocaleDateString('es-ES');
-    const promo=!estado.soloMovil?'<br><b>Beneficio promocional:</b> tarjeta regalo MediaMarkt de 100 € (independiente del ahorro).':'';
-    document.getElementById('v17-summary-multi').innerHTML=
-      `<b>${estado.op.toUpperCase()}</b> · ${dataReporte.lineas.length} línea(s) · Total ${dataReporte.cuotaTotal.toFixed(2)}€/mes${promo}`;
-    originalAbrir();
-  };
-
-  document.getElementById('v17-save-multi').onclick=()=>{localStorage.setItem(KEY_MANUAL,JSON.stringify(snapshot()));flash()};
-  document.getElementById('v17-restore-multi').onclick=()=>{const x=JSON.parse(localStorage.getItem(KEY_MANUAL)||'null');x&&applySnapshot(x)?flash('Propuesta recuperada'):flash('No hay propuesta guardada')};
-  document.getElementById('v17-new-multi').onclick=()=>{if(confirm('¿Crear una propuesta nueva?')){localStorage.removeItem(KEY_AUTO);location.reload()}};
-  document.getElementById('v17-clear-multi').onclick=()=>{if(confirm('¿Limpiar la propuesta actual?')){localStorage.removeItem(KEY_AUTO);localStorage.removeItem(KEY_MANUAL);location.reload()}};
-
-  try{
-    const auto=JSON.parse(localStorage.getItem(KEY_AUTO)||'null');
-    if(auto) applySnapshot(auto);
-  }catch(e){}
-})();
-</script>
-
 </body>
 </html>
