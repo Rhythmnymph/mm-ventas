@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v17-hotfix-1';
+const CACHE_NAME = 'mm-ventas-v17-pulido-1';
 const CORE = [
   './',
   './index.html',
