@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v17-revisado-1';
+const CACHE_NAME = 'mm-ventas-v17-simyo-layout-1';
 const CORE = [
   './',
   './index.html',
