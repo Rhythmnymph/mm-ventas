@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v17-pdf-definitivo-1';
+const CACHE_NAME = 'mm-ventas-v17-pdf-canvas-1';
 const CORE = [
   './',
   './index.html',
