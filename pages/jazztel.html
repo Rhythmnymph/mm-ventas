@@ -42,7 +42,7 @@
   margin-bottom:12px;
 }
 .doc-brand-row img{
-  width:78px;
+  width:46px;
   height:auto;
   object-fit:contain;
 }
@@ -184,6 +184,28 @@
   .doc-footer-summary{align-items:flex-start}
 }
 
+
+/* V17.3 - exportacion PDF corregida */
+.doc-section{break-inside:auto!important;page-break-inside:auto!important}
+.doc-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
+.doc-footer-summary,.doc-promo,.doc-legal{break-inside:avoid!important;page-break-inside:avoid!important}
+.pdf-export-stage{
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:1;
+  width:794px;
+  background:#fff;
+  pointer-events:none;
+}
+.pdf-export-stage .doc{
+  width:754px!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:20px!important;
+  box-sizing:border-box!important;
+}
+
 </style>
 </head>
 <body>
@@ -204,7 +226,7 @@
     <button class="close" onclick="closeBreakdown()">×</button>
     <div id="doc" class="doc">
       <div class="doc-brand-row">
-        <img src="../assets/mediamarkt-logo.png" alt="MediaMarkt">
+        <img src="../assets/mediamarkt-symbol.png" alt="MediaMarkt">
       </div>
       <div class="doc-header">
         <div>
@@ -293,18 +315,54 @@ document.getElementById('modal').style.display='block';
 document.body.style.overflow='hidden'
 }
 function closeBreakdown(){document.getElementById('modal').style.display='none';document.body.style.overflow=''}
-function makePDF(){
-  const elemento=document.getElementById('doc');
-  if(!window.html2pdf)return alert('No se pudo cargar el generador de PDF.');
-  const opt={
-    margin:[0.4,0.4,0.4,0.4],
-    filename:`Propuesta_Jazztel_MediaMarkt_${Date.now()}.pdf`,
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2.5,logging:false,useCORS:true},
-    jsPDF:{unit:'in',format:'letter',orientation:'portrait'},
-    pagebreak:{mode:['css','legacy']}
-  };
-  html2pdf().set(opt).from(elemento).save();
+
+async function exportDocPdf(sourceId,filename){
+  if(!window.html2pdf)throw new Error('No se pudo cargar el generador de PDF.');
+  const source=document.getElementById(sourceId);
+  const stage=document.createElement('div');
+  stage.className='pdf-export-stage';
+  const clone=source.cloneNode(true);
+  clone.removeAttribute('id');
+  stage.appendChild(clone);
+  document.body.appendChild(stage);
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  try{
+    const opt={
+      margin:[8,8,8,8],
+      filename,
+      image:{type:'jpeg',quality:.98},
+      html2canvas:{
+        scale:2,
+        logging:false,
+        useCORS:true,
+        backgroundColor:'#ffffff',
+        scrollX:0,
+        scrollY:0,
+        windowWidth:794,
+        width:794
+      },
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy']}
+    };
+    await window.html2pdf().set(opt).from(clone).save();
+  }finally{
+    stage.remove();
+  }
+}
+async function makePDF(){
+  const button=document.querySelector('.modal-card .pdf');
+  const old=button.textContent;
+  button.disabled=true;
+  button.textContent='Generando PDF...';
+  try{
+    await exportDocPdf('doc',`Propuesta_Jazztel_MediaMarkt_${Date.now()}.pdf`);
+  }catch(error){
+    console.error(error);
+    alert(error.message||'No se pudo generar el PDF.');
+  }finally{
+    button.disabled=false;
+    button.textContent=old;
+  }
 }
 sync();document.getElementById('tv-panel').style.display=state.tvOpen?'block':'none';document.getElementById('post-panel').style.display=state.postOpen?'block':'none';update();
 </script>

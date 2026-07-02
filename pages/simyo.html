@@ -208,7 +208,7 @@ main{
   margin-bottom:12px;
 }
 .doc-brand-row img{
-  width:78px;
+  width:46px;
   height:auto;
   object-fit:contain;
 }
@@ -364,6 +364,91 @@ main{
   .doc-footer-summary{align-items:flex-start}
 }
 
+
+/* V17.3 - controles y exportacion PDF corregidos */
+.service-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:8px!important;
+  width:100%!important;
+  justify-content:stretch!important;
+}
+.service-action{
+  width:auto!important;
+  height:auto!important;
+  min-width:0!important;
+  min-height:40px!important;
+  margin:0!important;
+  padding:9px 10px!important;
+  border-radius:9px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  line-height:1.15!important;
+  font-size:.74rem!important;
+  font-weight:900!important;
+  white-space:normal!important;
+  text-align:center!important;
+  box-sizing:border-box!important;
+}
+.service-action.toggle{
+  grid-column:1/-1!important;
+  border-color:rgba(255,102,0,.55)!important;
+  color:#ffd0b0!important;
+}
+.service-action.duplicate{
+  border-color:rgba(0,204,255,.55)!important;
+  color:#b8f0ff!important;
+}
+.service-action.remove{
+  border-color:rgba(255,77,77,.60)!important;
+  color:#ffbcbc!important;
+  background:rgba(255,77,77,.08)!important;
+}
+.doc-section{break-inside:auto!important;page-break-inside:auto!important}
+.doc-table tr{break-inside:avoid!important;page-break-inside:avoid!important}
+.doc-footer-summary,.doc-promo,.doc-legal{break-inside:avoid!important;page-break-inside:avoid!important}
+.pdf-export-stage{
+  position:absolute;
+  top:0;
+  left:0;
+  z-index:1;
+  width:794px;
+  background:#fff;
+  pointer-events:none;
+}
+.pdf-export-stage .doc{
+  width:754px!important;
+  max-width:none!important;
+  margin:0!important;
+  padding:20px!important;
+  box-sizing:border-box!important;
+}
+@media(max-width:460px){
+  .service-actions{grid-template-columns:1fr 1fr!important}
+  .service-action.toggle{grid-column:1/-1!important}
+}
+
+
+/* V17.3 — columnas según número de servicios */
+#services{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:12px;
+  align-items:start;
+}
+@media(min-width:880px){
+  #services.cols-2,
+  #services.cols-3{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
+@media(min-width:1240px){
+  #services.cols-3{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -383,7 +468,7 @@ main{
     <button class="close" id="close">×</button>
     <div id="doc" class="doc">
       <div class="doc-brand-row">
-        <img src="../assets/mediamarkt-logo.png" alt="MediaMarkt">
+        <img src="../assets/mediamarkt-symbol.png" alt="MediaMarkt">
       </div>
       <div class="doc-header">
         <div>
@@ -432,21 +517,21 @@ function addService(type){if(type==='segunda'&&state.services.filter(s=>s.type==
 function S(id){return state.services.find(s=>s.id===id)}function name(s){return s.type==='convergente'?'Fibra + móvil':s.type==='solo-fibra'?'Solo fibra':s.type==='segunda'?'Segunda residencia':'Solo móvil'}function lines(s){return s.type==='solo-movil'?LINES.mobile:LINES.conv}
 function price(s){let t=0;if(s.type==='convergente')t=BASE[s.mode][s.speed][s.mode==='digi'?'250':s.main];if(s.type==='solo-fibra')t=SOLO_FIBRA[s.speed];if(s.type==='segunda')t=SEGUNDA[s.speed];if(s.type==='convergente'||s.type==='solo-movil')lines(s).forEach(l=>{if(!(s.mode==='digi'||l[3]==='std'))return;t+=(s.qty[l[0]]||0)*l[2]});Object.values(s.tv).forEach(x=>t+=x.p);return t}function total(){return state.services.reduce((a,s)=>a+price(s),0)}
 function setp(id,k,v){const s=S(id);s[k]=v;if(k==='mode'){s.main=v==='digi'?'250':'50';s.qty=blank()}if(k==='coverage'&&v==='indirecta'&&s.speed==='300')s.speed='600';render()}function qty(id,l,d){const s=S(id);s.qty[l]=Math.max(0,(s.qty[l]||0)+d);render()}function tv(id,k){const s=S(id);s.tv[k]?delete s.tv[k]:s.tv[k]=TV[k];render()}
-function body(s){const nombre=`<div class=field><span class=label>Nombre o dirección del servicio</span><input class=price-input style="width:100%;font-size:1rem;text-align:left;padding:8px" data-label="${s.id}" value="${(s.label||'').replace(/\"/g,'&quot;')}" placeholder="Ej.: Vivienda principal"></div>`;if(s.type==='solo-fibra'||s.type==='segunda')return nombre+`<div class=field><span class=label>Tipo de cobertura / facturación</span><div class=toggle><button class="btn ${s.coverage==='directa'?'active':''}" data-set="${s.id}|coverage|directa">Directa</button><button class="btn ${s.coverage==='indirecta'?'active':''}" data-set="${s.id}|coverage|indirecta">Indirecta</button></div></div><div class=field><span class=label>Velocidad</span><div class=toggle><button class="btn ${s.speed==='300'?'active':''}" ${s.coverage==='indirecta'?'disabled':''} data-set="${s.id}|speed|300">300 MB</button><button class="btn ${s.speed==='600'?'active':''}" data-set="${s.id}|speed|600">600 MB</button><button class="btn ${s.speed==='1000'?'active':''}" data-set="${s.id}|speed|1000">1 GB</button></div><div class=note>${s.type==='segunda'?'Requiere una convergencia activa en otra dirección. ':''}Permanencia de 3 meses.</div></div>`;
+function body(s){const nombre=state.services.length>1?`<div class=field><span class=label>Nombre o dirección del servicio</span><input class=price-input style="width:100%;font-size:1rem;text-align:left;padding:8px" data-label="${s.id}" value="${(s.label||'').replace(/\"/g,'&quot;')}" placeholder="Ej.: Vivienda principal"></div>`:'';if(s.type==='solo-fibra'||s.type==='segunda')return nombre+`<div class=field><span class=label>Tipo de cobertura / facturación</span><div class=toggle><button class="btn ${s.coverage==='directa'?'active':''}" data-set="${s.id}|coverage|directa">Directa</button><button class="btn ${s.coverage==='indirecta'?'active':''}" data-set="${s.id}|coverage|indirecta">Indirecta</button></div></div><div class=field><span class=label>Velocidad</span><div class=toggle><button class="btn ${s.speed==='300'?'active':''}" ${s.coverage==='indirecta'?'disabled':''} data-set="${s.id}|speed|300">300 MB</button><button class="btn ${s.speed==='600'?'active':''}" data-set="${s.id}|speed|600">600 MB</button><button class="btn ${s.speed==='1000'?'active':''}" data-set="${s.id}|speed|1000">1 GB</button></div><div class=note>${s.type==='segunda'?'Requiere una convergencia activa en otra dirección. ':''}Permanencia de 3 meses.</div></div>`;
 return nombre+`<div class=field><span class=label>Modalidad</span><div class=toggle><button class="btn ${s.mode==='estandar'?'active':''}" data-set="${s.id}|mode|estandar">Estándar</button><button class="btn ${s.mode==='digi'?'active':''}" data-set="${s.id}|mode|digi">Origen DIGI</button></div></div>${s.type==='convergente'?`<div class=field><span class=label>Velocidad</span><div class=toggle><button class="btn ${s.speed==='600'?'active':''}" data-set="${s.id}|speed|600">600 MB</button><button class="btn ${s.speed==='1000'?'active':''}" data-set="${s.id}|speed|1000">1 GB</button></div></div><div class=field><span class=label>Línea principal</span><div class=toggle>${s.mode==='digi'?'<button class="btn active" disabled>250 GB Promo</button>':['50','120','300'].map(g=>`<button class="btn ${s.main===g?'active':''}" data-set="${s.id}|main|${g}">${g} GB</button>`).join('')}</div></div>`:''}<div class=field><span class=label>${s.type==='solo-movil'?'Líneas móviles':'Líneas adicionales'}</span>${s.mode==='digi'?'<div class=note>También puedes añadir líneas estándar además de las promocionales de origen DIGI.</div>':''}${lines(s).filter(l=>(s.mode==='digi'||l[3]==='std')).map(l=>`<div class="line ${(s.qty[l[0]]||0)>0?'active':''}"><div><div class=line-name>${l[1]}</div><div class=line-price>${euro(l[2])}/mes</div></div><div class=counter><button class=circle data-qty="${s.id}|${l[0]}|-1">−</button><span class=num>${s.qty[l[0]]||0}</span><button class=circle data-qty="${s.id}|${l[0]}|1">+</button></div></div>`).join('')}</div><div class=field><span class=label>TV / streaming</span><div class=toggle>${Object.entries(TV).map(([k,t])=>`<button class="btn ${s.tv[k]?'active':''}" data-tv="${s.id}|${k}">${t.name} · ${euro(t.p)}</button>`).join('')}</div></div>`}
 function summary(s){if(s.type==='convergente')return `${s.speed==='1000'?'1 GB':'600 MB'} · ${s.mode==='digi'?'Anti-DIGI 250 GB':s.main+' GB'}`;if(s.type==='solo-fibra'||s.type==='segunda')return `${s.speed==='1000'?'1 GB':s.speed+' MB'} · ${s.coverage}`;return `${s.mode==='digi'?'Origen DIGI':'Estándar'} · ${Object.values(s.qty).reduce((a,b)=>a+b,0)} línea(s)`}
-function render(){services.innerHTML=state.services.map((s,i)=>`<section class="service ${s.collapsed?'collapsed':''}">
+function render(){const serviceCount=state.services.length;services.className=serviceCount>=3?'cols-3':serviceCount===2?'cols-2':'cols-1';services.innerHTML=state.services.map((s,i)=>`<section class="service ${s.collapsed?'collapsed':''}">
 <div class=service-head>
   <div class=service-heading-row>
     <div class=service-heading>
-      <span class=service-title>${i+1}. ${s.label?s.label+' · ':''}${name(s)}</span>
+      <span class=service-title>${i+1}. ${serviceCount>1&&s.label?s.label+' · ':''}${name(s)}</span>
       <span class=service-sub>${summary(s)}</span>
     </div>
   </div>
   <div class=service-actions>
-    <button class="service-action toggle" type=button data-toggle="${s.id}">${s.collapsed?'Mostrar detalles':'Ocultar detalles'}</button>
-    <button class="service-action duplicate" type=button data-duplicate="${s.id}">Duplicar servicio</button>
-    <button class="service-action delete" type=button data-delete="${s.id}">Eliminar</button>
+    <button class="service-action toggle" type=button data-toggle="${s.id}">${s.collapsed?'Desplegar detalles':'Plegar detalles'}</button>
+    <button class="service-action duplicate" type=button data-duplicate="${s.id}">Duplicar</button>
+    <button class="service-action remove" type=button data-delete="${s.id}">Eliminar</button>
   </div>
 </div>
 <div class=service-body>${body(s)}<div class=subtotal><span>Subtotal</span><strong>${euro(price(s))}/mes</strong></div></div>
@@ -464,7 +549,7 @@ function rows(s){const r=[];if(s.type==='convergente')r.push(['Paquete principal
 function openReport(){
 const promoCount=state.services.filter(s=>s.type==='convergente').length;
 docServices.innerHTML=state.services.map((s,i)=>`<section class=doc-section>
-  <div class=doc-section-title>${i+1}. ${s.label?s.label+' - ':''}${name(s)}</div>
+  <div class=doc-section-title>${i+1}. ${state.services.length>1&&s.label?s.label+' - ':''}${name(s)}</div>
   <table class=doc-table>
     <thead><tr><th>Concepto</th><th>Detalle técnico</th><th>Importe</th></tr></thead>
     <tbody>${rows(s).map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${euro(x[2])}</td></tr>`).join('')}</tbody>
@@ -487,18 +572,54 @@ if(promoCount>0){
 modal.style.display='block';
 document.body.style.overflow='hidden'
 }
-function makePdf(){
-  const elemento=document.getElementById('doc');
-  if(!window.html2pdf)return alert('No se pudo cargar el generador de PDF.');
-  const opt={
-    margin:[0.4,0.4,0.4,0.4],
-    filename:`Propuesta_Simyo_MediaMarkt_${Date.now()}.pdf`,
-    image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2.5,logging:false,useCORS:true},
-    jsPDF:{unit:'in',format:'letter',orientation:'portrait'},
-    pagebreak:{mode:['css','legacy'],before:'.pdf-page-break'}
-  };
-  html2pdf().set(opt).from(elemento).save();
+
+async function exportDocPdf(sourceId,filename){
+  if(!window.html2pdf)throw new Error('No se pudo cargar el generador de PDF.');
+  const source=document.getElementById(sourceId);
+  const stage=document.createElement('div');
+  stage.className='pdf-export-stage';
+  const clone=source.cloneNode(true);
+  clone.removeAttribute('id');
+  stage.appendChild(clone);
+  document.body.appendChild(stage);
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  try{
+    const opt={
+      margin:[8,8,8,8],
+      filename,
+      image:{type:'jpeg',quality:.98},
+      html2canvas:{
+        scale:2,
+        logging:false,
+        useCORS:true,
+        backgroundColor:'#ffffff',
+        scrollX:0,
+        scrollY:0,
+        windowWidth:794,
+        width:794
+      },
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
+      pagebreak:{mode:['css','legacy']}
+    };
+    await window.html2pdf().set(opt).from(clone).save();
+  }finally{
+    stage.remove();
+  }
+}
+async function makePdf(){
+  const button=document.getElementById('pdf');
+  const old=button.textContent;
+  button.disabled=true;
+  button.textContent='Generando PDF...';
+  try{
+    await exportDocPdf('doc',`Propuesta_Simyo_MediaMarkt_${Date.now()}.pdf`);
+  }catch(error){
+    console.error(error);
+    alert(error.message||'No se pudo generar el PDF.');
+  }finally{
+    button.disabled=false;
+    button.textContent=old;
+  }
 }
 const services=document.getElementById('services'),current=document.getElementById('current'),annual=document.getElementById('annual'),monthly=document.getElementById('monthly'),grand=document.getElementById('grand'),summaryEl=document.getElementById('summary'),modal=document.getElementById('modal'),docServices=document.getElementById('doc-services'),docTotal=document.getElementById('doc-total'),docSaving=document.getElementById('doc-saving');
 function saveState(){try{localStorage.setItem('mmv_simyo_v17',JSON.stringify({state,nextId}))}catch(e){}}function loadState(){try{const x=JSON.parse(localStorage.getItem('mmv_simyo_v17')||'null');if(x&&x.state&&Array.isArray(x.state.services)){state=x.state;nextId=x.nextId||1;return true}}catch(e){}return false}const oldRender=render;render=function(){oldRender();saveState()};document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addService(b.dataset.add));current.oninput=update;document.getElementById('open-report').onclick=openReport;document.getElementById('close').onclick=()=>{modal.style.display='none';document.body.style.overflow=''};document.getElementById('pdf').onclick=makePdf;if(!loadState())addService('convergente');else render();
