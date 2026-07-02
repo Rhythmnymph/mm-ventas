@@ -206,6 +206,31 @@
   box-sizing:border-box!important;
 }
 
+
+/* PDF definitivo: copia literal del sistema Multioperador */
+.modal{display:none;position:fixed;inset:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:20000;overflow-y:auto;padding:10px;box-sizing:border-box}
+.modal-card{background:#fff;color:#333;width:100%;max-width:650px;border-radius:12px;padding:25px;position:relative;margin:20px auto;box-shadow:0 10px 25px rgba(0,0,0,.5);box-sizing:border-box}
+.close{position:sticky;float:right;top:0;z-index:5;width:44px;height:44px;margin:-8px -8px 4px 10px;border-radius:50%;background:#eee;color:#444;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 3px 12px rgba(0,0,0,.18);border:none;font-size:1.8rem;font-weight:bold;cursor:pointer}
+.doc-proposal{padding:10px;background:#fff;color:#222;font-family:Arial,sans-serif;width:auto!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;overflow:visible!important}
+.doc-header{border-bottom:4px solid #e30613;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.doc-brand{font-size:1.5rem;font-weight:900;color:#e30613;text-transform:uppercase;letter-spacing:1px}
+.doc-title{font-size:.9rem;font-weight:bold;color:#666;text-align:right;text-transform:uppercase}
+.doc-section{margin-bottom:22px;break-inside:avoid;page-break-inside:avoid}
+.doc-section-title{font-size:.85rem;color:#e30613;text-transform:uppercase;font-weight:800;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px}
+.doc-table{width:100%;border-collapse:collapse;margin-bottom:5px;table-layout:auto!important}
+.doc-table th{text-align:left;font-size:.75rem;color:#777;text-transform:uppercase;padding:6px 0;border-bottom:1px solid #eee}
+.doc-table td{padding:9px 0;font-size:.9rem;border-bottom:1px solid #f9f9f9;line-height:1.3;vertical-align:top}
+.doc-table td.price{text-align:right;font-weight:bold;color:#000;width:80px;white-space:nowrap}
+.doc-footer-summary{background:#fef2f2;border:1px solid #fee2e2;border-radius:6px;padding:15px;margin-top:25px;display:flex;justify-content:space-between;align-items:center;break-inside:avoid;page-break-inside:avoid}
+.doc-total-label{font-size:1.1rem;font-weight:900;color:#000}
+.doc-total-price{font-size:1.6rem;font-weight:900;color:#e30613;white-space:nowrap}
+.doc-legal{font-size:.75rem;color:#555;text-align:justify;margin-top:25px;border-top:2px solid #e30613;padding-top:12px;line-height:1.4;break-inside:avoid;page-break-inside:avoid}
+.doc-promo{margin-top:14px;padding:13px;border:1px solid #f3b2b7;background:#fff4f5;border-radius:7px;break-inside:avoid;page-break-inside:avoid}
+.doc-promo-title{font-size:.74rem;text-transform:uppercase;font-weight:900;color:#e30613;letter-spacing:.05em}
+.doc-promo-value{font-size:1.05rem;font-weight:900;color:#222;margin-top:4px}
+.pdf{background:#000;color:#fff;width:100%;padding:12px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1rem;margin-top:12px}
+@media(max-width:620px){.doc-header{display:flex}.doc-title{text-align:right}.modal-card{padding:18px}}
+
 </style>
 </head>
 <body>
@@ -221,64 +246,19 @@
 <div class="section"><span class="label" style="text-align:center">¿Cuánto paga actualmente?</span><div style="text-align:center"><input id="current" type="number" class="price-input" placeholder="0" oninput="update()" inputmode="decimal"><span style="font-size:1.45rem;font-weight:900;color:var(--primary)">€</span></div></div>
 <div class="result"><span class="label">Ahorro estimado al año</span><div id="annual" class="annual">0€</div><div id="monthly" class="monthly">Esperando precio</div><div id="total-label" style="font-weight:850;margin-top:6px"></div><div id="summary" class="summary"></div><button class="action" onclick="openBreakdown()">Generar propuesta detallada</button></div>
 
-<div id="modal" class="modal">
-  <div class="modal-card">
-    <button class="close" onclick="closeBreakdown()">×</button>
-    <div id="doc" class="doc">
-      <div class="doc-brand-row">
-        <img src="../assets/mediamarkt-symbol.png" alt="MediaMarkt">
-      </div>
-      <div class="doc-header">
-        <div>
-          <div class="doc-main-title">MediaMarkt Añaza</div>
-          <div class="doc-operator">Propuesta Jazztel</div>
-        </div>
-        <div class="doc-side-title">Estudio de servicios<br>y propuesta económica</div>
-      </div>
-
-      <section class="doc-section">
-        <div class="doc-section-title">1. Servicio principal</div>
-        <table class="doc-table">
-          <thead><tr><th>Concepto</th><th>Detalle técnico</th><th>Importe</th></tr></thead>
-          <tbody id="base-rows"></tbody>
-        </table>
-      </section>
-
-      <section class="doc-section" id="mob-sec">
-        <div class="doc-section-title">2. Telefonía móvil</div>
-        <table class="doc-table">
-          <thead><tr><th>Línea</th><th>Características y datos</th><th>Importe</th></tr></thead>
-          <tbody id="mob-rows"></tbody>
-        </table>
-      </section>
-
-      <section class="doc-section" id="tv-doc-sec">
-        <div class="doc-section-title">3. Plataformas de contenidos y televisión</div>
-        <table class="doc-table">
-          <thead><tr><th>Servicio</th><th>Detalle del plan</th><th>Importe</th></tr></thead>
-          <tbody id="tv-rows"></tbody>
-        </table>
-      </section>
-
-      <div class="doc-footer-summary">
-        <div>
-          <div class="doc-total-label">Presupuesto Mensual Total</div>
-          <div id="save-note" class="doc-saving"></div>
-        </div>
-        <div id="doc-total" class="doc-total-price"></div>
-      </div>
-
-      <div id="doc-gift-jazz" class="doc-promo" style="display:none">
-        <div class="doc-promo-title">Beneficio promocional</div>
-        <div class="doc-promo-value">Tarjeta regalo MediaMarkt de 100 €</div>
-        <div style="font-size:.74rem;color:#666;margin-top:4px">Beneficio independiente de la cuota mensual y del ahorro.</div>
-      </div>
-
-      <div id="legal" class="doc-legal"></div>
-    </div>
-    <button class="pdf" onclick="makePDF()">Guardar propuesta PDF</button>
-  </div>
+<div id="modal" class="modal"><div class="modal-card">
+<button class="close" onclick="closeBreakdown()">×</button>
+<div id="contenido-pdf" class="doc-proposal">
+  <div class="doc-header"><div class="doc-brand">MediaMarkt Añaza</div><div class="doc-title">Estudio de Servicios<br>y Propuesta Económica</div></div>
+  <div class="doc-section"><div class="doc-section-title">1. Conexión de Fibra Óptica</div><table class="doc-table"><thead><tr><th>Concepto</th><th>Detalle Técnico</th><th style="text-align:right">Importe</th></tr></thead><tbody id="pdf-jazz-base"></tbody></table></div>
+  <div class="doc-section" id="pdf-jazz-mobile-section"><div class="doc-section-title">2. Telefonía Móvil</div><table class="doc-table"><thead><tr><th>Línea</th><th>Características y Datos</th><th style="text-align:right">Importe</th></tr></thead><tbody id="pdf-jazz-mobile"></tbody></table></div>
+  <div class="doc-section" id="pdf-jazz-tv-section"><div class="doc-section-title">3. Plataformas de Contenidos y Televisión</div><table class="doc-table"><thead><tr><th>Servicio</th><th>Detalle del Plan Contratado</th><th style="text-align:right">Importe</th></tr></thead><tbody id="pdf-jazz-tv"></tbody></table></div>
+  <div class="doc-footer-summary"><div><div class="doc-total-label">Presupuesto Mensual Total</div><div style="font-size:.75rem;color:#666;font-weight:bold;margin-top:2px" id="pdf-jazz-saving"></div></div><div class="doc-total-price" id="pdf-jazz-total">0,00€</div></div>
+  <div id="pdf-jazz-gift" class="doc-promo" style="display:none"><div class="doc-promo-title">Beneficio promocional</div><div class="doc-promo-value">Tarjeta regalo MediaMarkt de 100 €</div><div style="font-size:.74rem;color:#666;margin-top:4px">Beneficio independiente de la cuota mensual y del ahorro.</div></div>
+  <div class="doc-legal" id="pdf-jazz-legal"></div>
 </div>
+<button class="pdf" onclick="makePDF()">Guardar Propuesta PDF</button>
+</div></div>
 
 <script>
 const PACKS={eco80:{name:'Jazz Duo 5G - 80GB Eco',lines:2,data:'80 GB compartidos (40 GB por línea)',kind:'shared',prices:{600:33.56}},one50:{name:'Jazz ONE 5G - 50GB',lines:1,data:'50 GB',kind:'shared',prices:{600:35.33}},duo120:{name:'Jazz Duo 5G - 120GB',lines:2,data:'120 GB compartidos (60 GB por línea)',kind:'shared',prices:{600:39.75,1000:46.82}},oneunl:{name:'Ilimitado 5G',lines:1,data:'Datos ilimitados',kind:'unlimited',prices:{600:44.17}},duounl:{name:'Doblemente Ilimitado 5G',lines:2,data:'Datos ilimitados',kind:'unlimited',prices:{600:53.02,1000:60.09}}};
@@ -298,71 +278,31 @@ function toggleOrange(){if(state.football)state.football=false;state.orange=!sta
 function toggleFootball(){state.football=!state.football;if(state.football){state.tv={};state.orange=false}update()}
 function update(){report={base:[],lines:[],tv:[],total:0,upfront:0,stay:''};let base=0;if(state.type==='convergente'){const p=PACKS[state.pack];base=p.prices[state.speed];report.base.push({concept:`Fibra ${state.speed==='1000'?'1 GB':'600 MB'} + fijo`,detail:`${p.name}: ${p.lines} línea${p.lines>1?'s':''}, ${p.data} y llamadas ilimitadas`,price:base});for(let i=1;i<=p.lines;i++)report.lines.push({name:`Línea principal ${i}`,detail:p.data,price:0,note:'Incluida'});report.stay='12 meses en fibra.'}else if(state.type==='antidigi'){base=ANTI[state.speed];report.base.push({concept:`Fibra ${state.speed==='1000'?'1 GB':'600 MB'} + fijo`,detail:'Oferta Anti-DIGI con 2 líneas ilimitadas',price:base});for(let i=1;i<=2;i++)report.lines.push({name:`Línea principal ${i}`,detail:'Datos y llamadas ilimitadas',price:0,note:'Incluida'});report.stay='12 meses. Sujeta a portabilidad admitida.'}else if(state.type==='solofibra'){base=FIBER[state.speed];report.base.push({concept:`Fibra ${state.speed==='1000'?'1 GB':state.speed+' MB'}`,detail:'Servicio de solo fibra',price:base});report.stay='3 meses.'}else{base=SECOND;report.base.push({concept:'Fibra 600 MB',detail:'Segunda residencia de cliente Jazztel',price:base});report.stay='12 meses. Contratación posterior.'}if(state.second&&state.type!=='segunda'){base+=SECOND;report.base.push({concept:'2ª residencia 600 MB',detail:'Fibra adicional asociada',price:SECOND})}const group=state.type==='antidigi'?ADICS.unlimited:(state.type==='convergente'?ADICS[PACKS[state.pack].kind]:[]);let extra=0;group.forEach(a=>{for(let i=0;i<(state.qty[a.id]||0);i++)report.lines.push({name:a.name,detail:a.detail,price:a.price,note:'Línea adicional'});extra+=(state.qty[a.id]||0)*a.price});let tv=0;Object.entries(state.tv).forEach(([id,x])=>{tv+=x.price;report.tv.push({name:x.name,detail:'Cuota mensual',price:x.price});document.getElementById('tv-'+id)?.classList.add('selected')});document.querySelectorAll('.tv-btn').forEach(b=>b.classList.remove('selected'));Object.keys(state.tv).forEach(id=>document.getElementById('tv-'+id)?.classList.add('selected'));if(state.orange){const p=state.speed==='1000'?8.80:13.22;tv+=p;report.tv.push({name:'Orange TV Cine y Series',detail:'Solicitable tras activación',price:p});document.getElementById('tv-orange').classList.add('selected')}if(state.football){report.upfront=35.33;report.tv.push({name:'Promo fútbol + deporte',detail:'Pago único tras activación',price:0,once:true});document.getElementById('tv-futbol').classList.add('selected')}report.total=base+extra+tv;document.getElementById('second-btn').classList.toggle('active',state.second);document.getElementById('total-label').innerText=`Jazztel - Total: ${euro(report.total)}/mes`;const cur=parseFloat(document.getElementById('current').value)||0,save=cur-report.total;document.getElementById('annual').innerText=save>0?Math.round(save*12-report.upfront)+'€':'0€';document.getElementById('annual').style.color=save>0?'var(--success)':'var(--error)';document.getElementById('monthly').innerText=cur?save>0?`${euro(save)} de ahorro al mes`:'No hay mejora económica':'Esperando precio';document.getElementById('summary').innerHTML=`<strong>${state.type==='convergente'?PACKS[state.pack].name:state.type}</strong> · ${state.speed==='1000'?'1 GB':state.speed+' MB'}<br>Adicionales: ${report.lines.filter(x=>x.note==='Línea adicional').length}${state.second?' · incluye 2ª residencia':''}<br>TV: ${report.tv.map(x=>x.name).join(', ')||'Sin TV'}`;try{localStorage.setItem('mmv_jazztel_v2',JSON.stringify(state))}catch(e){}}
 function openBreakdown(){
-document.getElementById('base-rows').innerHTML=report.base.map(x=>`<tr><td><b>${x.concept}</b></td><td>${x.detail}</td><td>${euro(x.price)}</td></tr>`).join('');
-document.getElementById('mob-rows').innerHTML=report.lines.map(x=>`<tr><td><b>${x.name}</b><br><small style="color:#666">${x.note}</small></td><td>${x.detail}</td><td>${x.price?euro(x.price):'Incluida'}</td></tr>`).join('');
-document.getElementById('mob-sec').style.display=report.lines.length?'block':'none';
-document.getElementById('tv-rows').innerHTML=report.tv.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.detail}</td><td>${x.once?'Pago único':euro(x.price)}</td></tr>`).join('');
-document.getElementById('tv-doc-sec').style.display=report.tv.length?'block':'none';
-document.getElementById('doc-total').innerText=euro(report.total);
+document.getElementById('pdf-jazz-base').innerHTML=report.base.map(x=>`<tr><td><b>${x.concept}</b></td><td>${x.detail}</td><td class="price">${euro(x.price)}</td></tr>`).join('');
+document.getElementById('pdf-jazz-mobile').innerHTML=report.lines.map(x=>`<tr><td><b>${x.name}</b><br><small style="color:#666">${x.note}</small></td><td>${x.detail}</td><td class="price">${x.price?euro(x.price):'Incluida'}</td></tr>`).join('');
+document.getElementById('pdf-jazz-mobile-section').style.display=report.lines.length?'block':'none';
+document.getElementById('pdf-jazz-tv').innerHTML=report.tv.map(x=>`<tr><td><b>${x.name}</b></td><td>${x.detail}</td><td class="price">${x.once?'Pago único':euro(x.price)}</td></tr>`).join('');
+document.getElementById('pdf-jazz-tv-section').style.display=report.tv.length?'block':'none';
+document.getElementById('pdf-jazz-total').innerText=euro(report.total);
 const cur=parseFloat(document.getElementById('current').value)||0;
-document.getElementById('save-note').innerText=cur>report.total
-  ?`Ahorro estimado: ${euro(cur-report.total)}/mes · ${Math.round((cur-report.total)*12-report.upfront)}€ al año`
-  :'Simulación personalizada sin comparación de ahorro.';
+document.getElementById('pdf-jazz-saving').innerText=cur>report.total?`Ahorro estimado: ${euro(cur-report.total)}/mes · ${Math.round((cur-report.total)*12-report.upfront)}€ al año`:'Simulación personalizada sin comparación de ahorro.';
 const cumplePromo=state.type==='convergente'||state.type==='antidigi';
-document.getElementById('doc-gift-jazz').style.display=cumplePromo?'block':'none';
-document.getElementById('legal').innerHTML=`<b>Condiciones legales y compromisos:</b> Precios finales con IGIC vigente, sujetos a cobertura y validación. Permanencia: ${report.stay}${state.second?' La segunda residencia figura como servicio adicional asociado.':''}${state.orange||state.football?' Los servicios posteriores deben solicitarse tras la activación.':''}`;
-document.getElementById('modal').style.display='block';
-document.body.style.overflow='hidden'
+document.getElementById('pdf-jazz-gift').style.display=cumplePromo?'block':'none';
+document.getElementById('pdf-jazz-legal').innerHTML=`<b>Condiciones legales y compromisos:</b> Precios finales con IGIC vigente, sujetos a cobertura y validación. Permanencia: ${report.stay}${state.second?' La segunda residencia figura como servicio adicional asociado.':''}${state.orange||state.football?' Los servicios posteriores deben solicitarse tras la activación.':''}`;
+document.getElementById('modal').style.display='block';document.body.style.overflow='hidden'
 }
 function closeBreakdown(){document.getElementById('modal').style.display='none';document.body.style.overflow=''}
 
-async function exportDocPdf(sourceId,filename){
-  if(!window.html2pdf)throw new Error('No se pudo cargar el generador de PDF.');
-  const source=document.getElementById(sourceId);
-  const stage=document.createElement('div');
-  stage.className='pdf-export-stage';
-  const clone=source.cloneNode(true);
-  clone.removeAttribute('id');
-  stage.appendChild(clone);
-  document.body.appendChild(stage);
-  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  try{
-    const opt={
-      margin:[8,8,8,8],
-      filename,
-      image:{type:'jpeg',quality:.98},
-      html2canvas:{
-        scale:2,
-        logging:false,
-        useCORS:true,
-        backgroundColor:'#ffffff',
-        scrollX:0,
-        scrollY:0,
-        windowWidth:794,
-        width:794
-      },
-      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['css','legacy']}
-    };
-    await window.html2pdf().set(opt).from(clone).save();
-  }finally{
-    stage.remove();
-  }
-}
-async function makePDF(){
-  const button=document.querySelector('.modal-card .pdf');
-  const old=button.textContent;
-  button.disabled=true;
-  button.textContent='Generando PDF...';
-  try{
-    await exportDocPdf('doc',`Propuesta_Jazztel_MediaMarkt_${Date.now()}.pdf`);
-  }catch(error){
-    console.error(error);
-    alert(error.message||'No se pudo generar el PDF.');
-  }finally{
-    button.disabled=false;
-    button.textContent=old;
-  }
+function makePDF(){
+  const elemento=document.getElementById('contenido-pdf');
+  const opt={
+    margin:[0.4,0.4,0.4,0.4],
+    filename:`Propuesta_Jazztel_MediaMarkt_${Date.now()}.pdf`,
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2.5,logging:false,useCORS:true},
+    jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+  };
+  html2pdf().set(opt).from(elemento).save();
 }
 sync();document.getElementById('tv-panel').style.display=state.tvOpen?'block':'none';document.getElementById('post-panel').style.display=state.postOpen?'block':'none';update();
 </script>

@@ -449,6 +449,31 @@ main{
   }
 }
 
+
+/* PDF definitivo: copia literal del sistema Multioperador */
+.modal{display:none;position:fixed;inset:0;width:100%;height:100%;background:rgba(0,0,0,.9);z-index:20000;overflow-y:auto;padding:10px;box-sizing:border-box}
+.modal-card{background:#fff;color:#333;width:100%;max-width:650px;border-radius:12px;padding:25px;position:relative;margin:20px auto;box-shadow:0 10px 25px rgba(0,0,0,.5);box-sizing:border-box}
+.close{position:sticky;float:right;top:0;z-index:5;width:44px;height:44px;margin:-8px -8px 4px 10px;border-radius:50%;background:#eee;color:#444;display:flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 3px 12px rgba(0,0,0,.18);border:none;font-size:1.8rem;font-weight:bold;cursor:pointer}
+.doc-proposal{padding:10px;background:#fff;color:#222;font-family:Arial,sans-serif;width:auto!important;max-width:none!important;min-width:0!important;box-sizing:border-box!important;overflow:visible!important}
+.doc-header{border-bottom:4px solid #e30613;padding-bottom:12px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
+.doc-brand{font-size:1.5rem;font-weight:900;color:#e30613;text-transform:uppercase;letter-spacing:1px}
+.doc-title{font-size:.9rem;font-weight:bold;color:#666;text-align:right;text-transform:uppercase}
+.doc-section{margin-bottom:22px;break-inside:avoid;page-break-inside:avoid}
+.doc-section-title{font-size:.85rem;color:#e30613;text-transform:uppercase;font-weight:800;border-bottom:1px solid #ddd;padding-bottom:4px;margin-bottom:10px;letter-spacing:.5px}
+.doc-table{width:100%;border-collapse:collapse;margin-bottom:5px;table-layout:auto!important}
+.doc-table th{text-align:left;font-size:.75rem;color:#777;text-transform:uppercase;padding:6px 0;border-bottom:1px solid #eee}
+.doc-table td{padding:9px 0;font-size:.9rem;border-bottom:1px solid #f9f9f9;line-height:1.3;vertical-align:top}
+.doc-table td.price{text-align:right;font-weight:bold;color:#000;width:80px;white-space:nowrap}
+.doc-footer-summary{background:#fef2f2;border:1px solid #fee2e2;border-radius:6px;padding:15px;margin-top:25px;display:flex;justify-content:space-between;align-items:center;break-inside:avoid;page-break-inside:avoid}
+.doc-total-label{font-size:1.1rem;font-weight:900;color:#000}
+.doc-total-price{font-size:1.6rem;font-weight:900;color:#e30613;white-space:nowrap}
+.doc-legal{font-size:.75rem;color:#555;text-align:justify;margin-top:25px;border-top:2px solid #e30613;padding-top:12px;line-height:1.4;break-inside:avoid;page-break-inside:avoid}
+.doc-promo{margin-top:14px;padding:13px;border:1px solid #f3b2b7;background:#fff4f5;border-radius:7px;break-inside:avoid;page-break-inside:avoid}
+.doc-promo-title{font-size:.74rem;text-transform:uppercase;font-weight:900;color:#e30613;letter-spacing:.05em}
+.doc-promo-value{font-size:1.05rem;font-weight:900;color:#222;margin-top:4px}
+.pdf{background:#000;color:#fff;width:100%;padding:12px;border:none;border-radius:8px;font-weight:bold;cursor:pointer;font-size:1rem;margin-top:12px}
+@media(max-width:620px){.doc-header{display:flex}.doc-title{text-align:right}.modal-card{padding:18px}}
+
 </style>
 </head>
 <body>
@@ -463,49 +488,17 @@ main{
 <div class="results"><span class="label">Ahorro estimado al año</span><div id="annual" class="annual">0€</div><div id="monthly" class="monthly">Esperando precio</div><div id="mm-v17-gift" class="mm-v17-benefit"><div class="mm-v17-benefit-title">Beneficio promocional independiente</div><div id="mm-v17-gift-value" class="mm-v17-benefit-value">🎁 Tarjeta regalo MediaMarkt de 100 €</div><div class="mm-v17-benefit-note">Se muestra aparte del ahorro y de la cuota mensual.</div></div><div id="grand" class="grand">Total propuesta: 0,00€/mes</div><div id="summary" class="summary"></div><button class="action" id="open-report">Generar propuesta completa</button></div>
 </main>
 
-<div id="modal" class="modal">
-  <div class="modal-card">
-    <button class="close" id="close">×</button>
-    <div id="doc" class="doc">
-      <div class="doc-brand-row">
-        <img src="../assets/mediamarkt-symbol.png" alt="MediaMarkt">
-      </div>
-      <div class="doc-header">
-        <div>
-          <div class="doc-main-title">MediaMarkt Añaza</div>
-          <div class="doc-operator">Propuesta Simyo</div>
-        </div>
-        <div class="doc-side-title">Estudio de servicios<br>y propuesta económica</div>
-      </div>
-
-      <div id="doc-services"></div>
-
-      <div class="doc-footer-summary">
-        <div>
-          <div class="doc-total-label">Presupuesto Mensual Total</div>
-          <div id="doc-saving" class="doc-saving"></div>
-        </div>
-        <div id="doc-total" class="doc-total-price"></div>
-      </div>
-
-      <div id="doc-gift" class="doc-promo" style="display:none">
-        <div class="doc-promo-title">Beneficio promocional</div>
-        <div id="doc-gift-value" class="doc-promo-value"></div>
-        <div style="font-size:.74rem;color:#666;margin-top:4px">Beneficio independiente de la cuota mensual y del ahorro.</div>
-      </div>
-
-      <div class="doc-legal">
-        <b>Condiciones legales y compromisos:</b>
-        Precios finales con IGIC vigente y sujetos a cobertura y validación.
-        Fibra + móvil estándar, solo fibra y segunda residencia: 3 meses de permanencia.
-        Promoción Anti-DIGI: 12 meses.
-        Máximo 2 fibras de segunda residencia.
-        La fibra de 300 MB solo está disponible con cobertura directa.
-      </div>
-    </div>
-    <button class="pdf" id="pdf">Guardar propuesta PDF</button>
-  </div>
+<div id="modal" class="modal"><div class="modal-card">
+<button class="close" id="close">×</button>
+<div id="contenido-pdf" class="doc-proposal">
+  <div class="doc-header"><div class="doc-brand">MediaMarkt Añaza</div><div class="doc-title">Estudio de Servicios<br>y Propuesta Económica</div></div>
+  <div id="pdf-simyo-services"></div>
+  <div class="doc-footer-summary"><div><div class="doc-total-label">Presupuesto Mensual Total</div><div style="font-size:.75rem;color:#666;font-weight:bold;margin-top:2px" id="pdf-simyo-saving"></div></div><div class="doc-total-price" id="pdf-simyo-total">0,00€</div></div>
+  <div id="pdf-simyo-gift" class="doc-promo" style="display:none"><div class="doc-promo-title">Beneficio promocional</div><div class="doc-promo-value" id="pdf-simyo-gift-value"></div><div style="font-size:.74rem;color:#666;margin-top:4px">Beneficio independiente de la cuota mensual y del ahorro.</div></div>
+  <div class="doc-legal"><b>Condiciones legales y compromisos:</b> Precios finales con IGIC vigente y sujetos a cobertura y validación. Fibra + móvil estándar, solo fibra y segunda residencia: 3 meses de permanencia. Promoción Anti-DIGI: 12 meses. Máximo 2 fibras de segunda residencia. La fibra de 300 MB solo está disponible con cobertura directa.</div>
 </div>
+<button class="pdf" id="pdf">Guardar Propuesta PDF</button>
+</div></div>
 
 <script>
 const BASE={estandar:{600:{50:28.29,120:31.83,300:37.13},1000:{50:30.06,120:33.59,300:38.90}},digi:{600:{250:22.54},1000:{250:24.31}}};
@@ -548,80 +541,32 @@ function update(){const t=total(),c=parseFloat(current.value)||0,d=c-t;grand.inn
 function rows(s){const r=[];if(s.type==='convergente')r.push(['Paquete principal',`${s.speed==='1000'?'Fibra 1 GB':'Fibra 600 MB'} + móvil ${s.mode==='digi'?'250 GB Anti-DIGI':s.main+' GB'}`,BASE[s.mode][s.speed][s.mode==='digi'?'250':s.main]]);if(s.type==='solo-fibra')r.push(['Solo fibra',`${s.speed==='1000'?'1 GB':s.speed+' MB'} · ${s.coverage}`,SOLO_FIBRA[s.speed]]);if(s.type==='segunda')r.push(['Segunda residencia',`${s.speed==='1000'?'1 GB':s.speed+' MB'} · ${s.coverage}`,SEGUNDA[s.speed]]);if(s.type==='convergente'||s.type==='solo-movil')lines(s).filter(l=>(s.mode==='digi'||l[3]==='std')).forEach(l=>{for(let i=0;i<(s.qty[l[0]]||0);i++)r.push([s.type==='solo-movil'?'Línea móvil':'Línea adicional',l[1],l[2]])});Object.values(s.tv).forEach(t=>r.push(['TV / streaming',t.name,t.p]));return r}
 function openReport(){
 const promoCount=state.services.filter(s=>s.type==='convergente').length;
-docServices.innerHTML=state.services.map((s,i)=>`<section class=doc-section>
-  <div class=doc-section-title>${i+1}. ${state.services.length>1&&s.label?s.label+' - ':''}${name(s)}</div>
-  <table class=doc-table>
-    <thead><tr><th>Concepto</th><th>Detalle técnico</th><th>Importe</th></tr></thead>
-    <tbody>${rows(s).map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${euro(x[2])}</td></tr>`).join('')}</tbody>
-  </table>
-  <div class=doc-service-subtotal><span>Subtotal del servicio</span><strong>${euro(price(s))}/mes</strong></div>
-</section>`).join('');
-docTotal.innerText=euro(total())+'/mes';
+document.getElementById('pdf-simyo-services').innerHTML=state.services.map((s,i)=>`<div class="doc-section">
+  <div class="doc-section-title">${i+1}. ${state.services.length>1&&s.label?s.label+' - ':''}${name(s)}</div>
+  <table class="doc-table"><thead><tr><th>Concepto</th><th>Detalle Técnico</th><th style="text-align:right">Importe</th></tr></thead>
+  <tbody>${rows(s).map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td class="price">${euro(x[2])}</td></tr>`).join('')}</tbody></table>
+  <div style="text-align:right;font-size:.82rem;font-weight:bold;color:#666;margin-top:7px">Subtotal: <span style="color:#e30613;font-size:.95rem">${euro(price(s))}/mes</span></div>
+</div>`).join('');
+document.getElementById('pdf-simyo-total').innerText=euro(total())+'/mes';
 const c=parseFloat(current.value)||0,d=c-total();
-docSaving.innerText=d>0?`Ahorro estimado: ${euro(d)}/mes · ${Math.round(d*12)}€ al año`:'Simulación personalizada sin comparación de ahorro.';
-const gift=document.getElementById('doc-gift');
-const giftValue=document.getElementById('doc-gift-value');
-if(promoCount>0){
-  gift.style.display='block';
-  giftValue.innerText=promoCount===1
-    ?'Tarjeta regalo MediaMarkt de 100 €'
-    :`${promoCount} tarjetas regalo MediaMarkt de 100 € (${promoCount*100} € en total)`;
-}else{
-  gift.style.display='none';
-}
-modal.style.display='block';
-document.body.style.overflow='hidden'
+document.getElementById('pdf-simyo-saving').innerText=d>0?`Ahorro estimado: ${euro(d)}/mes · ${Math.round(d*12)}€ al año`:'Simulación personalizada sin comparación de ahorro.';
+const gift=document.getElementById('pdf-simyo-gift');
+if(promoCount){gift.style.display='block';document.getElementById('pdf-simyo-gift-value').innerText=promoCount===1?'Tarjeta regalo MediaMarkt de 100 €':`${promoCount} tarjetas regalo MediaMarkt de 100 € (${promoCount*100} € en total)`}else gift.style.display='none';
+modal.style.display='block';document.body.style.overflow='hidden'
 }
 
-async function exportDocPdf(sourceId,filename){
-  if(!window.html2pdf)throw new Error('No se pudo cargar el generador de PDF.');
-  const source=document.getElementById(sourceId);
-  const stage=document.createElement('div');
-  stage.className='pdf-export-stage';
-  const clone=source.cloneNode(true);
-  clone.removeAttribute('id');
-  stage.appendChild(clone);
-  document.body.appendChild(stage);
-  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  try{
-    const opt={
-      margin:[8,8,8,8],
-      filename,
-      image:{type:'jpeg',quality:.98},
-      html2canvas:{
-        scale:2,
-        logging:false,
-        useCORS:true,
-        backgroundColor:'#ffffff',
-        scrollX:0,
-        scrollY:0,
-        windowWidth:794,
-        width:794
-      },
-      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'},
-      pagebreak:{mode:['css','legacy']}
-    };
-    await window.html2pdf().set(opt).from(clone).save();
-  }finally{
-    stage.remove();
-  }
+function makePdf(){
+  const elemento=document.getElementById('contenido-pdf');
+  const opt={
+    margin:[0.4,0.4,0.4,0.4],
+    filename:`Propuesta_Simyo_MediaMarkt_${Date.now()}.pdf`,
+    image:{type:'jpeg',quality:0.98},
+    html2canvas:{scale:2.5,logging:false,useCORS:true},
+    jsPDF:{unit:'in',format:'letter',orientation:'portrait'}
+  };
+  html2pdf().set(opt).from(elemento).save();
 }
-async function makePdf(){
-  const button=document.getElementById('pdf');
-  const old=button.textContent;
-  button.disabled=true;
-  button.textContent='Generando PDF...';
-  try{
-    await exportDocPdf('doc',`Propuesta_Simyo_MediaMarkt_${Date.now()}.pdf`);
-  }catch(error){
-    console.error(error);
-    alert(error.message||'No se pudo generar el PDF.');
-  }finally{
-    button.disabled=false;
-    button.textContent=old;
-  }
-}
-const services=document.getElementById('services'),current=document.getElementById('current'),annual=document.getElementById('annual'),monthly=document.getElementById('monthly'),grand=document.getElementById('grand'),summaryEl=document.getElementById('summary'),modal=document.getElementById('modal'),docServices=document.getElementById('doc-services'),docTotal=document.getElementById('doc-total'),docSaving=document.getElementById('doc-saving');
+const services=document.getElementById('services'),current=document.getElementById('current'),annual=document.getElementById('annual'),monthly=document.getElementById('monthly'),grand=document.getElementById('grand'),summaryEl=document.getElementById('summary'),modal=document.getElementById('modal'),docServices=document.getElementById('pdf-simyo-services'),docTotal=document.getElementById('pdf-simyo-total'),docSaving=document.getElementById('pdf-simyo-saving');
 function saveState(){try{localStorage.setItem('mmv_simyo_v17',JSON.stringify({state,nextId}))}catch(e){}}function loadState(){try{const x=JSON.parse(localStorage.getItem('mmv_simyo_v17')||'null');if(x&&x.state&&Array.isArray(x.state.services)){state=x.state;nextId=x.nextId||1;return true}}catch(e){}return false}const oldRender=render;render=function(){oldRender();saveState()};document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addService(b.dataset.add));current.oninput=update;document.getElementById('open-report').onclick=openReport;document.getElementById('close').onclick=()=>{modal.style.display='none';document.body.style.overflow=''};document.getElementById('pdf').onclick=makePdf;if(!loadState())addService('convergente');else render();
 </script>
 </body></html>
