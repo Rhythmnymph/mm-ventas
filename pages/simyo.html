@@ -108,6 +108,262 @@ main{width:min(1180px,100%);margin:0 auto}
   .service-action{flex:1}
 }
 
+
+/* V17.2 revisado y probado */
+main{
+  width:100%;
+  max-width:1180px!important;
+  margin:0 auto;
+}
+#services{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  align-items:start;
+}
+.service{
+  margin-bottom:0;
+}
+.service-head{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:14px;
+  background:rgba(255,255,255,.055);
+}
+.service-heading-row{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.service-heading{
+  min-width:0;
+}
+.service-title{
+  display:block;
+  font-size:.98rem;
+  font-weight:950;
+  color:#fff;
+}
+.service-sub{
+  display:block;
+  font-size:.74rem;
+  color:var(--dim);
+  margin-top:3px;
+}
+.service-actions{
+  width:100%;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:7px;
+}
+.service-action{
+  border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.065);
+  color:#fff;
+  border-radius:9px;
+  padding:9px 8px;
+  font-size:.72rem;
+  font-weight:900;
+  cursor:pointer;
+  white-space:nowrap;
+}
+.service-action.toggle{border-color:rgba(255,102,0,.48);color:#ffc39d}
+.service-action.duplicate{border-color:rgba(0,204,255,.42);color:#a7ecff}
+.service-action.delete{border-color:rgba(255,77,77,.48);color:#ffb0b0}
+.service-action:active{transform:scale(.97)}
+.service.collapsed .service-body{display:none}
+.price-input{max-width:440px}
+.results,.section{width:100%}
+@media(min-width:880px){
+  #services{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  .section{padding:16px}
+  .service-body{padding:16px}
+}
+@media(min-width:1240px){
+  #services{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+}
+@media(max-width:460px){
+  .service-actions{
+    grid-template-columns:1fr;
+  }
+}
+
+/* Documento profesional, igualado al estilo Multioperador */
+.doc{
+  padding:10px;
+  background:#fff;
+  color:#222;
+  font-family:Arial,sans-serif;
+}
+.doc-brand-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+.doc-brand-row img{
+  width:78px;
+  height:auto;
+  object-fit:contain;
+}
+.doc-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:18px;
+  border-bottom:4px solid #e30613;
+  padding-bottom:12px;
+  margin-bottom:20px;
+}
+.doc-main-title{
+  font-size:1.48rem;
+  font-weight:950;
+  color:#e30613;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.doc-operator{
+  margin-top:4px;
+  font-size:.78rem;
+  font-weight:800;
+  color:#666;
+  text-transform:uppercase;
+}
+.doc-side-title{
+  font-size:.88rem;
+  line-height:1.12;
+  font-weight:800;
+  color:#666;
+  text-align:right;
+  text-transform:uppercase;
+}
+.doc-section{
+  margin-bottom:22px;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.doc-section-title{
+  font-size:.85rem;
+  color:#e30613;
+  text-transform:uppercase;
+  font-weight:900;
+  border-bottom:1px solid #ddd;
+  padding-bottom:5px;
+  margin-bottom:10px;
+  letter-spacing:.04em;
+}
+.doc-table{
+  width:100%;
+  border-collapse:collapse;
+  table-layout:fixed;
+}
+.doc-table th{
+  text-align:left;
+  font-size:.73rem;
+  color:#777;
+  text-transform:uppercase;
+  padding:6px 0;
+  border-bottom:1px solid #e8e8e8;
+}
+.doc-table td{
+  padding:9px 0;
+  font-size:.88rem;
+  border-bottom:1px solid #f2f2f2;
+  line-height:1.3;
+  vertical-align:top;
+}
+.doc-table th:nth-child(1),.doc-table td:nth-child(1){width:30%}
+.doc-table th:nth-child(2),.doc-table td:nth-child(2){width:50%}
+.doc-table th:nth-child(3),.doc-table td:nth-child(3){width:20%;text-align:right;font-weight:800}
+.doc-service-subtotal{
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  gap:10px;
+  margin-top:8px;
+  font-size:.84rem;
+  font-weight:800;
+  color:#555;
+}
+.doc-service-subtotal strong{
+  color:#e30613;
+  font-size:.98rem;
+}
+.doc-footer-summary{
+  background:#fef2f2;
+  border:1px solid #fee2e2;
+  border-radius:7px;
+  padding:15px;
+  margin-top:24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:16px;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.doc-total-label{
+  font-size:1.08rem;
+  font-weight:950;
+  color:#111;
+}
+.doc-saving{
+  font-size:.74rem;
+  color:#666;
+  font-weight:700;
+  margin-top:3px;
+}
+.doc-total-price{
+  font-size:1.62rem;
+  font-weight:950;
+  color:#e30613;
+  white-space:nowrap;
+}
+.doc-promo{
+  margin-top:14px;
+  padding:13px;
+  border:1px solid #f3b2b7;
+  background:#fff4f5;
+  border-radius:7px;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.doc-promo-title{
+  font-size:.74rem;
+  text-transform:uppercase;
+  font-weight:900;
+  color:#e30613;
+  letter-spacing:.05em;
+}
+.doc-promo-value{
+  font-size:1rem;
+  font-weight:900;
+  color:#222;
+  margin-top:4px;
+}
+.doc-legal{
+  font-size:.75rem;
+  color:#555;
+  text-align:justify;
+  margin-top:24px;
+  border-top:2px solid #e30613;
+  padding-top:12px;
+  line-height:1.4;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+@media(max-width:620px){
+  .doc-header{display:block}
+  .doc-side-title{text-align:left;margin-top:8px}
+  .doc-footer-summary{align-items:flex-start}
+}
+
 </style>
 </head>
 <body>
@@ -121,7 +377,51 @@ main{width:min(1180px,100%);margin:0 auto}
 <div class="section"><span class="label" style="text-align:center">¿Cuánto paga actualmente por todo?</span><div class="price-box"><input id="current" class="price-input" type="number" inputmode="decimal" placeholder="0"><b style="font-size:1.4rem;color:var(--p)">€</b></div></div>
 <div class="results"><span class="label">Ahorro estimado al año</span><div id="annual" class="annual">0€</div><div id="monthly" class="monthly">Esperando precio</div><div id="mm-v17-gift" class="mm-v17-benefit"><div class="mm-v17-benefit-title">Beneficio promocional independiente</div><div id="mm-v17-gift-value" class="mm-v17-benefit-value">🎁 Tarjeta regalo MediaMarkt de 100 €</div><div class="mm-v17-benefit-note">Se muestra aparte del ahorro y de la cuota mensual.</div></div><div id="grand" class="grand">Total propuesta: 0,00€/mes</div><div id="summary" class="summary"></div><button class="action" id="open-report">Generar propuesta completa</button></div>
 </main>
-<div id="modal" class="modal"><div class="modal-card"><button class="close" id="close">×</button><div id="doc" class="doc"><div class="mm-v17-brand" style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><img src="../assets/mediamarkt-symbol.png" alt="" style="width:42px;height:42px;object-fit:contain"><div><div style="font-weight:950;font-size:1rem;color:#e30613">MediaMarkt Añaza</div><div style="font-size:.72rem;color:#666">Propuesta personalizada</div></div></div><div class="doc-head"><div class="brand">Simyo by MediaMarkt</div><b>Propuesta completa</b></div><div id="doc-services"></div><div class="doc-total"><strong>Presupuesto mensual total</strong><strong id="doc-total"></strong></div><div id="doc-saving" style="font-size:.78rem;color:#666;margin-top:6px"></div><div id="doc-gift" class="doc-promo" style="display:none"><div class="doc-promo-title">Beneficio promocional</div><div id="doc-gift-value" class="doc-promo-value">Tarjeta regalo MediaMarkt de 100 €</div><div style="font-size:.74rem;color:#666;margin-top:4px">Beneficio independiente de la cuota mensual y del ahorro.</div></div><div class="legal">Precios con IGIC vigente y sujetos a cobertura y validación. Fibra + móvil estándar, solo fibra y segunda residencia: 3 meses de permanencia. Anti-DIGI: 12 meses. Máximo 2 fibras de segunda residencia. La fibra de 300 MB solo está disponible con cobertura directa.</div></div><button class="pdf" id="pdf">Guardar propuesta PDF</button></div></div>
+
+<div id="modal" class="modal">
+  <div class="modal-card">
+    <button class="close" id="close">×</button>
+    <div id="doc" class="doc">
+      <div class="doc-brand-row">
+        <img src="../assets/mediamarkt-logo.png" alt="MediaMarkt">
+      </div>
+      <div class="doc-header">
+        <div>
+          <div class="doc-main-title">MediaMarkt Añaza</div>
+          <div class="doc-operator">Propuesta Simyo</div>
+        </div>
+        <div class="doc-side-title">Estudio de servicios<br>y propuesta económica</div>
+      </div>
+
+      <div id="doc-services"></div>
+
+      <div class="doc-footer-summary">
+        <div>
+          <div class="doc-total-label">Presupuesto Mensual Total</div>
+          <div id="doc-saving" class="doc-saving"></div>
+        </div>
+        <div id="doc-total" class="doc-total-price"></div>
+      </div>
+
+      <div id="doc-gift" class="doc-promo" style="display:none">
+        <div class="doc-promo-title">Beneficio promocional</div>
+        <div id="doc-gift-value" class="doc-promo-value"></div>
+        <div style="font-size:.74rem;color:#666;margin-top:4px">Beneficio independiente de la cuota mensual y del ahorro.</div>
+      </div>
+
+      <div class="doc-legal">
+        <b>Condiciones legales y compromisos:</b>
+        Precios finales con IGIC vigente y sujetos a cobertura y validación.
+        Fibra + móvil estándar, solo fibra y segunda residencia: 3 meses de permanencia.
+        Promoción Anti-DIGI: 12 meses.
+        Máximo 2 fibras de segunda residencia.
+        La fibra de 300 MB solo está disponible con cobertura directa.
+      </div>
+    </div>
+    <button class="pdf" id="pdf">Guardar propuesta PDF</button>
+  </div>
+</div>
+
 <script>
 const BASE={estandar:{600:{50:28.29,120:31.83,300:37.13},1000:{50:30.06,120:33.59,300:38.90}},digi:{600:{250:22.54},1000:{250:24.31}}};
 const SOLO_FIBRA={300:22.98,600:24.75,1000:26.52},SEGUNDA={300:13.26,600:19.45,1000:21.21};
@@ -137,15 +437,15 @@ return nombre+`<div class=field><span class=label>Modalidad</span><div class=tog
 function summary(s){if(s.type==='convergente')return `${s.speed==='1000'?'1 GB':'600 MB'} · ${s.mode==='digi'?'Anti-DIGI 250 GB':s.main+' GB'}`;if(s.type==='solo-fibra'||s.type==='segunda')return `${s.speed==='1000'?'1 GB':s.speed+' MB'} · ${s.coverage}`;return `${s.mode==='digi'?'Origen DIGI':'Estándar'} · ${Object.values(s.qty).reduce((a,b)=>a+b,0)} línea(s)`}
 function render(){services.innerHTML=state.services.map((s,i)=>`<section class="service ${s.collapsed?'collapsed':''}">
 <div class=service-head>
-  <button class=service-toggle type=button data-toggle="${s.id}">
-    <span class=service-heading>
+  <div class=service-heading-row>
+    <div class=service-heading>
       <span class=service-title>${i+1}. ${s.label?s.label+' · ':''}${name(s)}</span>
       <span class=service-sub>${summary(s)}</span>
-    </span>
-    <span class=service-chevron aria-hidden=true>⌄</span>
-  </button>
+    </div>
+  </div>
   <div class=service-actions>
-    <button class="service-action duplicate" type=button data-duplicate="${s.id}">Duplicar</button>
+    <button class="service-action toggle" type=button data-toggle="${s.id}">${s.collapsed?'Mostrar detalles':'Ocultar detalles'}</button>
+    <button class="service-action duplicate" type=button data-duplicate="${s.id}">Duplicar servicio</button>
     <button class="service-action delete" type=button data-delete="${s.id}">Eliminar</button>
   </div>
 </div>
@@ -155,23 +455,32 @@ document.querySelectorAll('[data-set]').forEach(b=>b.onclick=()=>{const x=b.data
 document.querySelectorAll('[data-qty]').forEach(b=>b.onclick=()=>{const x=b.dataset.qty.split('|');qty(+x[0],x[1],+x[2])});
 document.querySelectorAll('[data-tv]').forEach(b=>b.onclick=()=>{const x=b.dataset.tv.split('|');tv(+x[0],x[1])});
 document.querySelectorAll('[data-label]').forEach(i=>i.oninput=()=>{const s=S(+i.dataset.label);s.label=i.value;saveState()});
-document.querySelectorAll('[data-duplicate]').forEach(b=>b.onclick=e=>{e.stopPropagation();const original=S(+b.dataset.duplicate);const copia=JSON.parse(JSON.stringify(original));copia.id=nextId++;copia.label=(copia.label||name(copia))+' copia';copia.collapsed=false;state.services.push(copia);render()});
-document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=e=>{e.stopPropagation();if(confirm('¿Eliminar este servicio?')){state.services=state.services.filter(s=>s.id!==+b.dataset.delete);render()}});
+document.querySelectorAll('[data-duplicate]').forEach(b=>b.onclick=()=>{const original=S(+b.dataset.duplicate);const copia=JSON.parse(JSON.stringify(original));copia.id=nextId++;copia.label=(copia.label||name(copia))+' copia';copia.collapsed=false;state.services.push(copia);render()});
+document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>{if(confirm('¿Eliminar este servicio?')){state.services=state.services.filter(s=>s.id!==+b.dataset.delete);render()}});
 document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>{const s=S(+b.dataset.toggle);s.collapsed=!s.collapsed;render()});
 update()}
 function update(){const t=total(),c=parseFloat(current.value)||0,d=c-t;grand.innerText=`Total propuesta: ${euro(t)}/mes`;annual.innerText=d>0?Math.round(d*12)+'€':'0€';annual.style.color=d>0?'var(--green)':'var(--red)';monthly.innerText=c?(d>0?`${euro(d)} de ahorro al mes`:'No hay mejora económica'):'Esperando precio';const n={convergente:0,'solo-fibra':0,segunda:0,'solo-movil':0};state.services.forEach(s=>n[s.type]++);summaryEl.innerHTML=state.services.length?`<b>${state.services.length} servicio(s)</b><br>Convergencias: ${n.convergente} · Solo fibra: ${n['solo-fibra']} · Segundas residencias: ${n.segunda} · Solo móvil: ${n['solo-movil']}`:'Añade el primer servicio.'}
 function rows(s){const r=[];if(s.type==='convergente')r.push(['Paquete principal',`${s.speed==='1000'?'Fibra 1 GB':'Fibra 600 MB'} + móvil ${s.mode==='digi'?'250 GB Anti-DIGI':s.main+' GB'}`,BASE[s.mode][s.speed][s.mode==='digi'?'250':s.main]]);if(s.type==='solo-fibra')r.push(['Solo fibra',`${s.speed==='1000'?'1 GB':s.speed+' MB'} · ${s.coverage}`,SOLO_FIBRA[s.speed]]);if(s.type==='segunda')r.push(['Segunda residencia',`${s.speed==='1000'?'1 GB':s.speed+' MB'} · ${s.coverage}`,SEGUNDA[s.speed]]);if(s.type==='convergente'||s.type==='solo-movil')lines(s).filter(l=>(s.mode==='digi'||l[3]==='std')).forEach(l=>{for(let i=0;i<(s.qty[l[0]]||0);i++)r.push([s.type==='solo-movil'?'Línea móvil':'Línea adicional',l[1],l[2]])});Object.values(s.tv).forEach(t=>r.push(['TV / streaming',t.name,t.p]));return r}
 function openReport(){
 const promoCount=state.services.filter(s=>s.type==='convergente').length;
-docServices.innerHTML=state.services.map((s,i)=>`<div class=doc-service><div class=doc-title>${i+1}. ${s.label?s.label+' · ':''}${name(s)}</div><table><thead><tr><th>Concepto</th><th>Detalle</th><th class=right>Importe</th></tr></thead><tbody>${rows(s).map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td class=right>${euro(x[2])}</td></tr>`).join('')}</tbody></table><div class=doc-subtotal>Subtotal: ${euro(price(s))}/mes</div></div>`).join('');
+docServices.innerHTML=state.services.map((s,i)=>`<section class=doc-section>
+  <div class=doc-section-title>${i+1}. ${s.label?s.label+' - ':''}${name(s)}</div>
+  <table class=doc-table>
+    <thead><tr><th>Concepto</th><th>Detalle técnico</th><th>Importe</th></tr></thead>
+    <tbody>${rows(s).map(x=>`<tr><td><b>${x[0]}</b></td><td>${x[1]}</td><td>${euro(x[2])}</td></tr>`).join('')}</tbody>
+  </table>
+  <div class=doc-service-subtotal><span>Subtotal del servicio</span><strong>${euro(price(s))}/mes</strong></div>
+</section>`).join('');
 docTotal.innerText=euro(total())+'/mes';
 const c=parseFloat(current.value)||0,d=c-total();
-docSaving.innerText=d>0?`Ahorro estimado: ${euro(d)}/mes · ${Math.round(d*12)}€ al año`:'Simulación personalizada de servicios Simyo.';
+docSaving.innerText=d>0?`Ahorro estimado: ${euro(d)}/mes · ${Math.round(d*12)}€ al año`:'Simulación personalizada sin comparación de ahorro.';
 const gift=document.getElementById('doc-gift');
 const giftValue=document.getElementById('doc-gift-value');
 if(promoCount>0){
   gift.style.display='block';
-  giftValue.innerText=promoCount===1?'Tarjeta regalo MediaMarkt de 100 €':`${promoCount} tarjetas regalo MediaMarkt de 100 € (${promoCount*100} € en total)`;
+  giftValue.innerText=promoCount===1
+    ?'Tarjeta regalo MediaMarkt de 100 €'
+    :`${promoCount} tarjetas regalo MediaMarkt de 100 € (${promoCount*100} € en total)`;
 }else{
   gift.style.display='none';
 }
@@ -185,9 +494,9 @@ function makePdf(){
     margin:[0.4,0.4,0.4,0.4],
     filename:`Propuesta_Simyo_MediaMarkt_${Date.now()}.pdf`,
     image:{type:'jpeg',quality:0.98},
-    html2canvas:{scale:2.5,logging:false,useCORS:true,backgroundColor:'#ffffff'},
+    html2canvas:{scale:2.5,logging:false,useCORS:true},
     jsPDF:{unit:'in',format:'letter',orientation:'portrait'},
-    pagebreak:{mode:['css','legacy']}
+    pagebreak:{mode:['css','legacy'],before:'.pdf-page-break'}
   };
   html2pdf().set(opt).from(elemento).save();
 }
