@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v17-Definitivo';
+const CACHE_NAME = 'mm-ventas-v18-recomendador';
 const CORE = [
   './',
   './index.html',
@@ -8,6 +8,7 @@ const CORE = [
   './assets/mediamarkt-logo.png',
   './assets/mediamarkt-symbol.png',
   './pages/multi.html',
+  './pages/recomendador.html',
   './pages/simyo.html',
   './pages/jazztel.html',
   './pages/luz.html'
