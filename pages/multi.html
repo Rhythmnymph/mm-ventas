@@ -220,13 +220,19 @@
             <div id="grid-jazztel" class="tv-grid" style="display:none;">
                 <div class="tv-btn" id="btn-jazz-base" onclick="toggleTV('jazz', 'base', 4.38)">JazzTV Base (4.38€)</div>
                 <div class="tv-btn" id="btn-jazz-netflix" onclick="toggleTV('jazz', 'netflix', 7.95)">Netflix c/anuncios (7.95€)</div>
+                <div class="tv-btn" id="btn-jazz-netflixstd" onclick="toggleTV('jazz', 'netflixstd', 13.26)">Netflix estándar (13.26€)</div>
+                <div class="tv-btn" id="btn-jazz-netflixpremium" onclick="toggleTV('jazz', 'netflixpremium', 19.45)">Netflix Premium (19.45€)</div>
                 <div class="tv-btn" id="btn-jazz-prime" onclick="toggleTV('jazz', 'prime', 8.83)">Prime + Max (8.83€)</div>
                 <div class="tv-btn" id="btn-jazz-disney" onclick="toggleTV('jazz', 'disney', 6.18)">Disney+ c/anuncios (6.18€)</div>
-                <div class="tv-btn" id="btn-jazz-daznmotor" onclick="toggleTV('jazz', 'daznmotor', 8.83)">DAZN Motor (8.83€)</div>
+                <div class="tv-btn" id="btn-jazz-disneystd" onclick="toggleTV('jazz', 'disneystd', 9.72)">Disney+ estándar (9.72€)</div>
+                <div class="tv-btn" id="btn-jazz-disneypremium" onclick="toggleTV('jazz', 'disneypremium', 14.14)">Disney+ Premium (14.14€)</div>
+                <div class="tv-btn" id="btn-jazz-daznmotor" onclick="toggleTV('jazz', 'daznmotor', 8.83)">DAZN Motor (8.83€*)</div>
                 <div class="tv-btn" id="btn-jazz-daznbasket" onclick="toggleTV('jazz', 'daznbasket', 8.83)">DAZN Basket (8.83€)</div>
-                <div class="tv-btn" id="btn-jazz-orange" onclick="toggleTV('jazz', 'orange', 8.80)">Orange TV (8.80€)</div>
-                <div class="tv-btn" id="btn-jazz-futbol" onclick="toggleFutbolPromo()">Promo Fútbol (Pago único)</div>
+                <div class="tv-btn" id="btn-jazz-orange" onclick="toggleTV('jazz', 'orange', 13.22)">Orange TV Cine y Series (13.22€)</div>
+                <div class="tv-btn" id="btn-jazz-futbol" onclick="toggleFutbolPromo('futbol')">Todo Fútbol y Baloncesto (38.86€)</div>
+                <div class="tv-btn" id="btn-jazz-deporte" onclick="toggleFutbolPromo('deporte')">Todo Deporte (47.74€)</div>
             </div>
+            <div class="subnote" id="jazz-tv-note" style="display:none;margin-top:8px">Servicios con deco: alta de 8,80€. Deben solicitarse tras la activación y solo están disponibles para particulares. DAZN Motor pasa a 17,68€/mes después de 12 meses.</div>
         </div>
     </div>
 
@@ -357,7 +363,7 @@
             document.getElementById('tgl-antidigi').style.display = ((estado.op === 'simyo' && !estado.soloMovil) || estado.op === 'jazztel') ? 'block' : 'none';
             document.getElementById('tgl-antidigi').classList.toggle('active-warning', estado.antiDigi);
             
-            document.getElementById('tgl-velocidad').style.display = (estado.op === 'jazztel' && estado.antiDigi) ? 'block' : 'none';
+            document.getElementById('tgl-velocidad').style.display = (estado.op === 'jazztel') ? 'block' : 'none';
             document.getElementById('tgl-velocidad').classList.toggle('active-blue', estado.jazzVelocidad1Gb);
             
             document.getElementById('tgl-ilimitados').style.display = (estado.op === 'jazztel' && !estado.antiDigi) ? 'block' : 'none';
@@ -371,6 +377,7 @@
             document.getElementById('grid-lowi').style.display = (estado.op === 'lowi') ? 'flex' : 'none';
             document.getElementById('grid-simyo').style.display = (estado.op === 'simyo') ? 'flex' : 'none';
             document.getElementById('grid-jazztel').style.display = (estado.op === 'jazztel') ? 'flex' : 'none';
+            document.getElementById('jazz-tv-note').style.display = (estado.op === 'jazztel') ? 'block' : 'none';
         }
 
         function toggleAntiDigi() {
@@ -384,6 +391,12 @@
         }
 
         function toggleVelocidad() {
+            if (estado.op === 'jazztel' && !estado.antiDigi && estado.isUnlimited && estado.baseLines === 1) {
+                estado.jazzVelocidad1Gb = false;
+                actualizarUIOpciones();
+                actualizar();
+                return;
+            }
             estado.jazzVelocidad1Gb = !estado.jazzVelocidad1Gb;
             actualizarUIOpciones();
             actualizar();
@@ -413,6 +426,7 @@
                 } else {
                     if (estado.baseLines < 1) estado.baseLines = 1;
                     if (estado.baseLines > 2) estado.baseLines = 2;
+                    if (estado.baseLines === 1) estado.jazzVelocidad1Gb = false;
                 }
             }
             actualizarUIOpciones();
@@ -432,15 +446,18 @@
             actualizarUIOpciones();
         }
 
-        // Función exclusiva para la Promo de Fútbol
-        function toggleFutbolPromo() {
+        function toggleFutbolPromo(tipo) {
             const op = 'jazz';
             const currentObj = estado.tvSeleccionada[op];
-            if (currentObj['futbol']) {
-                delete currentObj['futbol'];
+            const otro = tipo === 'futbol' ? 'deporte' : 'futbol';
+            delete currentObj[otro];
+            delete currentObj['base'];
+            if (currentObj[tipo]) {
+                delete currentObj[tipo];
             } else {
-                for (let key in currentObj) delete currentObj[key]; // Desmarca incompatibles
-                currentObj['futbol'] = { precio: 0, nombre: "Promo Todo el Fútbol + Deporte", nota: "Pago Único (Promo + Deco)" };
+                currentObj[tipo] = tipo === 'futbol'
+                    ? { precio: 38.86, nombre: "Pack Todo Fútbol y Baloncesto", nota: "Cuota mensual" }
+                    : { precio: 47.74, nombre: "Pack Todo Deporte", nota: "Cuota mensual" };
             }
             actualizar();
         }
@@ -451,7 +468,13 @@
                 delete currentObj[service];
             } else {
                 if (op === 'jazz') {
-                    if (currentObj['futbol']) delete currentObj['futbol']; // Desmarca futbol si metes otra tv
+                    const groups = [['netflix','netflixstd','netflixpremium'],['disney','disneystd','disneypremium']];
+                    groups.forEach(g => { if (g.includes(service)) g.filter(x => x !== service).forEach(x => delete currentObj[x]); });
+                    if (service === 'base') {
+                        ['futbol','deporte','orange','netflix','netflixstd','netflixpremium','prime','disney','disneystd','disneypremium','daznmotor','daznbasket'].forEach(x => delete currentObj[x]);
+                    } else {
+                        delete currentObj['base'];
+                    }
                 }
                 currentObj[service] = { precio: price, nombre: document.getElementById(`btn-${op}-${service}`).innerText.split('(')[0].trim() };
             }
@@ -516,22 +539,23 @@
                     }
                 } else {
                     if (estado.isUnlimited) {
-                        dataReporte.fibraVelocidad = "1 Gbps (Fibra Óptica Jazztel)";
                         if (estado.baseLines === 1) {
-                            precioBasePaquete = 51.25;
-                            dataReporte.lineas.push({ tipo: "Línea Principal (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 51.25, nota: "Fibra + 1 Ilimitada" });
+                            precioBasePaquete = 44.17;
+                            dataReporte.fibraVelocidad = "600 Mbps (Fibra Óptica Jazztel)";
+                            dataReporte.lineas.push({ tipo: "Línea Principal (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 44.17, nota: "Fibra 600 MB + 1 Ilimitada" });
                         } else {
-                            precioBasePaquete = 60.09;
-                            dataReporte.lineas.push({ tipo: "Línea Principal 1 (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 60.09, nota: "Fibra + 2 Ilimitadas" });
+                            precioBasePaquete = estado.jazzVelocidad1Gb ? 60.09 : 53.02;
+                            dataReporte.fibraVelocidad = estado.jazzVelocidad1Gb ? "1 Gbps (Fibra Óptica Jazztel)" : "600 Mbps (Fibra Óptica Jazztel)";
+                            dataReporte.lineas.push({ tipo: "Línea Principal 1 (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: precioBasePaquete, nota: "Fibra + 2 Ilimitadas" });
                             dataReporte.lineas.push({ tipo: "Línea Principal 2 (Paquete)", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 0, nota: "Incluida en precio base" });
                         }
                         for(let i=0; i<estado.adicLines; i++) {
                             dataReporte.lineas.push({ tipo: "Línea Adicional Ilimitada", datos: "Datos Ilimitados + Llamadas Ilimitadas", precio: 8.84, nota: "Línea extra" });
                         }
                     } else {
-                        precioBasePaquete = 39.75;
-                        dataReporte.fibraVelocidad = "1 Gbps (Fibra Óptica Jazztel)";
-                        dataReporte.lineas.push({ tipo: "Línea Principal 1 (Paquete)", datos: "Gigas Compartidos + Llamadas Ilimitadas", precio: 39.75, nota: "Pack Ahorro Combinado" });
+                        precioBasePaquete = estado.jazzVelocidad1Gb ? 46.82 : 39.75;
+                        dataReporte.fibraVelocidad = estado.jazzVelocidad1Gb ? "1 Gbps (Fibra Óptica Jazztel)" : "600 Mbps (Fibra Óptica Jazztel)";
+                        dataReporte.lineas.push({ tipo: "Línea Principal 1 (Paquete)", datos: "120 GB compartidos + Llamadas Ilimitadas", precio: precioBasePaquete, nota: "Pack Ahorro Combinado" });
                         dataReporte.lineas.push({ tipo: "Línea Principal 2 (Paquete)", datos: "Gigas Compartidos + Llamadas Ilimitadas", precio: 0, nota: "Incluida en precio base" });
                         for(let i=0; i<estado.adicLines; i++) {
                             dataReporte.lineas.push({ tipo: "Línea Adicional Compartida", datos: "Llamadas Ilimitadas (Acceso al depósito común)", precio: 5.31, nota: "Línea extra" });
@@ -551,15 +575,15 @@
                 
                 let itemTV = estado.tvSeleccionada[familiaTV][s];
                 
-                // Lógica de Pago Único de Fútbol
-                if (s === 'futbol') {
-                    dataReporte.upfrontCost += 26.53 + 8.80;
-                    dataReporte.upfrontDetails.push("Promo Fútbol Verano (26.53€) + Cuota Alta Deco (8.80€)");
-                    dataReporte.tv.push({ nombre: itemTV.nombre, precio: 0, nota: "Servicio de Pago Único Inicial" });
-                } else {
-                    totalTV += itemTV.precio;
-                    dataReporte.tv.push({ nombre: itemTV.nombre, precio: itemTV.precio, nota: "Cuota recurrente mensual" });
-                }
+                totalTV += itemTV.precio;
+                const nota = s === 'daznmotor' ? '8,83€/mes durante 12 meses; después 17,68€/mes' : 'Cuota recurrente mensual';
+                dataReporte.tv.push({ nombre: itemTV.nombre, precio: itemTV.precio, nota });
+            }
+
+            const serviciosDeco = ['futbol','deporte','orange','netflix','netflixstd','netflixpremium','prime','disney','disneystd','disneypremium','daznmotor','daznbasket'];
+            if (familiaTV === 'jazz' && serviciosDeco.some(s => estado.tvSeleccionada.jazz[s])) {
+                dataReporte.upfrontCost = 8.80;
+                dataReporte.upfrontDetails.push("Cuota de alta de decodificador (8,80€)");
             }
 
             if (estado.hasMovistar) {
@@ -676,7 +700,7 @@
                         txtLegal += "El paquete estándar de Fibra + Móvil de Simyo incluye un compromiso de permanencia de 3 meses. Nota aclaratoria: Durante el volcado de la solicitud en la plataforma de tramitación, el sistema puede lanzar ofertas promocionales puntuales con un precio mejorado; en este escenario excepcional, el cliente tendrá siempre el derecho absoluto de elegir si prefiere aceptar dicha promoción (asumiendo la permanencia que lleve asociada) o conservar la tarifa regular manteniendo el compromiso estándar de 3 meses.";
                     }
                 } else if (estado.op === 'jazztel') {
-                    txtLegal += "Toda contratación de paquetes combinados de Fibra + Móvil de Jazztel incluye de forma regular un compromiso de permanencia fijado en 12 meses. Promociones de pago único exentas de prorrateo mensual.";
+                    txtLegal += "Toda contratación de paquetes combinados de Fibra + Móvil de Jazztel incluye de forma regular un compromiso de permanencia fijado en 12 meses. Los servicios de TV con decodificador se solicitan a atención al cliente tras la activación, tienen 8,80€ de alta y solo están disponibles para particulares.";
                 }
             }
             

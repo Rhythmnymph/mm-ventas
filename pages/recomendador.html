@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#090003">
+  <title>Recomendador estratégico · MM Ventas</title>
+  <style>
+    :root{
+      --bg:#070003;--card:rgba(255,255,255,.075);--stroke:rgba(255,255,255,.13);
+      --text:#fff;--dim:rgba(255,255,255,.68);--mm:#e30613;--green:#00e676;
+      --yellow:#ffd23f;--orange:#ff6600;--blue:#00ccff;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%;background:#070003;color:var(--text);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;-webkit-tap-highlight-color:transparent}
+    body{background:radial-gradient(circle at 85% -5%,rgba(227,6,19,.42),transparent 34%),linear-gradient(180deg,#120006,#050001 72%);overflow-x:hidden}
+    button,input{font:inherit}
+    button{cursor:pointer}
+    .app{min-height:100dvh;max-width:760px;margin:auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px calc(env(safe-area-inset-bottom,0px) + 28px)}
+    .topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+    .back{width:44px;height:44px;display:grid;place-items:center;border-radius:15px;border:1px solid var(--stroke);background:rgba(255,255,255,.07);color:#fff;text-decoration:none;font-size:1.8rem;font-weight:900}
+    .top-sub{color:var(--dim);font-size:.73rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+    .top-title{font-size:1.12rem;font-weight:1000}
+    .hero{position:relative;overflow:hidden;border:1px solid var(--stroke);border-radius:28px;padding:22px 19px;background:linear-gradient(135deg,rgba(227,6,19,.31),rgba(255,255,255,.055));box-shadow:0 20px 48px rgba(0,0,0,.33)}
+    .hero:after{content:"";position:absolute;width:145px;height:145px;border-radius:50%;right:-48px;top:-62px;background:radial-gradient(circle,rgba(255,210,63,.45),transparent 68%)}
+    .eyebrow{color:var(--yellow);font-size:.76rem;font-weight:1000;letter-spacing:.16em;text-transform:uppercase}
+    h1{margin:8px 0 7px;font-size:2rem;line-height:1;letter-spacing:-.05em}
+    .hero p{margin:0;max-width:520px;color:var(--dim);font-weight:720;line-height:1.35}
+    .progress-wrap{margin:17px 4px 12px}
+    .progress-meta{display:flex;justify-content:space-between;gap:8px;color:var(--dim);font-size:.78rem;font-weight:850;margin-bottom:7px}
+    .progress{height:7px;border-radius:999px;background:rgba(255,255,255,.1);overflow:hidden}
+    .progress>div{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--mm),#ff4b55);transition:width .25s ease}
+    .panel{border:1px solid var(--stroke);background:linear-gradient(145deg,rgba(255,255,255,.095),rgba(255,255,255,.045));border-radius:27px;padding:20px 17px;box-shadow:0 17px 42px rgba(0,0,0,.28);animation:in .22s ease both}
+    .question{font-size:1.43rem;font-weight:1000;line-height:1.1;letter-spacing:-.035em;margin:0 0 7px}
+    .help{margin:0 0 17px;color:var(--dim);font-weight:700;font-size:.91rem;line-height:1.35}
+    .choices{display:grid;grid-template-columns:1fr;gap:9px}
+    .choice{width:100%;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.065);color:#fff;border-radius:18px;padding:14px;text-align:left;transition:.15s ease}
+    .choice:active{transform:scale(.985)}
+    .choice.selected{border-color:var(--mm);background:rgba(227,6,19,.18);box-shadow:0 0 0 1px rgba(227,6,19,.22)}
+    .choice-title{font-weight:950;font-size:1rem}
+    .choice-note{color:var(--dim);font-size:.79rem;font-weight:700;margin-top:3px;line-height:1.25}
+    .provider{display:inline-block;margin-left:6px;padding:3px 7px;border-radius:999px;background:rgba(255,255,255,.1);font-size:.68rem;color:rgba(255,255,255,.78);vertical-align:2px}
+    .input-wrap{display:flex;align-items:center;gap:9px;border:1px solid rgba(255,255,255,.14);background:rgba(0,0,0,.22);border-radius:20px;padding:5px 14px}
+    .input-wrap input{width:100%;border:0;outline:0;background:transparent;color:#fff;font-size:2rem;font-weight:1000;padding:12px 0;text-align:center}
+    .input-wrap span{font-size:1.5rem;font-weight:1000;color:var(--yellow)}
+    .nav{display:flex;gap:10px;margin-top:16px}
+    .nav button{min-height:50px;border-radius:17px;font-weight:1000;border:1px solid var(--stroke)}
+    .prev{width:35%;background:rgba(255,255,255,.07);color:#fff}
+    .next{flex:1;background:var(--mm);color:#fff;border-color:transparent!important;box-shadow:0 12px 28px rgba(227,6,19,.25)}
+    .next:disabled{opacity:.38;box-shadow:none;cursor:default}
+    .result-stack{display:grid;gap:12px}
+    .result-card{position:relative;overflow:hidden;border:1px solid var(--stroke);border-radius:25px;padding:19px;background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.045))}
+    .result-card.primary{border-color:rgba(0,230,118,.55);box-shadow:0 18px 46px rgba(0,230,118,.09)}
+    .result-card:after{content:"";position:absolute;width:130px;height:130px;border-radius:50%;right:-55px;bottom:-60px;background:var(--accent,var(--mm));opacity:.16}
+    .tag{display:inline-block;border-radius:999px;padding:6px 9px;background:rgba(0,230,118,.13);color:#7dffbd;font-size:.7rem;font-weight:1000;letter-spacing:.08em;text-transform:uppercase}
+    .brand{font-size:1.48rem;font-weight:1000;margin:10px 0 4px}
+    .pack{font-weight:850;line-height:1.32;max-width:560px}
+    .price{font-size:2rem;font-weight:1000;letter-spacing:-.04em;margin:12px 0 2px}
+    .price small{font-size:.82rem;color:var(--dim);letter-spacing:0}
+    .conditions{color:var(--dim);font-size:.82rem;font-weight:720;line-height:1.35}
+    .reason{margin-top:12px;padding:11px 12px;border-radius:15px;background:rgba(255,255,255,.065);font-size:.83rem;font-weight:800;line-height:1.35}
+    .warning{margin-top:10px;color:#ffd9a3;font-size:.79rem;font-weight:800;line-height:1.35}
+    .open-calc{display:inline-flex;margin-top:13px;position:relative;z-index:1;color:#fff;text-decoration:none;font-weight:950;border:1px solid rgba(255,255,255,.16);border-radius:13px;padding:10px 12px;background:rgba(255,255,255,.08)}
+    .other-toggle{width:100%;min-height:52px;margin-top:13px;border-radius:17px;border:1px solid var(--stroke);background:rgba(255,255,255,.07);color:#fff;font-weight:1000}
+    .alternatives{display:none;margin-top:11px;gap:10px}
+    .alternatives.open{display:grid}
+    .summary{border:1px solid var(--stroke);border-radius:19px;padding:13px;background:rgba(0,0,0,.2);color:var(--dim);font-size:.82rem;font-weight:750;line-height:1.45;margin-bottom:12px}
+    .restart{width:100%;min-height:50px;margin-top:12px;border:0;border-radius:17px;background:var(--mm);color:#fff;font-weight:1000}
+    .tiny{font-size:.74rem;color:rgba(255,255,255,.48);line-height:1.35;margin-top:12px;text-align:center}
+    @media(min-width:620px){.choices.two{grid-template-columns:1fr 1fr}.choices.three{grid-template-columns:repeat(3,1fr)}.panel{padding:24px}.app{padding-left:20px;padding-right:20px}}
+    @keyframes in{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <div class="topbar"><a class="back" href="../index.html" aria-label="Volver">‹</a><div><div class="top-sub">Estrategia mensual</div><div class="top-title">Recomendador de tarifa</div></div></div>
+    <section class="hero"><div class="eyebrow">Venta guiada</div><h1>Encuentra la mejor propuesta</h1><p>Responde lo que necesita el cliente. La recomendación prioriza comisión, encaje y ahorro, pero siempre conserva otras alternativas.</p></section>
+    <div class="progress-wrap" id="progressWrap"><div class="progress-meta"><span id="progressText">Pregunta 1</span><span id="progressPct">0%</span></div><div class="progress"><div id="progressBar"></div></div></div>
+    <section id="screen" class="panel"></section>
+  </main>
+<script>
+const SIMYO_ANTI_ORIGINS=['digi','vodafone','lowi','finetwork','avatel','ptv','aire'];
+const ORIGINS=[
+  ['digi','Digi'],['vodafone','Vodafone'],['lowi','Lowi'],['finetwork','Finetwork'],['avatel','Avatel'],['ptv','PTV Telecom'],['aire','Aire Networks'],
+  ['movistar','Movistar'],['o2','O2'],['orange','Orange'],['jazztel','Jazztel'],['simyo','Simyo'],['masmovil','MásMóvil'],['pepephone','Pepephone'],['otro','Otra compañía']
+];
+const TV_OPTIONS=[
+  {id:'football',name:'Todo Fútbol y Baloncesto',note:'38,86 €/mes · solo Jazztel · tras la activación',provider:'Jazztel'},
+  {id:'sport',name:'Todo Deporte',note:'Fútbol, baloncesto y motor · 47,74 €/mes · solo Jazztel',provider:'Jazztel'},
+  {id:'orange_tv',name:'Orange TV Cine y Series',note:'13,22 €/mes · solo Jazztel',provider:'Jazztel'},
+  {id:'netflix_ads',name:'Netflix con anuncios',note:'Disponible con Jazztel, Lowi y Simyo',provider:'Varias'},
+  {id:'netflix_standard',name:'Netflix estándar',note:'13,26 €/mes con Jazztel',provider:'Jazztel'},
+  {id:'netflix_premium',name:'Netflix Premium',note:'19,45 €/mes con Jazztel',provider:'Jazztel'},
+  {id:'prime_max',name:'Prime + Max',note:'8,83 €/mes con Jazztel; equivalente separado en Lowi',provider:'Varias'},
+  {id:'disney_ads',name:'Disney+ con anuncios',note:'Disponible con Jazztel y Lowi',provider:'Varias'},
+  {id:'disney_standard',name:'Disney+ estándar',note:'9,72 €/mes con Jazztel',provider:'Jazztel'},
+  {id:'disney_premium',name:'Disney+ Premium',note:'14,14 €/mes con Jazztel',provider:'Jazztel'},
+  {id:'dazn_motor',name:'DAZN Motor',note:'8,83 €/mes durante 12 meses; después 17,68 €',provider:'Jazztel'},
+  {id:'dazn_basket',name:'DAZN Baloncesto',note:'8,83 €/mes con Jazztel',provider:'Jazztel'},
+  {id:'lowi_tv',name:'TV Canales',note:'4,42 €/mes · solo Lowi',provider:'Lowi'},
+  {id:'simyo_sky',name:'TV + SkyShowtime',note:'5,30 €/mes · solo Simyo',provider:'Simyo'}
+];
+const TV_GROUPS={football:['football','sport'],netflix:['netflix_ads','netflix_standard','netflix_premium'],disney:['disney_ads','disney_standard','disney_premium']};
+let answers={service:null,usage:null,mobileAction:null,origin:null,temporary:null,fiberSpeed:'600',currentPrice:'',lines:2,data:'120',fixed:false,unlimited:false,wantsTv:false,tv:[],simyoStay:'3'};
+let index=0;
+const screen=document.getElementById('screen');
+
+function steps(){
+  const s=[{id:'service',title:'¿Qué necesita el cliente?',help:'Elige el servicio principal para adaptar las siguientes preguntas.',type:'choices',cols:'three',options:[['mobile','Solo móvil','Una o varias líneas sin fibra'],['fiber','Solo fibra','Internet en una vivienda'],['convergent','Fibra + móvil','Paquete convergente completo']]}];
+  if(answers.service==='mobile'){
+    s.push({id:'usage',title:'¿Dónde se utilizará la línea?',help:'Para router priorizaremos bonos grandes de datos.',type:'choices',cols:'two',options:[['phone','En un móvil','Uso personal con llamadas'],['router','En un router','300 GB recomendados; 150 GB como mínimo']]});
+    if(answers.usage==='phone'){
+      s.push({id:'mobileAction',title:'¿Conserva el número?',help:'La estrategia de solo móvil cambia entre portabilidad y alta nueva.',type:'choices',cols:'two',options:[['port','Portabilidad','Conservar el número actual'],['new','Alta nueva','Crear un número nuevo']]});
+      if(answers.mobileAction==='port')s.push(originStep());
+      if(answers.mobileAction==='new')s.push({id:'temporary',title:'¿La línea estará activa menos de 3 meses?',help:'Para usos muy cortos conviene ofrecer prepago.',type:'choices',cols:'two',options:[[true,'Sí','Recomendar modalidad prepago'],[false,'No','Recomendar contrato de 150 GB']]});
+    }
+  }
+  if(answers.service==='fiber')s.push(speedStep(true));
+  if(answers.service==='convergent'){
+    s.push(originStep(),
+      {id:'currentPrice',title:'¿Cuánto paga actualmente por todo?',help:'Incluye fibra, líneas y televisión. Si no lo sabe, puede dejarlo en 0 €.',type:'price'},
+      {id:'lines',title:'¿Cuántas líneas móviles necesita?',help:'Las líneas incluidas y adicionales cambian el paquete recomendado.',type:'choices',cols:'three',options:[[1,'1 línea',''],[2,'2 líneas',''],[3,'3 líneas',''],[4,'4 o más','Se calcularán 4 líneas']]},
+      speedStep(false),
+      {id:'data',title:'¿Cuántos datos necesita?',help:'Elegiremos una tarifa que iguale o supere esta necesidad.',type:'choices',cols:'two',options:[['50','Hasta 50 GB','Uso moderado'],['80','Hasta 80 GB','Dos líneas de uso medio'],['120','Hasta 120 GB','Uso alto compartido'],['300','250–300 GB','Uso muy alto']]},
+      {id:'fixed',title:'¿Necesita teléfono fijo?',help:'Si lo necesita, Jazztel tendrá prioridad.',type:'choices',cols:'two',options:[[true,'Sí','Debe incluir teléfono fijo'],[false,'No','No es necesario']]},
+      {id:'unlimited',title:'¿Necesita datos ilimitados?',help:'Esta respuesta prevalece sobre la cantidad aproximada de gigas.',type:'choices',cols:'two',options:[[true,'Sí','Priorizar paquetes ilimitados'],[false,'No','Basta con un bono de datos']]},
+      {id:'wantsTv',title:'¿Quiere televisión o streaming?',help:'La selección puede orientar la compañía, pero nunca ocultará alternativas.',type:'choices',cols:'two',options:[[true,'Sí','Elegir contenidos'],[false,'No','Continuar sin televisión']]});
+    if(answers.wantsTv)s.push({id:'tv',title:'¿Qué contenidos le interesan?',help:'Puedes elegir varios. Si ninguna compañía los reúne todos, te mostraremos las diferencias.',type:'tv'});
+    if(SIMYO_ANTI_ORIGINS.includes(answers.origin))s.push({id:'simyoStay',title:'Si se valora Simyo, ¿qué permanencia acepta?',help:'La promoción cambia según el compromiso elegido.',type:'choices',cols:'two',options:[['12','12 meses','Tarifa Anti-Digi'],['3','3 meses','Tarifa estándar']]});
+  }
+  s.push({id:'result',type:'result'});
+  return s;
+}
+function originStep(){return {id:'origin',title:'¿Con qué compañía está ahora?',help:'Así evitamos portabilidades imposibles y aplicamos las promociones correctas.',type:'origins'}}
+function speedStep(include300){const opts=include300?[[300,'300 MB','Suficiente para uso normal'],[600,'600 MB','Varios dispositivos'],[1000,'1 GB','Máxima velocidad']]:[[600,'600 MB','Equilibrada'],[1000,'1 GB','Máxima velocidad']];return {id:'fiberSpeed',title:'¿Qué velocidad de fibra necesita?',help:'La recomendación respetará esta velocidad siempre que el paquete lo permita.',type:'choices',cols:'three',options:opts}}
+
+function render(){
+  const list=steps(); if(index>=list.length)index=list.length-1; const step=list[index];
+  const pct=step.id==='result'?100:Math.round((index/(list.length-1))*100);
+  document.getElementById('progressText').textContent=step.id==='result'?'Recomendación lista':`Pregunta ${index+1} de ${list.length-1}`;
+  document.getElementById('progressPct').textContent=pct+'%';document.getElementById('progressBar').style.width=pct+'%';
+  if(step.type==='result'){renderResult();return}
+  let body=`<h2 class="question">${step.title}</h2><p class="help">${step.help||''}</p>`;
+  if(step.type==='choices')body+=choiceHtml(step);
+  if(step.type==='origins')body+=`<div class="choices two">${ORIGINS.map(o=>choiceButton(step.id,o[0],o[1],'')).join('')}</div>`;
+  if(step.type==='price')body+=`<div class="input-wrap"><input id="priceInput" type="number" inputmode="decimal" min="0" step="0.01" value="${answers.currentPrice}" placeholder="0"><span>€</span></div>`;
+  if(step.type==='tv')body+=`<div class="choices two">${TV_OPTIONS.map(o=>`<button class="choice ${answers.tv.includes(o.id)?'selected':''}" data-tv="${o.id}"><div class="choice-title">${o.name}<span class="provider">${o.provider}</span></div><div class="choice-note">${o.note}</div></button>`).join('')}</div>`;
+  body+=navHtml(step);screen.innerHTML=body;bind(step);
+}
+function choiceHtml(step){return `<div class="choices ${step.cols||''}">${step.options.map(o=>choiceButton(step.id,o[0],o[1],o[2])).join('')}</div>`}
+function choiceButton(id,value,title,note){const encoded=typeof value==='boolean'?String(value):value;return `<button class="choice ${String(answers[id])===String(value)?'selected':''}" data-choice="${id}" data-value="${encoded}"><div class="choice-title">${title}</div>${note?`<div class="choice-note">${note}</div>`:''}</button>`}
+function navHtml(step){return `<div class="nav">${index?'<button class="prev" id="prevBtn">Atrás</button>':''}<button class="next" id="nextBtn" ${canContinue(step)?'':'disabled'}>${index===steps().length-2?'Ver recomendación':'Continuar'}</button></div>`}
+function canContinue(step){if(step.type==='price'||step.type==='tv')return true;return answers[step.id]!==null&&answers[step.id]!==undefined}
+function bind(step){
+  document.getElementById('prevBtn')?.addEventListener('click',()=>{index--;render()});
+  document.getElementById('nextBtn')?.addEventListener('click',()=>{if(step.type==='price')answers.currentPrice=document.getElementById('priceInput').value||'0';index++;render();window.scrollTo({top:0,behavior:'smooth'})});
+  document.querySelectorAll('[data-choice]').forEach(b=>b.addEventListener('click',()=>{let v=b.dataset.value;if(v==='true'||v==='false')v=v==='true';if(['lines','fiberSpeed'].includes(b.dataset.choice))v=Number(v);answers[b.dataset.choice]=v;render()}));
+  document.querySelectorAll('[data-tv]').forEach(b=>b.addEventListener('click',()=>toggleTv(b.dataset.tv)));
+}
+function toggleTv(id){
+  const group=Object.values(TV_GROUPS).find(g=>g.includes(id));if(group)answers.tv=answers.tv.filter(x=>!group.includes(x));
+  if(answers.tv.includes(id))answers.tv=answers.tv.filter(x=>x!==id);else answers.tv.push(id);render();
+}
+
+function tvQuote(provider){
+  const maps={
+    jazztel:{football:38.86,sport:47.74,orange_tv:13.22,netflix_ads:7.95,netflix_standard:13.26,netflix_premium:19.45,prime_max:8.83,disney_ads:6.18,disney_standard:9.72,disney_premium:14.14,dazn_motor:8.83,dazn_basket:8.83},
+    lowi:{netflix_ads:7.07,prime_max:8.85,disney_ads:5.31,lowi_tv:4.42},
+    simyo:{netflix_ads:7.07,simyo_sky:5.30}
+  };
+  const labels=Object.fromEntries(TV_OPTIONS.map(x=>[x.id,x.name]));let monthly=0;const included=[],missing=[];
+  answers.tv.forEach(id=>{if(maps[provider][id]!=null){monthly+=maps[provider][id];included.push(labels[id])}else missing.push(labels[id])});
+  const decoder=['football','sport','orange_tv'].some(x=>answers.tv.includes(x))&&provider==='jazztel';
+  return {monthly,included,missing,upfront:decoder?8.80:0};
+}
+function quoteJazztel(){
+  if(answers.origin==='jazztel')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),needUnlimited=answers.unlimited||answers.data==='unlimited';let base=0,pack='',actualSpeed=speed,extras=0;
+  if(answers.origin==='digi'){
+    base=speed==='1000'?37.98:30.91;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas ilimitadas Anti-Digi`;extras=Math.max(0,lines-2)*8.84;
+  }else if(needUnlimited||Number(answers.data)>120){
+    if(lines===1){base=44.17;actualSpeed='600';pack='Fibra 600 MB + fijo + 1 línea ilimitada'}else{base=speed==='1000'?60.09:53.02;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas ilimitadas`;extras=Math.max(0,lines-2)*8.84}
+  }else if(lines<=2&&Number(answers.data)<=80&&speed==='600'){
+    base=33.56;pack='Fibra 600 MB + fijo + 2 líneas · 80 GB compartidos';
+  }else if(lines===1&&Number(answers.data)<=50){
+    base=35.33;actualSpeed='600';pack='Fibra 600 MB + fijo + 1 línea · 50 GB';
+  }else{
+    base=speed==='1000'?46.82:39.75;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas · 120 GB compartidos`;extras=Math.max(0,lines-2)*(Number(answers.data)<=80?5.31:7.96);
+  }
+  const tv=tvQuote('jazztel'),total=base+extras+tv.monthly;const warnings=[];if(actualSpeed!==speed)warnings.push('Este paquete está disponible con 600 MB.');if(tv.missing.length)warnings.push('Sin '+tv.missing.join(', ')+'.');if(tv.upfront)warnings.push('Alta de decodificador: 8,80 € una sola vez.');if(answers.tv.includes('dazn_motor'))warnings.push('DAZN Motor pasa a 17,68 €/mes después de 12 meses.');
+  return {provider:'Jazztel',accent:'#ffd23f',pack,total,stay:'12 meses',warnings,tv,equivalent:actualSpeed===speed&&tv.missing.length===0,link:'jazztel.html'};
+}
+function quoteLowi(){
+  if(['vodafone','lowi'].includes(answers.origin))return null;const lines=Number(answers.lines)||1,base=29.18+(Math.max(0,lines-1)*4.42),tv=tvQuote('lowi'),warnings=[];
+  if(answers.fixed)warnings.push('No incluye teléfono fijo.');if(answers.unlimited||answers.data==='unlimited'||Number(answers.data)>100)warnings.push('La línea principal tiene 100 GB; no ofrece datos ilimitados.');if(tv.missing.length)warnings.push('Alternativa sin '+tv.missing.join(', ')+'.');
+  return {provider:'Lowi',accent:'#00ccff',pack:`Fibra 1 GB + ${lines} línea${lines>1?'s':''} · principal de 100 GB${lines>1?' y adicionales de 50 GB':''}`,total:base+tv.monthly,stay:'3 meses',warnings,tv,link:'multi.html'};
+}
+function quoteSimyo(){
+  if(answers.origin==='simyo')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),eligible=SIMYO_ANTI_ORIGINS.includes(answers.origin),anti=eligible&&answers.simyoStay==='12';let base,pack,stay,warnings=[];
+  if(anti){base=(speed==='1000'?24.31:22.54)+Math.max(0,lines-1)*6.63;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + ${lines} línea${lines>1?'s':''} de 250 GB Anti-Digi`;stay='12 meses'}else{const data=answers.data==='unlimited'?300:Math.min(300,Math.max(50,Number(answers.data)||50));const bucket=data<=50?50:data<=120?120:300;const prices={600:{50:28.29,120:31.83,300:37.13},1000:{50:30.06,120:33.59,300:38.90}};base=prices[speed][bucket]+Math.max(0,lines-1)*(bucket===300?10.61:4.42);pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + ${lines} línea${lines>1?'s':''} · principal de ${bucket} GB`;stay='3 meses'}
+  if(answers.fixed)warnings.push('No incluye teléfono fijo.');if(answers.unlimited||answers.data==='unlimited')warnings.push('No ofrece datos ilimitados.');const tv=tvQuote('simyo');if(tv.missing.length)warnings.push('Alternativa sin '+tv.missing.join(', ')+'.');
+  return {provider:'Simyo',accent:'#ff6600',pack,total:base+tv.monthly,stay,warnings,tv,link:'simyo.html'};
+}
+function convergentResult(){
+  const jazz=quoteJazztel(),lowi=quoteLowi(),simyo=quoteSimyo(),all=[jazz,lowi,simyo].filter(Boolean);const current=Number(answers.currentPrice)||0;
+  const jazzOnly=['football','sport','orange_tv','netflix_standard','netflix_premium','disney_standard','disney_premium','dazn_motor','dazn_basket'].some(x=>answers.tv.includes(x));
+  const lowiOnly=answers.tv.includes('lowi_tv'),simyoOnly=answers.tv.includes('simyo_sky');const premium=!!jazz&&jazz.equivalent&&current>jazz.total;
+  let primary=null,reasons=[];
+  if(jazz&&(answers.fixed||answers.unlimited||answers.origin==='digi'||answers.origin==='avatel'||jazzOnly||premium)){primary=jazz;if(answers.fixed)reasons.push('necesita teléfono fijo');if(answers.unlimited)reasons.push('necesita datos ilimitados');if(answers.origin==='digi')reasons.push('tiene oferta Anti-Digi');if(answers.origin==='avatel')reasons.push('origen Avatel');if(jazzOnly)reasons.push('ha elegido contenido exclusivo de Jazztel');if(premium)reasons.push(`Jazztel cubre los servicios por ${money(jazz.total)}, menos de lo que paga ahora`)}
+  if(!primary&&lowiOnly&&lowi)primary=lowi;if(!primary&&simyoOnly&&simyo)primary=simyo;if(!primary&&lowi)primary=lowi;if(!primary&&simyo)primary=simyo;if(!primary&&jazz)primary=jazz;
+  if(!reasons.length&&primary){if(primary.provider==='Lowi')reasons.push('es la opción válida con mayor prioridad de comisión');else if(primary.provider==='Simyo')reasons.push('Jazztel y Lowi no son aplicables como portabilidad');else reasons.push('es la mejor opción válida para esta configuración')}
+  primary.reason='Recomendación principal porque '+reasons.join(', ')+'.';
+  return {primary,alternatives:all.filter(x=>x!==primary),premium,current};
+}
+function mobileResult(){
+  if(answers.usage==='router')return {primary:{provider:'Simyo',accent:'#ff6600',pack:'Línea para router · 300 GB',total:17.69,stay:'Sin permanencia',warnings:[],link:'simyo.html',reason:'Recomendación principal para evitar que un router se quede corto de datos.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Línea para router · 150 GB',total:12.38,stay:'Sin permanencia',warnings:['Opción mínima recomendada para router.'],link:'simyo.html'}]};
+  if(answers.mobileAction==='new'&&answers.temporary)return {primary:{provider:'Simyo Prepago',accent:'#ff6600',pack:'Línea temporal de menos de 3 meses',total:null,stay:'Sin contrato',warnings:['Elegir el bono de prepago disponible que mejor encaje.'],link:'simyo.html',reason:'Recomendación principal por tratarse de un uso temporal.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Contrato · 150 GB + llamadas',total:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html'}]};
+  if(answers.mobileAction==='port'&&answers.origin==='simyo')return {primary:{provider:'Aviso',accent:'#e30613',pack:'No se puede portar de Simyo a Simyo',total:null,stay:'',warnings:['Puede mantenerse la tarifa actual o tramitar un alta nueva.'],link:'simyo.html',reason:'La compañía de origen y destino es la misma.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Alta nueva · 150 GB + llamadas',total:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html'}]};
+  const port=answers.mobileAction==='port';return {primary:{provider:'Simyo',accent:'#ff6600',pack:port?'Portabilidad · 100 GB + llamadas':'Alta nueva · 150 GB + llamadas',total:port?8.84:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html',reason:port?'Tarifa estratégica de portabilidad.':'Tarifa estratégica de alta nueva.'},alternatives:[]};
+}
+function fiberResult(){const speed=String(answers.fiberSpeed),jazz={300:17.64,600:22.95,1000:27.37}[speed],simyo={300:22.98,600:24.75,1000:26.52}[speed];const j={provider:'Jazztel',accent:'#ffd23f',pack:`Solo fibra ${speed==='1000'?'1 GB':speed+' MB'}`,total:jazz,stay:'3 meses',warnings:[],link:'jazztel.html'},s={provider:'Simyo',accent:'#ff6600',pack:`Solo fibra ${speed==='1000'?'1 GB':speed+' MB'}`,total:simyo,stay:'3 meses',warnings:[],link:'simyo.html'};return simyo<jazz?{primary:{...s,reason:'Es la opción de solo fibra más económica para esta velocidad.'},alternatives:[j]}:{primary:{...j,reason:'Es la opción de solo fibra más económica para esta velocidad.'},alternatives:[s]}}
+
+function renderResult(){
+  const data=answers.service==='convergent'?convergentResult():answers.service==='fiber'?fiberResult():mobileResult();
+  const summary=summaryHtml(data);screen.innerHTML=`<h2 class="question">Recomendación preparada</h2><p class="help">La primera opción sigue la estrategia. Las demás permanecen disponibles para orientar la conversación.</p>${summary}<div class="result-stack">${cardHtml(data.primary,true)}</div>${data.alternatives.length?`<button class="other-toggle" id="otherToggle">Ver otras opciones (${data.alternatives.length})</button><div class="alternatives" id="alternatives">${data.alternatives.map(x=>cardHtml(x,false)).join('')}</div>`:''}<button class="restart" id="restart">Empezar de nuevo</button><div class="tiny">Precios con IGIC. Resultado orientativo sujeto a cobertura, validación y condiciones de contratación.</div>`;
+  document.getElementById('otherToggle')?.addEventListener('click',e=>{const a=document.getElementById('alternatives');a.classList.toggle('open');e.currentTarget.textContent=a.classList.contains('open')?'Ocultar otras opciones':`Ver otras opciones (${data.alternatives.length})`});
+  document.getElementById('restart').addEventListener('click',()=>{answers={service:null,usage:null,mobileAction:null,origin:null,temporary:null,fiberSpeed:'600',currentPrice:'',lines:2,data:'120',fixed:false,unlimited:false,wantsTv:false,tv:[],simyoStay:'3'};index=0;render();window.scrollTo({top:0,behavior:'smooth'})});
+}
+function cardHtml(x,primary){const warnings=x.warnings||[];return `<article class="result-card ${primary?'primary':''}" style="--accent:${x.accent}">${primary?'<span class="tag">Recomendación principal</span>':''}<div class="brand">${x.provider}</div><div class="pack">${x.pack}</div><div class="price">${x.total==null?'Consultar':money(x.total)}${x.total==null?'':' <small>/mes</small>'}</div><div class="conditions">${x.stay||''}${x.tv&&x.tv.included.length?` · TV incluida en el cálculo: ${x.tv.included.join(', ')}`:''}</div>${x.reason?`<div class="reason">${x.reason}</div>`:''}${warnings.length?`<div class="warning">${warnings.join(' ')}</div>`:''}<a class="open-calc" href="${x.link}">Abrir calculadora</a></article>`}
+function summaryHtml(data){if(answers.service!=='convergent')return '';const current=Number(answers.currentPrice)||0;return `<div class="summary"><b>Necesidades:</b> ${answers.lines} línea${answers.lines>1?'s':''}, fibra ${answers.fiberSpeed==='1000'?'1 GB':answers.fiberSpeed+' MB'}, ${answers.unlimited?'datos ilimitados':answers.data+' GB'}, ${answers.fixed?'con':'sin'} fijo${answers.tv.length?', TV: '+TV_OPTIONS.filter(x=>answers.tv.includes(x.id)).map(x=>x.name).join(', '):', sin TV'}.<br><b>Precio actual:</b> ${current?money(current):'no indicado'}${data.premium?' · El cliente paga más que la propuesta equivalente de Jazztel.':''}</div>`}
+function money(v){return Number(v).toFixed(2).replace('.',',')+' €'}
+render();
+</script>
+</body>
+</html>
