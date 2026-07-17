@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v18-recomendador';
+const CACHE_NAME = 'mm-ventas-v19-derivaciones';
 const CORE = [
   './',
   './index.html',
@@ -11,7 +11,8 @@ const CORE = [
   './pages/recomendador.html',
   './pages/simyo.html',
   './pages/jazztel.html',
-  './pages/luz.html'
+  './pages/luz.html',
+  './pages/derivaciones.html'
 ];
 
 self.addEventListener('install', event => {
