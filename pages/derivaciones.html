@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <title>Registro de derivaciones</title>
+  <style>
+    :root { --bg:#070707; --card:#171717; --card2:#202020; --line:#343434; --red:#e30613; --yellow:#ffd400; --green:#35d07f; --blue:#43b9ff; --muted:#a8a8a8; --text:#fff; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:"Segoe UI",Arial,sans-serif; min-height:100vh; }
+    button,input,select,textarea { font:inherit; }
+    button { cursor:pointer; touch-action:manipulation; }
+    .app { width:min(760px,100%); margin:auto; padding:12px 12px 90px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 2px 14px; }
+    .brand { display:flex; align-items:center; gap:10px; }
+    .mark { width:12px; height:38px; border-radius:4px; background:var(--red); box-shadow:6px 0 0 #8e0008; transform:skew(-8deg); }
+    h1 { font-size:1.16rem; margin:0; line-height:1.15; }
+    .subtitle { color:var(--muted); font-size:.76rem; margin-top:3px; }
+    .tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; background:#101010; padding:5px; border-radius:12px; position:sticky; top:0; z-index:5; }
+    .tab { border:0; border-radius:9px; padding:10px 5px; color:#bbb; background:transparent; font-weight:700; font-size:.82rem; }
+    .tab.active { background:var(--red); color:white; }
+    .view { display:none; padding-top:12px; }
+    .view.active { display:block; }
+    .type-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px; }
+    .type-btn { border:1px solid var(--line); background:var(--card); color:white; border-radius:12px; padding:16px 8px; font-weight:800; }
+    .type-btn small { display:block; font-size:.7rem; color:var(--muted); margin-top:4px; font-weight:500; }
+    .type-btn.active { border-color:var(--red); background:#31080b; box-shadow:inset 0 0 0 1px var(--red); }
+    .panel { background:var(--card); border:1px solid #2b2b2b; border-radius:14px; padding:14px; margin-bottom:12px; }
+    .panel-title { margin:0 0 12px; font-size:.9rem; text-transform:uppercase; letter-spacing:.5px; }
+    label { display:block; color:#d8d8d8; font-size:.78rem; font-weight:700; margin:12px 0 6px; }
+    input,select,textarea { width:100%; border:1px solid var(--line); background:#0d0d0d; color:white; border-radius:9px; padding:12px; outline:none; }
+    input:focus,select:focus,textarea:focus { border-color:var(--red); }
+    textarea { resize:vertical; min-height:62px; }
+    .chips { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+    .chip { border:1px solid var(--line); background:var(--card2); color:white; border-radius:9px; padding:10px 5px; font-size:.76rem; font-weight:650; }
+    .chip.active { background:#3a0b0e; border-color:var(--red); color:#fff; }
+    .conditional { display:none; }
+    .conditional.show { display:block; }
+    .primary { width:100%; border:0; background:var(--red); color:white; border-radius:10px; padding:14px; font-weight:850; margin-top:14px; }
+    .secondary { border:1px solid var(--line); background:#252525; color:white; border-radius:9px; padding:10px 12px; font-weight:700; }
+    .danger { color:#ff9198; }
+    .notice { color:var(--muted); font-size:.72rem; line-height:1.35; margin:10px 2px 0; }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:10px; }
+    .stat { background:var(--card); border:1px solid #292929; border-radius:11px; text-align:center; padding:12px 5px; }
+    .stat strong { display:block; font-size:1.45rem; }
+    .stat span { color:var(--muted); font-size:.68rem; }
+    .report { background:linear-gradient(145deg,#1a1a1a,#101010); border:1px solid #333; border-top:4px solid var(--red); border-radius:14px; padding:16px; }
+    .report h2 { margin:0; font-size:1rem; }
+    .report-date { color:var(--muted); font-size:.75rem; margin-top:3px; }
+    .report-section { margin-top:16px; }
+    .report-section h3 { color:var(--yellow); font-size:.78rem; text-transform:uppercase; margin:0 0 7px; }
+    .report-row { display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px solid #292929; font-size:.82rem; }
+    .report-row:last-child { border-bottom:0; }
+    .report-row span:last-child { font-weight:800; text-align:right; }
+    .empty { text-align:center; color:var(--muted); padding:28px 10px; font-size:.85rem; }
+    .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
+    .actions .primary { margin:0; padding:11px 6px; font-size:.78rem; }
+    .actions .secondary { padding:11px 6px; font-size:.78rem; }
+    .history-head { display:flex; gap:8px; margin-bottom:10px; }
+    .history-head input { flex:1; }
+    .entry { background:var(--card); border:1px solid #292929; border-radius:12px; padding:12px; margin-bottom:8px; }
+    .entry-top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
+    .badge { display:inline-block; padding:4px 7px; border-radius:20px; font-size:.65rem; font-weight:850; background:#342023; color:#ffadb2; }
+    .badge.pending { background:#332d16; color:#ffe783; }
+    .entry strong { display:block; margin-top:7px; font-size:.9rem; }
+    .entry-meta { color:var(--muted); font-size:.73rem; margin-top:5px; line-height:1.4; }
+    .entry-note { font-size:.76rem; margin-top:7px; color:#ddd; }
+    .entry-actions { display:flex; gap:5px; }
+    .icon-btn { background:#292929; border:0; color:#ddd; border-radius:7px; padding:6px 8px; }
+    .footer-tools { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:14px; }
+    .footer-tools button,.file-label { border:1px solid var(--line); background:#191919; color:#ccc; border-radius:8px; padding:9px 4px; text-align:center; font-size:.68rem; font-weight:700; cursor:pointer; }
+    #toast { position:fixed; left:50%; bottom:22px; transform:translate(-50%,20px); background:white; color:#111; border-radius:30px; padding:10px 18px; font-weight:800; font-size:.8rem; opacity:0; pointer-events:none; transition:.2s; z-index:20; box-shadow:0 5px 25px #0009; }
+    #toast.show { opacity:1; transform:translate(-50%,0); }
+    @media (min-width:600px) { .chips { grid-template-columns:repeat(3,1fr); } }
+  </style>
+</head>
+<body>
+<main class="app">
+  <header>
+    <div class="brand"><div class="mark"></div><div><h1>Derivaciones y oportunidades</h1><div class="subtitle">Registro interno · MediaMarkt Añaza</div></div></div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-view="registro">Registrar</button>
+    <button class="tab" data-view="reporte">Reporte</button>
+    <button class="tab" data-view="historial">Historial</button>
+  </nav>
+
+  <section id="registro" class="view active">
+    <div class="type-grid">
+      <button class="type-btn active" data-type="Derivación">Derivación<small>Enviada por un vendedor</small></button>
+      <button class="type-btn" data-type="Interesado">Cliente interesado<small>Se lleva información</small></button>
+    </div>
+    <form id="entryForm" class="panel">
+      <h2 class="panel-title" id="formTitle">Nueva derivación</h2>
+      <label for="seller">Vendedor que lo deriva</label>
+      <input id="seller" list="sellerList" autocomplete="off" placeholder="Escribe el nombre del vendedor" required>
+      <datalist id="sellerList"></datalist>
+
+      <label>Servicios (puedes seleccionar varios)</label>
+      <div id="serviceChips" class="chips"></div>
+
+      <label>Resultado o situación</label>
+      <div id="statusChips" class="chips"></div>
+
+      <div id="returnFields" class="conditional">
+        <label for="returnDate">Fecha estimada de regreso</label>
+        <input id="returnDate" type="date">
+      </div>
+
+      <label for="details">Detalle breve (opcional)</label>
+      <textarea id="details" placeholder="Ej.: Tiene que traer factura / quiere consultarlo con su pareja"></textarea>
+
+      <button class="primary" type="submit" id="saveButton">Registrar derivación</button>
+      <div class="notice">Los datos se guardan en este dispositivo. Evita escribir nombres completos, teléfonos u otros datos personales del cliente.</div>
+    </form>
+  </section>
+
+  <section id="reporte" class="view">
+    <div class="panel">
+      <label for="reportDate" style="margin-top:0">Día del reporte</label>
+      <input id="reportDate" type="date">
+    </div>
+    <div id="stats" class="stats"></div>
+    <div id="reportCard" class="report"></div>
+    <div class="actions">
+      <button class="primary" id="copyReport">Copiar para Teams</button>
+      <button class="secondary" id="downloadImage">Descargar imagen</button>
+    </div>
+  </section>
+
+  <section id="historial" class="view">
+    <div class="history-head"><input id="historyDate" type="date"><button class="secondary" id="todayHistory">Hoy</button></div>
+    <div id="historyList"></div>
+    <div class="footer-tools">
+      <button id="exportData">Exportar copia</button>
+      <label class="file-label">Importar copia<input id="importData" type="file" accept="application/json" hidden></label>
+      <button id="clearData" class="danger">Borrar todo</button>
+    </div>
+  </section>
+</main>
+<div id="toast">Registrado</div>
+
+<script>
+(() => {
+  'use strict';
+  const STORAGE_KEY = 'mm_derivaciones_v1';
+  const SELLERS_KEY = 'mm_derivaciones_vendedores_v1';
+  const services = ['Operadores / telefonía','Luz','Placas solares','Punto de carga','Protección / seguros','Financiación','PowerService / reparación','Otro servicio'];
+  const statuses = {
+    'Derivación': ['Contratado','Presupuesto realizado','Interesado pendiente','No viable'],
+    'Interesado': ['Volverá con documentación','Quiere pensarlo','Lo consultará','Pendiente de fecha','Información entregada','Baja probabilidad']
+  };
+  let records = loadJSON(STORAGE_KEY, []);
+  let currentType = 'Derivación', selectedServices = [], selectedStatus = '', editingId = null;
+  const $ = id => document.getElementById(id);
+  const localISO = (date = new Date()) => {
+    const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
+    return `${y}-${m}-${d}`;
+  };
+  const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  function loadJSON(key, fallback) { try { const value = JSON.parse(localStorage.getItem(key)); return value ?? fallback; } catch { return fallback; } }
+  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
+  function prettyDate(iso) { if (!iso) return 'Sin fecha'; return new Date(iso+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}); }
+  function toast(message) { const el=$('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.remove('show'),1600); }
+
+  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab,.view').forEach(el=>el.classList.remove('active'));
+    btn.classList.add('active'); $(btn.dataset.view).classList.add('active');
+    if (btn.dataset.view==='reporte') renderReport();
+    if (btn.dataset.view==='historial') renderHistory();
+  }));
+  document.querySelectorAll('.type-btn').forEach(btn => btn.addEventListener('click', () => setType(btn.dataset.type)));
+
+  function setType(type) {
+    currentType=type; selectedStatus='';
+    document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
+    $('formTitle').textContent = type==='Derivación' ? 'Nueva derivación' : 'Nuevo cliente interesado';
+    $('saveButton').textContent = editingId ? 'Guardar cambios' : (type==='Derivación' ? 'Registrar derivación' : 'Registrar interesado');
+    $('seller').required = type==='Derivación';
+    $('seller').placeholder = type==='Derivación' ? 'Escribe el nombre del vendedor' : 'Vendedor de origen (si lo hay)';
+    renderStatusChips(); updateConditional();
+  }
+  function renderChips(items, container, onSelect, selected) {
+    container.innerHTML=''; items.forEach(item=>{
+      const b=document.createElement('button'); b.type='button'; b.className='chip'+(item===selected?' active':''); b.textContent=item;
+      b.addEventListener('click',()=>onSelect(item)); container.appendChild(b);
+    });
+  }
+  function renderServiceChips() {
+    const container=$('serviceChips'); container.innerHTML='';
+    services.forEach(item=>{
+      const b=document.createElement('button'); b.type='button'; b.className='chip'+(selectedServices.includes(item)?' active':''); b.textContent=item;
+      b.addEventListener('click',()=>{ selectedServices=selectedServices.includes(item)?selectedServices.filter(x=>x!==item):[...selectedServices,item]; renderServiceChips(); });
+      container.appendChild(b);
+    });
+  }
+  function renderStatusChips() { renderChips(statuses[currentType],$('statusChips'),item=>{ selectedStatus=item; renderStatusChips(); updateConditional(); },selectedStatus); }
+  function updateConditional() { $('returnFields').classList.toggle('show', currentType==='Interesado' || /pendiente|volverá/i.test(selectedStatus)); }
+  function updateSellerList() {
+    const prior=loadJSON(SELLERS_KEY,[]); const names=[...new Set([...prior,...records.map(r=>r.seller).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
+    $('sellerList').innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join('');
+  }
+  function rememberSeller(name) { if(!name)return; const list=loadJSON(SELLERS_KEY,[]); if(!list.some(n=>n.toLowerCase()===name.toLowerCase())) { list.push(name); localStorage.setItem(SELLERS_KEY,JSON.stringify(list)); } }
+
+  $('entryForm').addEventListener('submit', e => {
+    e.preventDefault(); const seller=$('seller').value.trim(), details=$('details').value.trim();
+    if (currentType==='Derivación' && !seller) return toast('Escribe el vendedor');
+    if (!selectedServices.length) return toast('Selecciona al menos un servicio');
+    if (!selectedStatus) return toast('Selecciona la situación');
+    const existing=records.find(r=>r.id===editingId);
+    const record={ id:editingId||String(Date.now()), createdAt:existing?.createdAt||new Date().toISOString(), updatedAt:new Date().toISOString(), date:existing?.date||localISO(), type:currentType, seller, services:[...selectedServices], status:selectedStatus, returnDate:$('returnDate').value, details };
+    if(editingId) records=records.map(r=>r.id===editingId?record:r); else records.push(record);
+    rememberSeller(seller); save(); resetForm(); updateSellerList(); toast(editingId?'Cambios guardados':'✓ Registrado');
+  });
+  function resetForm() { editingId=null; $('entryForm').reset(); selectedServices=[]; selectedStatus=''; setType('Derivación'); renderServiceChips(); }
+
+  $('reportDate').value=localISO(); $('historyDate').value=localISO();
+  $('reportDate').addEventListener('change',renderReport); $('historyDate').addEventListener('change',renderHistory);
+  $('todayHistory').addEventListener('click',()=>{ $('historyDate').value=localISO(); renderHistory(); });
+  function dayRecords(date) { return records.filter(r=>r.date===date); }
+  function countBy(list,key) { return list.reduce((a,r)=>{ const k=r[key]||'Sin indicar'; a[k]=(a[k]||0)+1; return a; },{}); }
+  function recordServices(r) { return Array.isArray(r.services) && r.services.length ? r.services : (r.service ? [r.service] : ['Sin indicar']); }
+  function countServices(list) { return list.reduce((a,r)=>{ recordServices(r).forEach(k=>a[k]=(a[k]||0)+1); return a; },{}); }
+  function sortedEntries(obj) { return Object.entries(obj).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0])); }
+
+  function renderReport() {
+    const date=$('reportDate').value||localISO(), list=dayRecords(date), deriv=list.filter(r=>r.type==='Derivación'), interested=list.filter(r=>r.type==='Interesado'||/pendiente|volverá|pensarlo|consultará|información/i.test(r.status));
+    const hired=list.filter(r=>r.status==='Contratado').length;
+    $('stats').innerHTML=`<div class="stat"><strong>${deriv.length}</strong><span>DERIVACIONES</span></div><div class="stat"><strong>${interested.length}</strong><span>INTERESADOS</span></div><div class="stat"><strong>${hired}</strong><span>CONTRATADOS</span></div>`;
+    if(!list.length) { $('reportCard').innerHTML=`<h2>REPORTE DE DERIVACIONES</h2><div class="report-date">${prettyDate(date)}</div><div class="empty">No hay registros para este día.</div>`; return; }
+    const sellerRows=sortedEntries(countBy(deriv.filter(r=>r.seller),'seller')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+    const serviceRows=sortedEntries(countServices(list)).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+    const statusRows=sortedEntries(countBy(list,'status')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+    const pending=list.filter(r=>r.returnDate||r.details).map(r=>`<div class="report-row"><span>${esc(recordServices(r).join(' + '))}${r.details?' · '+esc(r.details):''}</span><span>${r.returnDate?prettyDate(r.returnDate):''}</span></div>`).join('');
+    $('reportCard').innerHTML=`<h2>REPORTE DE DERIVACIONES</h2><div class="report-date">${prettyDate(date)}</div>${sellerRows?`<div class="report-section"><h3>Por vendedor</h3>${sellerRows}</div>`:''}<div class="report-section"><h3>Por servicio</h3>${serviceRows}</div><div class="report-section"><h3>Resultados</h3>${statusRows}</div>${pending?`<div class="report-section"><h3>Oportunidades / seguimiento</h3>${pending}</div>`:''}`;
+  }
+  function reportText() {
+    const date=$('reportDate').value||localISO(), list=dayRecords(date), deriv=list.filter(r=>r.type==='Derivación'), hired=list.filter(r=>r.status==='Contratado').length;
+    if(!list.length) return `🔴 REPORTE DE DERIVACIONES — ${prettyDate(date)}\n\nSin registros.`;
+    let text=`🔴 REPORTE DE DERIVACIONES — ${prettyDate(date)}\n\n👥 Derivaciones: ${deriv.length}\n🟡 Registros totales: ${list.length}\n✅ Contratados: ${hired}\n`;
+    const sellers=sortedEntries(countBy(deriv.filter(r=>r.seller),'seller')); if(sellers.length){ text+='\nVENDEDORES\n'; sellers.forEach(([n,c])=>text+=`• ${n}: ${c}\n`); }
+    text+='\nSERVICIOS\n'; sortedEntries(countServices(list)).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
+    text+='\nRESULTADOS\n'; sortedEntries(countBy(list,'status')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
+    const follow=list.filter(r=>r.returnDate||r.details); if(follow.length){ text+='\nOPORTUNIDADES / SEGUIMIENTO\n'; follow.forEach(r=>text+=`• ${recordServices(r).join(' + ')}${r.details?' — '+r.details:''}${r.returnDate?' ('+prettyDate(r.returnDate)+')':''}\n`); }
+    return text.trim();
+  }
+  $('copyReport').addEventListener('click',async()=>{ try { await navigator.clipboard.writeText(reportText()); toast('Copiado para Teams'); } catch { const t=document.createElement('textarea');t.value=reportText();document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('Copiado para Teams'); } });
+
+  function wrap(ctx,text,maxWidth) { const words=text.split(/\s+/), lines=[]; let line=''; for(const word of words){ const test=line?line+' '+word:word; if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;}else line=test;} if(line)lines.push(line); return lines; }
+  $('downloadImage').addEventListener('click',()=>{
+    const lines=reportText().replace(/[🔴👥🟡✅•]/g,'').split('\n'), canvas=document.createElement('canvas'), ctx=canvas.getContext('2d'), width=1080, pad=72, lineH=42;
+    ctx.font='28px Segoe UI, Arial'; const wrapped=[]; lines.forEach(line=>{ if(!line){wrapped.push('');return;} wrap(ctx,line,width-pad*2).forEach(x=>wrapped.push(x)); });
+    canvas.width=width; canvas.height=Math.max(600,pad*2+wrapped.length*lineH+70); const g=ctx.createLinearGradient(0,0,width,canvas.height);g.addColorStop(0,'#202020');g.addColorStop(1,'#090909');ctx.fillStyle=g;ctx.fillRect(0,0,width,canvas.height);ctx.fillStyle='#e30613';ctx.fillRect(0,0,width,18);
+    ctx.fillStyle='#fff';ctx.font='28px Segoe UI, Arial';let y=pad+25;wrapped.forEach((line,i)=>{ const isHeading=i===0||/^(VENDEDORES|SERVICIOS|RESULTADOS|OPORTUNIDADES)/.test(line);ctx.font=isHeading?'bold 30px Segoe UI, Arial':'28px Segoe UI, Arial';ctx.fillStyle=isHeading?(i===0?'#fff':'#ffd400'):'#e8e8e8';ctx.fillText(line,pad,y);y+=lineH; });
+    ctx.fillStyle='#777';ctx.font='22px Segoe UI, Arial';ctx.fillText('Registro interno · MediaMarkt Añaza',pad,canvas.height-45);
+    const a=document.createElement('a');a.download=`reporte-derivaciones-${$('reportDate').value}.png`;a.href=canvas.toDataURL('image/png');a.click();toast('Imagen descargada');
+  });
+
+  function renderHistory() {
+    const list=dayRecords($('historyDate').value||localISO()).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+    if(!list.length){$('historyList').innerHTML='<div class="empty">No hay registros este día.</div>';return;}
+    $('historyList').innerHTML=list.map(r=>`<article class="entry"><div class="entry-top"><div><span class="badge ${r.type==='Interesado'?'pending':''}">${esc(r.type)}</span><strong>${esc(recordServices(r).join(' + '))}</strong></div><div class="entry-actions"><button class="icon-btn" data-edit="${r.id}" title="Editar">✎</button><button class="icon-btn danger" data-delete="${r.id}" title="Eliminar">×</button></div></div><div class="entry-meta">${r.seller?'Vendedor: '+esc(r.seller)+' · ':''}${esc(r.status)}${r.returnDate?' · Regreso: '+prettyDate(r.returnDate):''}</div>${r.details?`<div class="entry-note">${esc(r.details)}</div>`:''}</article>`).join('');
+    $('historyList').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>editRecord(b.dataset.edit)));
+    $('historyList').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>deleteRecord(b.dataset.delete)));
+  }
+  function editRecord(id) { const r=records.find(x=>x.id===id);if(!r)return; editingId=id;currentType=r.type;selectedServices=recordServices(r);selectedStatus=r.status;$('seller').value=r.seller||'';$('details').value=r.details||'';$('returnDate').value=r.returnDate||'';setType(r.type);selectedStatus=r.status;renderStatusChips();selectedServices=recordServices(r);renderServiceChips();updateConditional();$('formTitle').textContent='Editar registro';$('saveButton').textContent='Guardar cambios';document.querySelector('[data-view="registro"]').click();window.scrollTo({top:0,behavior:'smooth'}); }
+  function deleteRecord(id) { if(!confirm('¿Eliminar este registro?'))return;records=records.filter(r=>r.id!==id);save();renderHistory();toast('Registro eliminado'); }
+
+  $('exportData').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),records},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`copia-derivaciones-${localISO()}.json`;a.click();URL.revokeObjectURL(a.href); });
+  $('importData').addEventListener('change',async e=>{ const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text()),incoming=Array.isArray(data)?data:data.records;if(!Array.isArray(incoming))throw new Error();const map=new Map(records.map(r=>[r.id,r]));incoming.forEach(r=>map.set(r.id||String(Date.now()+Math.random()),r));records=[...map.values()];save();updateSellerList();renderHistory();toast('Copia importada');}catch{alert('El archivo no es una copia válida.');}e.target.value=''; });
+  $('clearData').addEventListener('click',()=>{ if(confirm('¿Borrar definitivamente todos los registros de este dispositivo?')){records=[];save();renderHistory();toast('Datos borrados');} });
+
+  renderServiceChips(); renderStatusChips(); updateSellerList(); renderReport();
+})();
+</script>
+</body>
+</html>
