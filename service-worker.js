@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v20-servicios_actualizados';
+const CACHE_NAME = 'mm-ventas-v20-3-gestiones-flexibles';
 const CORE = [
   './',
   './index.html',
