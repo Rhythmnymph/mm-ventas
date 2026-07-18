@@ -101,9 +101,13 @@ const TV_OPTIONS=[
   {id:'simyo_sky',name:'TV + SkyShowtime',note:'5,30 €/mes · solo Simyo',provider:'Simyo'}
 ];
 const TV_GROUPS={football:['football','sport'],netflix:['netflix_ads','netflix_standard','netflix_premium'],disney:['disney_ads','disney_standard','disney_premium']};
-let answers={service:null,usage:null,mobileAction:null,origin:null,temporary:null,fiberSpeed:'600',currentPrice:'',lines:2,data:'120',fixed:false,unlimited:false,wantsTv:false,tv:[],simyoStay:'3'};
-let index=0;
+const RECOMMENDER_KEY='mmv_recomendador_v19';
+const TRANSFER_KEY='mmv_recomendacion_transfer_v19';
+const defaultAnswers=()=>({service:null,usage:null,mobileAction:null,origin:null,temporary:null,fiberSpeed:'600',currentPrice:'',lines:2,data:'120',fixed:false,unlimited:false,wantsTv:false,tv:[],simyoStay:'3'});
+let answers=defaultAnswers(),index=0;
+try{const saved=JSON.parse(localStorage.getItem(RECOMMENDER_KEY)||'null');if(saved&&saved.answers){answers={...answers,...saved.answers};index=Number(saved.index)||0}}catch(e){}
 const screen=document.getElementById('screen');
+function saveProgress(){try{localStorage.setItem(RECOMMENDER_KEY,JSON.stringify({answers,index,updatedAt:new Date().toISOString()}))}catch(e){}}
 
 function steps(){
   const s=[{id:'service',title:'¿Qué necesita el cliente?',help:'Elige el servicio principal para adaptar las siguientes preguntas.',type:'choices',cols:'three',options:[['mobile','Solo móvil','Una o varias líneas sin fibra'],['fiber','Solo fibra','Internet en una vivienda'],['convergent','Fibra + móvil','Paquete convergente completo']]}];
@@ -135,6 +139,7 @@ function originStep(){return {id:'origin',title:'¿Con qué compañía está aho
 function speedStep(include300){const opts=include300?[[300,'300 MB','Suficiente para uso normal'],[600,'600 MB','Varios dispositivos'],[1000,'1 GB','Máxima velocidad']]:[[600,'600 MB','Equilibrada'],[1000,'1 GB','Máxima velocidad']];return {id:'fiberSpeed',title:'¿Qué velocidad de fibra necesita?',help:'La recomendación respetará esta velocidad siempre que el paquete lo permita.',type:'choices',cols:'three',options:opts}}
 
 function render(){
+  saveProgress();
   const list=steps(); if(index>=list.length)index=list.length-1; const step=list[index];
   const pct=step.id==='result'?100:Math.round((index/(list.length-1))*100);
   document.getElementById('progressText').textContent=step.id==='result'?'Recomendación lista':`Pregunta ${index+1} de ${list.length-1}`;
@@ -223,9 +228,13 @@ function renderResult(){
   const data=answers.service==='convergent'?convergentResult():answers.service==='fiber'?fiberResult():mobileResult();
   const summary=summaryHtml(data);screen.innerHTML=`<h2 class="question">Recomendación preparada</h2><p class="help">La primera opción sigue la estrategia. Las demás permanecen disponibles para orientar la conversación.</p>${summary}<div class="result-stack">${cardHtml(data.primary,true)}</div>${data.alternatives.length?`<button class="other-toggle" id="otherToggle">Ver otras opciones (${data.alternatives.length})</button><div class="alternatives" id="alternatives">${data.alternatives.map(x=>cardHtml(x,false)).join('')}</div>`:''}<button class="restart" id="restart">Empezar de nuevo</button><div class="tiny">Precios con IGIC. Resultado orientativo sujeto a cobertura, validación y condiciones de contratación.</div>`;
   document.getElementById('otherToggle')?.addEventListener('click',e=>{const a=document.getElementById('alternatives');a.classList.toggle('open');e.currentTarget.textContent=a.classList.contains('open')?'Ocultar otras opciones':`Ver otras opciones (${data.alternatives.length})`});
-  document.getElementById('restart').addEventListener('click',()=>{answers={service:null,usage:null,mobileAction:null,origin:null,temporary:null,fiberSpeed:'600',currentPrice:'',lines:2,data:'120',fixed:false,unlimited:false,wantsTv:false,tv:[],simyoStay:'3'};index=0;render();window.scrollTo({top:0,behavior:'smooth'})});
+  document.getElementById('restart').addEventListener('click',()=>{answers=defaultAnswers();index=0;localStorage.removeItem(RECOMMENDER_KEY);render();window.scrollTo({top:0,behavior:'smooth'})});
+  document.querySelectorAll('[data-open-provider]').forEach(link=>link.addEventListener('click',()=>{
+    const all=[data.primary,...data.alternatives];const choice=all.find(x=>x.provider===link.dataset.openProvider&&x.pack===link.dataset.openPack)||data.primary;
+    try{localStorage.setItem(TRANSFER_KEY,JSON.stringify({provider:choice.provider,recommendation:choice,answers,createdAt:new Date().toISOString()}));saveProgress()}catch(e){}
+  }));
 }
-function cardHtml(x,primary){const warnings=x.warnings||[];return `<article class="result-card ${primary?'primary':''}" style="--accent:${x.accent}">${primary?'<span class="tag">Recomendación principal</span>':''}<div class="brand">${x.provider}</div><div class="pack">${x.pack}</div><div class="price">${x.total==null?'Consultar':money(x.total)}${x.total==null?'':' <small>/mes</small>'}</div><div class="conditions">${x.stay||''}${x.tv&&x.tv.included.length?` · TV incluida en el cálculo: ${x.tv.included.join(', ')}`:''}</div>${x.reason?`<div class="reason">${x.reason}</div>`:''}${warnings.length?`<div class="warning">${warnings.join(' ')}</div>`:''}<a class="open-calc" href="${x.link}">Abrir calculadora</a></article>`}
+function cardHtml(x,primary){const warnings=x.warnings||[];return `<article class="result-card ${primary?'primary':''}" style="--accent:${x.accent}">${primary?'<span class="tag">Recomendación principal</span>':''}<div class="brand">${x.provider}</div><div class="pack">${x.pack}</div><div class="price">${x.total==null?'Consultar':money(x.total)}${x.total==null?'':' <small>/mes</small>'}</div><div class="conditions">${x.stay||''}${x.tv&&x.tv.included.length?` · TV incluida en el cálculo: ${x.tv.included.join(', ')}`:''}</div>${x.reason?`<div class="reason">${x.reason}</div>`:''}${warnings.length?`<div class="warning">${warnings.join(' ')}</div>`:''}<a class="open-calc" href="${x.link}?from=recomendador" data-open-provider="${x.provider}" data-open-pack="${x.pack.replace(/"/g,'&quot;')}">Abrir propuesta configurada</a></article>`}
 function summaryHtml(data){if(answers.service!=='convergent')return '';const current=Number(answers.currentPrice)||0;return `<div class="summary"><b>Necesidades:</b> ${answers.lines} línea${answers.lines>1?'s':''}, fibra ${answers.fiberSpeed==='1000'?'1 GB':answers.fiberSpeed+' MB'}, ${answers.unlimited?'datos ilimitados':answers.data+' GB'}, ${answers.fixed?'con':'sin'} fijo${answers.tv.length?', TV: '+TV_OPTIONS.filter(x=>answers.tv.includes(x.id)).map(x=>x.name).join(', '):', sin TV'}.<br><b>Precio actual:</b> ${current?money(current):'no indicado'}${data.premium?' · El cliente paga más que la propuesta equivalente de Jazztel.':''}</div>`}
 function money(v){return Number(v).toFixed(2).replace('.',',')+' €'}
 render();

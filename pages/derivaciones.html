@@ -50,6 +50,7 @@
     .report-date { color:var(--muted); font-size:.75rem; margin-top:3px; }
     .report-section { margin-top:16px; }
     .report-section h3 { color:var(--yellow); font-size:.78rem; text-transform:uppercase; margin:0 0 7px; }
+    .report-mini { color:#a8a8a8; font-size:.66rem; font-weight:850; text-transform:uppercase; letter-spacing:.5px; margin:10px 0 3px; }
     .report-row { display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px solid #292929; font-size:.82rem; }
     .report-row:last-child { border-bottom:0; }
     .report-row span:last-child { font-weight:800; text-align:right; }
@@ -89,24 +90,27 @@
 
   <section id="registro" class="view active">
     <div class="type-grid">
-      <button class="type-btn active" data-type="Derivación">Derivación<small>Enviada por un vendedor</small></button>
-      <button class="type-btn" data-type="Interesado">Cliente interesado<small>Se lleva información</small></button>
+      <button class="type-btn active" data-type="Vendedor">Apoyo vendedor<small>Cliente derivado por un compañero</small></button>
+      <button class="type-btn" data-type="Captación">Captación propia<small>Cliente captado por mí</small></button>
     </div>
     <form id="entryForm" class="panel">
-      <h2 class="panel-title" id="formTitle">Nueva derivación</h2>
-      <label for="seller">Vendedor que lo deriva</label>
-      <input id="seller" list="sellerList" autocomplete="off" placeholder="Escribe el nombre del vendedor" required>
-      <datalist id="sellerList"></datalist>
+      <h2 class="panel-title" id="formTitle">Nuevo apoyo de vendedor</h2>
+      <div id="sellerFields">
+        <label for="seller">Vendedor que lo deriva</label>
+        <input id="seller" list="sellerList" autocomplete="off" placeholder="Escribe el nombre del vendedor" required>
+        <datalist id="sellerList"></datalist>
+      </div>
 
       <label>Servicios (puedes seleccionar varios)</label>
       <div id="serviceChips" class="chips"></div>
 
-      <label>Resultado o situación</label>
+      <label id="statusLabel">Resultado de la derivación</label>
       <div id="statusChips" class="chips"></div>
+      <div id="statusHelp" class="notice"></div>
 
-      <div id="returnFields" class="conditional">
-        <label for="returnDate">Fecha estimada de regreso</label>
-        <input id="returnDate" type="date">
+      <div id="reasonFields" class="conditional">
+        <label>¿Por qué no se tramita ahora?</label>
+        <div id="reasonChips" class="chips"></div>
       </div>
 
       <label for="details">Detalle breve (opcional)</label>
@@ -147,13 +151,18 @@
   'use strict';
   const STORAGE_KEY = 'mm_derivaciones_v1';
   const SELLERS_KEY = 'mm_derivaciones_vendedores_v1';
-  const services = ['Operadores / telefonía','Luz','Placas solares','Punto de carga','Protección / seguros','Financiación','PowerService / reparación','Otro servicio'];
+  const services = ['Operadores','Luz','Placas solares'];
   const statuses = {
-    'Derivación': ['Contratado','Presupuesto realizado','Interesado pendiente','No viable'],
-    'Interesado': ['Volverá con documentación','Quiere pensarlo','Lo consultará','Pendiente de fecha','Información entregada','Baja probabilidad']
+    'Vendedor': ['Contratado','Se lleva información','No contratado'],
+    'Captación': ['Interés alto','Interés medio','Interés bajo']
   };
-  let records = loadJSON(STORAGE_KEY, []);
-  let currentType = 'Derivación', selectedServices = [], selectedStatus = '', editingId = null;
+  const reasons = ['Falta factura o documentación','Tiene que consultarlo','Quiere comparar o pensarlo','Tiene permanencia','Otro motivo'];
+  let records = loadJSON(STORAGE_KEY, []).map(r => {
+    if (r.type==='Derivación') return {...r,type:'Vendedor',status:r.status==='Contratado'?'Contratado':r.status==='No viable'?'No contratado':'Se lleva información'};
+    if (r.type==='Interesado') return {...r,type:'Captación',status:/baja/i.test(r.status)?'Interés bajo':/volverá|pendiente/i.test(r.status)?'Interés alto':'Interés medio',reason:r.reason||'Otro motivo'};
+    return r;
+  });
+  let currentType = 'Vendedor', selectedServices = [], selectedStatus = '', selectedReason = '', editingId = null;
   const $ = id => document.getElementById(id);
   const localISO = (date = new Date()) => {
     const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
@@ -176,11 +185,15 @@
   function setType(type) {
     currentType=type; selectedStatus='';
     document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
-    $('formTitle').textContent = type==='Derivación' ? 'Nueva derivación' : 'Nuevo cliente interesado';
-    $('saveButton').textContent = editingId ? 'Guardar cambios' : (type==='Derivación' ? 'Registrar derivación' : 'Registrar interesado');
-    $('seller').required = type==='Derivación';
-    $('seller').placeholder = type==='Derivación' ? 'Escribe el nombre del vendedor' : 'Vendedor de origen (si lo hay)';
-    renderStatusChips(); updateConditional();
+    $('formTitle').textContent = type==='Vendedor' ? 'Nuevo apoyo de vendedor' : 'Nueva captación propia';
+    $('saveButton').textContent = editingId ? 'Guardar cambios' : (type==='Vendedor' ? 'Registrar derivación' : 'Registrar captación');
+    $('sellerFields').style.display = type==='Vendedor' ? 'block' : 'none';
+    $('statusLabel').textContent = type==='Vendedor' ? 'Resultado de la derivación' : 'Grado de interés del cliente';
+    $('seller').required = type==='Vendedor';
+    renderStatusChips(); renderReasonChips(); updateConditional();
+    $('statusHelp').innerHTML = type==='Captación'
+      ? '<b>Alto:</b> quiere tramitar, pero le falta algo. · <b>Medio:</b> le interesa y se lleva la propuesta para valorarla. · <b>Bajo:</b> acepta la información sin una intención clara.'
+      : 'Indica cómo terminó la atención del cliente que te envió el vendedor.';
   }
   function renderChips(items, container, onSelect, selected) {
     container.innerHTML=''; items.forEach(item=>{
@@ -197,7 +210,8 @@
     });
   }
   function renderStatusChips() { renderChips(statuses[currentType],$('statusChips'),item=>{ selectedStatus=item; renderStatusChips(); updateConditional(); },selectedStatus); }
-  function updateConditional() { $('returnFields').classList.toggle('show', currentType==='Interesado' || /pendiente|volverá/i.test(selectedStatus)); }
+  function renderReasonChips() { renderChips(reasons,$('reasonChips'),item=>{ selectedReason=item; renderReasonChips(); },selectedReason); }
+  function updateConditional() { $('reasonFields').classList.toggle('show', currentType==='Captación'); }
   function updateSellerList() {
     const prior=loadJSON(SELLERS_KEY,[]); const names=[...new Set([...prior,...records.map(r=>r.seller).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
     $('sellerList').innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join('');
@@ -206,15 +220,16 @@
 
   $('entryForm').addEventListener('submit', e => {
     e.preventDefault(); const seller=$('seller').value.trim(), details=$('details').value.trim();
-    if (currentType==='Derivación' && !seller) return toast('Escribe el vendedor');
+    if (currentType==='Vendedor' && !seller) return toast('Escribe el vendedor');
     if (!selectedServices.length) return toast('Selecciona al menos un servicio');
     if (!selectedStatus) return toast('Selecciona la situación');
+    if (currentType==='Captación' && !selectedReason) return toast('Selecciona por qué no se tramita');
     const existing=records.find(r=>r.id===editingId);
-    const record={ id:editingId||String(Date.now()), createdAt:existing?.createdAt||new Date().toISOString(), updatedAt:new Date().toISOString(), date:existing?.date||localISO(), type:currentType, seller, services:[...selectedServices], status:selectedStatus, returnDate:$('returnDate').value, details };
+    const record={ id:editingId||String(Date.now()), createdAt:existing?.createdAt||new Date().toISOString(), updatedAt:new Date().toISOString(), date:existing?.date||localISO(), type:currentType, seller:currentType==='Vendedor'?seller:'', services:[...selectedServices], status:selectedStatus, reason:currentType==='Captación'?selectedReason:'', details };
     if(editingId) records=records.map(r=>r.id===editingId?record:r); else records.push(record);
     rememberSeller(seller); save(); resetForm(); updateSellerList(); toast(editingId?'Cambios guardados':'✓ Registrado');
   });
-  function resetForm() { editingId=null; $('entryForm').reset(); selectedServices=[]; selectedStatus=''; setType('Derivación'); renderServiceChips(); }
+  function resetForm() { editingId=null; $('entryForm').reset(); selectedServices=[]; selectedStatus=''; selectedReason=''; setType('Vendedor'); renderServiceChips(); }
 
   $('reportDate').value=localISO(); $('historyDate').value=localISO();
   $('reportDate').addEventListener('change',renderReport); $('historyDate').addEventListener('change',renderHistory);
@@ -226,24 +241,27 @@
   function sortedEntries(obj) { return Object.entries(obj).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0])); }
 
   function renderReport() {
-    const date=$('reportDate').value||localISO(), list=dayRecords(date), deriv=list.filter(r=>r.type==='Derivación'), interested=list.filter(r=>r.type==='Interesado'||/pendiente|volverá|pensarlo|consultará|información/i.test(r.status));
-    const hired=list.filter(r=>r.status==='Contratado').length;
-    $('stats').innerHTML=`<div class="stat"><strong>${deriv.length}</strong><span>DERIVACIONES</span></div><div class="stat"><strong>${interested.length}</strong><span>INTERESADOS</span></div><div class="stat"><strong>${hired}</strong><span>CONTRATADOS</span></div>`;
-    if(!list.length) { $('reportCard').innerHTML=`<h2>REPORTE DE DERIVACIONES</h2><div class="report-date">${prettyDate(date)}</div><div class="empty">No hay registros para este día.</div>`; return; }
-    const sellerRows=sortedEntries(countBy(deriv.filter(r=>r.seller),'seller')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
-    const serviceRows=sortedEntries(countServices(list)).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
-    const statusRows=sortedEntries(countBy(list,'status')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
-    const pending=list.filter(r=>r.returnDate||r.details).map(r=>`<div class="report-row"><span>${esc(recordServices(r).join(' + '))}${r.details?' · '+esc(r.details):''}</span><span>${r.returnDate?prettyDate(r.returnDate):''}</span></div>`).join('');
-    $('reportCard').innerHTML=`<h2>REPORTE DE DERIVACIONES</h2><div class="report-date">${prettyDate(date)}</div>${sellerRows?`<div class="report-section"><h3>Por vendedor</h3>${sellerRows}</div>`:''}<div class="report-section"><h3>Por servicio</h3>${serviceRows}</div><div class="report-section"><h3>Resultados</h3>${statusRows}</div>${pending?`<div class="report-section"><h3>Oportunidades / seguimiento</h3>${pending}</div>`:''}`;
+    const date=$('reportDate').value||localISO(), list=dayRecords(date), support=list.filter(r=>r.type==='Vendedor'), own=list.filter(r=>r.type==='Captación');
+    const hired=support.filter(r=>r.status==='Contratado').length;
+    $('stats').innerHTML=`<div class="stat"><strong>${support.length}</strong><span>DERIVACIONES</span></div><div class="stat"><strong>${own.length}</strong><span>CAPTACIONES</span></div><div class="stat"><strong>${hired}</strong><span>CONTRATADAS</span></div>`;
+    if(!list.length) { $('reportCard').innerHTML=`<h2>ACTIVIDAD COMERCIAL</h2><div class="report-date">${prettyDate(date)}</div><div class="empty">No hay registros para este día.</div>`; return; }
+    const sellerRows=sortedEntries(countBy(support.filter(r=>r.seller),'seller')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+    const supportResultRows=sortedEntries(countBy(support,'status')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+    const interestRows=sortedEntries(countBy(own,'status')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+    const ownServiceRows=sortedEntries(countServices(own)).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+    const reasonRows=sortedEntries(countBy(own,'reason')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+    $('reportCard').innerHTML=`<h2>ACTIVIDAD COMERCIAL</h2><div class="report-date">${prettyDate(date)}</div><div class="report-section"><h3>Apoyo de vendedores · ${support.length}</h3><div class="report-mini">Vendedores</div>${sellerRows||'<div class="report-row"><span>Sin derivaciones</span><span>0</span></div>'}${supportResultRows?`<div class="report-mini">Resultados</div>${supportResultRows}`:''}</div><div class="report-section"><h3>Captación propia · ${own.length}</h3><div class="report-mini">Grado de interés</div>${interestRows||'<div class="report-row"><span>Sin captaciones</span><span>0</span></div>'}${ownServiceRows?`<div class="report-mini">Servicios</div>${ownServiceRows}`:''}${reasonRows?`<div class="report-mini">Por qué queda pendiente</div>${reasonRows}`:''}</div>`;
   }
   function reportText() {
-    const date=$('reportDate').value||localISO(), list=dayRecords(date), deriv=list.filter(r=>r.type==='Derivación'), hired=list.filter(r=>r.status==='Contratado').length;
-    if(!list.length) return `🔴 REPORTE DE DERIVACIONES — ${prettyDate(date)}\n\nSin registros.`;
-    let text=`🔴 REPORTE DE DERIVACIONES — ${prettyDate(date)}\n\n👥 Derivaciones: ${deriv.length}\n🟡 Registros totales: ${list.length}\n✅ Contratados: ${hired}\n`;
-    const sellers=sortedEntries(countBy(deriv.filter(r=>r.seller),'seller')); if(sellers.length){ text+='\nVENDEDORES\n'; sellers.forEach(([n,c])=>text+=`• ${n}: ${c}\n`); }
-    text+='\nSERVICIOS\n'; sortedEntries(countServices(list)).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
-    text+='\nRESULTADOS\n'; sortedEntries(countBy(list,'status')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
-    const follow=list.filter(r=>r.returnDate||r.details); if(follow.length){ text+='\nOPORTUNIDADES / SEGUIMIENTO\n'; follow.forEach(r=>text+=`• ${recordServices(r).join(' + ')}${r.details?' — '+r.details:''}${r.returnDate?' ('+prettyDate(r.returnDate)+')':''}\n`); }
+    const date=$('reportDate').value||localISO(), list=dayRecords(date), support=list.filter(r=>r.type==='Vendedor'), own=list.filter(r=>r.type==='Captación'), hired=support.filter(r=>r.status==='Contratado').length;
+    if(!list.length) return `🔴 ACTIVIDAD COMERCIAL — ${prettyDate(date)}\n\nSin registros.`;
+    let text=`🔴 ACTIVIDAD COMERCIAL — ${prettyDate(date)}\n\n🤝 APOYO DE VENDEDORES\nDerivaciones recibidas: ${support.length}\nContratadas: ${hired}\n`;
+    sortedEntries(countBy(support.filter(r=>r.seller),'seller')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
+    sortedEntries(countBy(support,'status')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
+    text+=`\n🎯 CAPTACIÓN PROPIA\nClientes interesados: ${own.length}\n`;
+    sortedEntries(countBy(own,'status')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
+    text+='\nSERVICIOS CAPTADOS\n'; sortedEntries(countServices(own)).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
+    text+='\nMOTIVOS PENDIENTES\n'; sortedEntries(countBy(own,'reason')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
     return text.trim();
   }
   $('copyReport').addEventListener('click',async()=>{ try { await navigator.clipboard.writeText(reportText()); toast('Copiado para Teams'); } catch { const t=document.createElement('textarea');t.value=reportText();document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('Copiado para Teams'); } });
@@ -261,11 +279,11 @@
   function renderHistory() {
     const list=dayRecords($('historyDate').value||localISO()).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
     if(!list.length){$('historyList').innerHTML='<div class="empty">No hay registros este día.</div>';return;}
-    $('historyList').innerHTML=list.map(r=>`<article class="entry"><div class="entry-top"><div><span class="badge ${r.type==='Interesado'?'pending':''}">${esc(r.type)}</span><strong>${esc(recordServices(r).join(' + '))}</strong></div><div class="entry-actions"><button class="icon-btn" data-edit="${r.id}" title="Editar">✎</button><button class="icon-btn danger" data-delete="${r.id}" title="Eliminar">×</button></div></div><div class="entry-meta">${r.seller?'Vendedor: '+esc(r.seller)+' · ':''}${esc(r.status)}${r.returnDate?' · Regreso: '+prettyDate(r.returnDate):''}</div>${r.details?`<div class="entry-note">${esc(r.details)}</div>`:''}</article>`).join('');
+    $('historyList').innerHTML=list.map(r=>`<article class="entry"><div class="entry-top"><div><span class="badge ${r.type==='Captación'?'pending':''}">${r.type==='Vendedor'?'Apoyo vendedor':'Captación propia'}</span><strong>${esc(recordServices(r).join(' + '))}</strong></div><div class="entry-actions"><button class="icon-btn" data-edit="${r.id}" title="Editar">✎</button><button class="icon-btn danger" data-delete="${r.id}" title="Eliminar">×</button></div></div><div class="entry-meta">${r.seller?'Vendedor: '+esc(r.seller)+' · ':''}${esc(r.status)}${r.reason?' · '+esc(r.reason):''}</div>${r.details?`<div class="entry-note">${esc(r.details)}</div>`:''}</article>`).join('');
     $('historyList').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>editRecord(b.dataset.edit)));
     $('historyList').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>deleteRecord(b.dataset.delete)));
   }
-  function editRecord(id) { const r=records.find(x=>x.id===id);if(!r)return; editingId=id;currentType=r.type;selectedServices=recordServices(r);selectedStatus=r.status;$('seller').value=r.seller||'';$('details').value=r.details||'';$('returnDate').value=r.returnDate||'';setType(r.type);selectedStatus=r.status;renderStatusChips();selectedServices=recordServices(r);renderServiceChips();updateConditional();$('formTitle').textContent='Editar registro';$('saveButton').textContent='Guardar cambios';document.querySelector('[data-view="registro"]').click();window.scrollTo({top:0,behavior:'smooth'}); }
+  function editRecord(id) { const r=records.find(x=>x.id===id);if(!r)return; editingId=id;currentType=r.type;selectedServices=recordServices(r);selectedStatus=r.status;selectedReason=r.reason||'';$('seller').value=r.seller||'';$('details').value=r.details||'';setType(r.type);selectedStatus=r.status;selectedReason=r.reason||'';renderStatusChips();renderReasonChips();selectedServices=recordServices(r);renderServiceChips();updateConditional();$('formTitle').textContent='Editar registro';$('saveButton').textContent='Guardar cambios';document.querySelector('[data-view="registro"]').click();window.scrollTo({top:0,behavior:'smooth'}); }
   function deleteRecord(id) { if(!confirm('¿Eliminar este registro?'))return;records=records.filter(r=>r.id!==id);save();renderHistory();toast('Registro eliminado'); }
 
   $('exportData').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),records},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`copia-derivaciones-${localISO()}.json`;a.click();URL.revokeObjectURL(a.href); });

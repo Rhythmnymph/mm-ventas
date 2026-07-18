@@ -494,7 +494,7 @@ main{
 </style>
 </head>
 <body>
-<div class="top"><a class="back" href="../index.html">‹</a><div><div class="top-sub">Calculadora dedicada</div><div class="top-title">Simyo Pro</div></div></div>
+<div class="top"><a class="back" id="backLink" href="../index.html">‹</a><div><div class="top-sub">Calculadora dedicada</div><div class="top-title">Simyo Pro</div></div></div>
 <main>
 <div class="header">Simyo Pro · V17</div>
 <div class="section"><span class="label">Añadir servicio a la propuesta</span><div class="add-grid">
@@ -745,5 +745,26 @@ async function makePdf() {
 }
 const services=document.getElementById('services'),current=document.getElementById('current'),annual=document.getElementById('annual'),monthly=document.getElementById('monthly'),grand=document.getElementById('grand'),summaryEl=document.getElementById('summary'),modal=document.getElementById('modal'),docServices=document.getElementById('doc-services'),docTotal=document.getElementById('doc-total'),docSaving=document.getElementById('doc-saving');
 function saveState(){try{localStorage.setItem('mmv_simyo_v17',JSON.stringify({state,nextId}))}catch(e){}}function loadState(){try{const x=JSON.parse(localStorage.getItem('mmv_simyo_v17')||'null');if(x&&x.state&&Array.isArray(x.state.services)){state=x.state;nextId=x.nextId||1;return true}}catch(e){}return false}const oldRender=render;render=function(){oldRender();saveState()};document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addService(b.dataset.add));current.oninput=update;document.getElementById('open-report').onclick=openReport;document.getElementById('close').onclick=()=>{modal.style.display='none';document.body.style.overflow=''};document.getElementById('pdf').onclick=makePdf;if(!loadState())addService('convergente');else render();
+function applyRecommendation(){
+  const params=new URLSearchParams(location.search);if(params.get('from')!=='recomendador')return false;
+  document.getElementById('backLink').href='recomendador.html';
+  try{
+    const transfer=JSON.parse(localStorage.getItem('mmv_recomendacion_transfer_v19')||'null');
+    if(!transfer||!String(transfer.provider).startsWith('Simyo')||localStorage.getItem('mmv_last_simyo_transfer')===transfer.createdAt)return false;
+    const a=transfer.answers||{},rec=transfer.recommendation||{},service={id:1,collapsed:false,label:'',coverage:'directa',speed:String(a.fiberSpeed||'600'),mode:/Anti-Digi/i.test(rec.pack||'')?'digi':'estandar',main:'50',qty:blank(),tv:{}};
+    if(a.service==='mobile'){
+      service.type='solo-movil';service.speed='1000';service.mode='estandar';
+      const gb=/300 GB/i.test(rec.pack||'')?'300':/100 GB/i.test(rec.pack||'')?'100':'150';service.qty[gb]=Math.max(1,Number(a.lines)||1);
+    }else if(a.service==='fiber')service.type='solo-fibra';
+    else{
+      service.type='convergente';const data=Number(a.data)||50;service.main=service.mode==='digi'?'250':data<=50?'50':data<=120?'120':'300';
+      const extras=Math.max(0,(Number(a.lines)||1)-1);service.qty[service.mode==='digi'?'250':(service.main==='300'?'300':'50')]=extras;
+      (a.tv||[]).forEach(id=>{if(id==='simyo_sky')service.tv.sky=TV.sky;if(id==='netflix_ads')service.tv.netflix=TV.netflix});
+    }
+    state={services:[service]};nextId=2;current.value=a.currentPrice||'';
+    localStorage.setItem('mmv_last_simyo_transfer',transfer.createdAt);saveState();return true;
+  }catch(e){console.error('No se pudo cargar la recomendación',e);return false}
+}
+const hadSavedState=loadState();const transferred=applyRecommendation();if(transferred||hadSavedState)render();else addService('convergente');
 </script>
 </body></html>

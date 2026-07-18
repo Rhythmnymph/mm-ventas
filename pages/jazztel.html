@@ -251,7 +251,7 @@
 </style>
 </head>
 <body>
-<div class="topbar"><a class="back" href="../index.html" aria-label="Volver">‹</a><div><div class="top-sub">Calculadora dedicada</div><div class="top-title">Jazztel Pro</div></div></div>
+<div class="topbar"><a class="back" id="backLink" href="../index.html" aria-label="Volver">‹</a><div><div class="top-sub">Calculadora dedicada</div><div class="top-title">Jazztel Pro</div></div></div>
 <div class="header">Calculadora <span>Jazztel</span> Pro</div>
 <div class="section"><span class="label">Tipo de contratación</span><div class="toggle-group"><button id="t-conv" class="toggle-btn active" onclick="setTipo('convergente')">Fibra + Móvil</button><button id="t-anti" class="toggle-btn" onclick="setTipo('antidigi')">Anti-DIGI</button><button id="t-fibra" class="toggle-btn" onclick="setTipo('solofibra')">Solo Fibra</button><button id="t-seg" class="toggle-btn" onclick="setTipo('segunda')">2ª Residencia</button></div>
 <div id="pack-block"><span class="label" style="margin-top:15px">Tarifa principal</span><div class="toggle-group"><button id="p-eco80" class="toggle-btn" onclick="setPack('eco80')">2 líneas · 80 GB Eco</button><button id="p-one50" class="toggle-btn" onclick="setPack('one50')">1 línea · 50 GB</button><button id="p-duo120" class="toggle-btn active" onclick="setPack('duo120')">2 líneas · 120 GB</button><button id="p-oneunl" class="toggle-btn" onclick="setPack('oneunl')">1 línea · Ilimitados</button><button id="p-duounl" class="toggle-btn" onclick="setPack('duounl')">2 líneas · Ilimitados</button></div></div>
@@ -452,6 +452,29 @@ const PACKS={eco80:{name:'Jazz Duo 5G - 80GB Eco',lines:2,data:'80 GB compartido
 const FIBER={300:17.64,600:22.95,1000:27.37},ANTI={600:30.91,1000:37.98},SECOND=13.22;const ADICS={shared:[{id:'20',name:'Línea adicional 20 GB',detail:'20 GB + llamadas ilimitadas',price:5.31},{id:'50',name:'Línea adicional 50 GB',detail:'50 GB + llamadas ilimitadas',price:7.96}],unlimited:[{id:'unl',name:'Línea adicional ilimitada',detail:'Datos y llamadas ilimitadas',price:8.84}]};
 let state={type:'convergente',pack:'duo120',speed:'600',qty:{20:0,50:0,unl:0},tv:{},tvOpen:false,postOpen:false,orange:false,football:false,second:false};try{Object.assign(state,JSON.parse(localStorage.getItem('mmv_jazztel_v2')||'{}'));if(state.football===true)state.football='football'}catch(e){}
 let report={};const euro=v=>Number(v).toFixed(2).replace('.',',')+'€';
+function applyRecommendation(){
+  const params=new URLSearchParams(location.search);if(params.get('from')!=='recomendador')return;
+  document.getElementById('backLink').href='recomendador.html';
+  try{
+    const transfer=JSON.parse(localStorage.getItem('mmv_recomendacion_transfer_v19')||'null');
+    if(!transfer||!String(transfer.provider).startsWith('Jazztel')||localStorage.getItem('mmv_last_jazztel_transfer')===transfer.createdAt)return;
+    const a=transfer.answers||{},packText=transfer.recommendation?.pack||'';
+    state={type:'convergente',pack:'duo120',speed:String(a.fiberSpeed||'600'),qty:{20:0,50:0,unl:0},tv:{},tvOpen:false,postOpen:false,orange:false,football:false,second:false};
+    if(a.service==='fiber')state.type='solofibra';
+    else if(a.origin==='digi')state.type='antidigi';
+    else if(/80 GB/i.test(packText))state.pack='eco80';
+    else if(/1 línea.*50 GB/i.test(packText))state.pack='one50';
+    else if(/1 línea ilimitada/i.test(packText))state.pack='oneunl';
+    else if(/2 líneas ilimitadas/i.test(packText))state.pack='duounl';
+    if(state.type==='convergente'&&!PACKS[state.pack].prices[state.speed])state.speed='600';
+    const included=state.type==='antidigi'?2:(state.type==='convergente'?PACKS[state.pack].lines:0),extra=Math.max(0,(Number(a.lines)||included)-included);
+    if(state.type==='antidigi'||PACKS[state.pack]?.kind==='unlimited')state.qty.unl=extra;else state.qty[Number(a.data)<=80?'20':'50']=extra;
+    const tvPrices={netflix_ads:[7.95,'Netflix con anuncios'],netflix_standard:[13.26,'Netflix estándar'],netflix_premium:[19.45,'Netflix Premium'],prime_max:[8.83,'Prime + Max'],disney_ads:[6.18,'Disney+ con anuncios'],disney_standard:[9.72,'Disney+ estándar'],disney_premium:[14.14,'Disney+ Premium'],dazn_motor:[8.83,'DAZN Motor'],dazn_basket:[8.83,'DAZN Baloncesto']};
+    (a.tv||[]).forEach(id=>{if(id==='football')state.football='football';else if(id==='sport')state.football='sport';else if(id==='orange_tv')state.orange=true;else if(tvPrices[id]){const x=tvPrices[id];const key={netflix_ads:'netflix',netflix_standard:'netflixstd',netflix_premium:'netflixpremium',prime_max:'prime',disney_ads:'disney',disney_standard:'disneystd',disney_premium:'disneypremium',dazn_motor:'motor',dazn_basket:'basket'}[id];state.tv[key]={price:x[0],name:x[1]}}});
+    document.getElementById('current').value=a.currentPrice||'';
+    localStorage.setItem('mmv_last_jazztel_transfer',transfer.createdAt);localStorage.setItem('mmv_jazztel_v2',JSON.stringify(state));
+  }catch(e){console.error('No se pudo cargar la recomendación',e)}
+}
 function setTipo(t){state.type=t;['conv','anti','fibra','seg'].forEach(x=>document.getElementById('t-'+x).classList.toggle('active',({conv:'convergente',anti:'antidigi',fibra:'solofibra',seg:'segunda'})[x]===t));state.qty={20:0,50:0,unl:0};if(t==='solofibra')state.speed='600';if(t==='segunda'){state.speed='600';state.second=false}sync();update()}
 function setPack(p){state.pack=p;if(!PACKS[p].prices[state.speed])state.speed='600';state.qty={20:0,50:0,unl:0};sync();update()}
 function setVel(v){if(state.type==='segunda')return;if(state.type==='convergente'&&!PACKS[state.pack].prices[v])return;state.speed=v;sync();update()}
@@ -486,7 +509,7 @@ function closeBreakdown(){document.getElementById('modal').style.display='none';
 async function makePDF() {
     await exportarPdfA4('doc', `Propuesta_Jazztel_MediaMarkt_${Date.now()}.pdf`);
 }
-sync();document.getElementById('tv-panel').style.display=state.tvOpen?'block':'none';document.getElementById('post-panel').style.display=state.postOpen?'block':'none';update();
+applyRecommendation();sync();document.getElementById('tv-panel').style.display=state.tvOpen?'block':'none';document.getElementById('post-panel').style.display=state.postOpen?'block':'none';update();
 </script>
 </body>
 </html>

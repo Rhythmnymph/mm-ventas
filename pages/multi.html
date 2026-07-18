@@ -145,7 +145,7 @@
 <body>
 
 <div class="mm-app-topbar">
-  <a class="mm-back" href="../index.html" aria-label="Volver">‹</a>
+  <a class="mm-back" id="backLink" href="../index.html" aria-label="Volver">‹</a>
   <div class="mm-title-wrap">
     <div class="mm-subtitle">MediaMarkt Añaza</div>
     <div class="mm-title">Multioperador</div>
@@ -318,6 +318,29 @@
         };
 
         let dataReporte = {};
+
+        function applyRecommendation() {
+            const params = new URLSearchParams(location.search);
+            if (params.get('from') !== 'recomendador') return;
+            document.getElementById('backLink').href = 'recomendador.html';
+            try {
+                const transfer = JSON.parse(localStorage.getItem('mmv_recomendacion_transfer_v19') || 'null');
+                if (!transfer || transfer.provider !== 'Lowi' || localStorage.getItem('mmv_last_multi_transfer') === transfer.createdAt) return;
+                const a = transfer.answers || {};
+                estado.op = 'lowi'; estado.soloMovil = false; estado.baseLines = 1;
+                estado.adicLines = Math.max(0, (Number(a.lines) || 1) - 1);
+                estado.antiDigi = false; estado.isUnlimited = false; estado.jazzVelocidad1Gb = false;
+                estado.tvPanel = Array.isArray(a.tv) && a.tv.length > 0;
+                estado.tvSeleccionada = { lowi: {}, simyo: {}, jazz: {} };
+                const map = {
+                    lowi_tv: [4.42, 'TV Canales'], netflix_ads: [7.07, 'Netflix con anuncios'],
+                    prime_max: [8.85, 'Prime + Max'], disney_ads: [5.31, 'Disney+ con anuncios']
+                };
+                (a.tv || []).forEach(id => { if (map[id]) estado.tvSeleccionada.lowi[id === 'lowi_tv' ? 'base' : id === 'netflix_ads' ? 'netflix' : id === 'prime_max' ? 'prime' : 'disney'] = { precio: map[id][0], nombre: map[id][1] }; });
+                document.getElementById('input-cliente').value = a.currentPrice || '';
+                localStorage.setItem('mmv_last_multi_transfer', transfer.createdAt);
+            } catch (e) { console.error('No se pudo cargar la recomendación', e); }
+        }
 
         function setOp(operador) {
             estado.op = operador;
@@ -725,6 +748,9 @@
             html2pdf().set(opt).from(elemento).save();
         }
 
+        applyRecommendation();
+        document.querySelectorAll('#op-lowi, #op-simyo, #op-jazztel').forEach(b => b.classList.remove('active'));
+        document.getElementById(`op-${estado.op}`).classList.add('active');
         actualizarUIOpciones();
         actualizar();
     </script>
