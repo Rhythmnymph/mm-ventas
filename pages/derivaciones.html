@@ -2,295 +2,104 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#000000">
-  <title>Registro de derivaciones</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="theme-color" content="#070707">
+  <title>Actividad comercial</title>
   <style>
-    :root { --bg:#070707; --card:#171717; --card2:#202020; --line:#343434; --red:#e30613; --yellow:#ffd400; --green:#35d07f; --blue:#43b9ff; --muted:#a8a8a8; --text:#fff; }
-    * { box-sizing:border-box; }
-    body { margin:0; background:var(--bg); color:var(--text); font-family:"Segoe UI",Arial,sans-serif; min-height:100vh; }
-    button,input,select,textarea { font:inherit; }
-    button { cursor:pointer; touch-action:manipulation; }
-    .app { width:min(760px,100%); margin:auto; padding:12px 12px 90px; }
-    header { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 2px 14px; }
-    .brand { display:flex; align-items:center; gap:10px; }
-    .mark { width:12px; height:38px; border-radius:4px; background:var(--red); box-shadow:6px 0 0 #8e0008; transform:skew(-8deg); }
-    h1 { font-size:1.16rem; margin:0; line-height:1.15; }
-    .subtitle { color:var(--muted); font-size:.76rem; margin-top:3px; }
-    .tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; background:#101010; padding:5px; border-radius:12px; position:sticky; top:0; z-index:5; }
-    .tab { border:0; border-radius:9px; padding:10px 5px; color:#bbb; background:transparent; font-weight:700; font-size:.82rem; }
-    .tab.active { background:var(--red); color:white; }
-    .view { display:none; padding-top:12px; }
-    .view.active { display:block; }
-    .type-grid { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-bottom:12px; }
-    .type-btn { border:1px solid var(--line); background:var(--card); color:white; border-radius:12px; padding:16px 8px; font-weight:800; }
-    .type-btn small { display:block; font-size:.7rem; color:var(--muted); margin-top:4px; font-weight:500; }
-    .type-btn.active { border-color:var(--red); background:#31080b; box-shadow:inset 0 0 0 1px var(--red); }
-    .panel { background:var(--card); border:1px solid #2b2b2b; border-radius:14px; padding:14px; margin-bottom:12px; }
-    .panel-title { margin:0 0 12px; font-size:.9rem; text-transform:uppercase; letter-spacing:.5px; }
-    label { display:block; color:#d8d8d8; font-size:.78rem; font-weight:700; margin:12px 0 6px; }
-    input,select,textarea { width:100%; border:1px solid var(--line); background:#0d0d0d; color:white; border-radius:9px; padding:12px; outline:none; }
-    input:focus,select:focus,textarea:focus { border-color:var(--red); }
-    textarea { resize:vertical; min-height:62px; }
-    .chips { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
-    .chip { border:1px solid var(--line); background:var(--card2); color:white; border-radius:9px; padding:10px 5px; font-size:.76rem; font-weight:650; }
-    .chip.active { background:#3a0b0e; border-color:var(--red); color:#fff; }
-    .conditional { display:none; }
-    .conditional.show { display:block; }
-    .primary { width:100%; border:0; background:var(--red); color:white; border-radius:10px; padding:14px; font-weight:850; margin-top:14px; }
-    .secondary { border:1px solid var(--line); background:#252525; color:white; border-radius:9px; padding:10px 12px; font-weight:700; }
-    .danger { color:#ff9198; }
-    .notice { color:var(--muted); font-size:.72rem; line-height:1.35; margin:10px 2px 0; }
-    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-bottom:10px; }
-    .stat { background:var(--card); border:1px solid #292929; border-radius:11px; text-align:center; padding:12px 5px; }
-    .stat strong { display:block; font-size:1.45rem; }
-    .stat span { color:var(--muted); font-size:.68rem; }
-    .report { background:linear-gradient(145deg,#1a1a1a,#101010); border:1px solid #333; border-top:4px solid var(--red); border-radius:14px; padding:16px; }
-    .report h2 { margin:0; font-size:1rem; }
-    .report-date { color:var(--muted); font-size:.75rem; margin-top:3px; }
-    .report-section { margin-top:16px; }
-    .report-section h3 { color:var(--yellow); font-size:.78rem; text-transform:uppercase; margin:0 0 7px; }
-    .report-mini { color:#a8a8a8; font-size:.66rem; font-weight:850; text-transform:uppercase; letter-spacing:.5px; margin:10px 0 3px; }
-    .report-row { display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-bottom:1px solid #292929; font-size:.82rem; }
-    .report-row:last-child { border-bottom:0; }
-    .report-row span:last-child { font-weight:800; text-align:right; }
-    .empty { text-align:center; color:var(--muted); padding:28px 10px; font-size:.85rem; }
-    .actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px; }
-    .actions .primary { margin:0; padding:11px 6px; font-size:.78rem; }
-    .actions .secondary { padding:11px 6px; font-size:.78rem; }
-    .history-head { display:flex; gap:8px; margin-bottom:10px; }
-    .history-head input { flex:1; }
-    .entry { background:var(--card); border:1px solid #292929; border-radius:12px; padding:12px; margin-bottom:8px; }
-    .entry-top { display:flex; justify-content:space-between; gap:8px; align-items:flex-start; }
-    .badge { display:inline-block; padding:4px 7px; border-radius:20px; font-size:.65rem; font-weight:850; background:#342023; color:#ffadb2; }
-    .badge.pending { background:#332d16; color:#ffe783; }
-    .entry strong { display:block; margin-top:7px; font-size:.9rem; }
-    .entry-meta { color:var(--muted); font-size:.73rem; margin-top:5px; line-height:1.4; }
-    .entry-note { font-size:.76rem; margin-top:7px; color:#ddd; }
-    .entry-actions { display:flex; gap:5px; }
-    .icon-btn { background:#292929; border:0; color:#ddd; border-radius:7px; padding:6px 8px; }
-    .footer-tools { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:14px; }
-    .footer-tools button,.file-label { border:1px solid var(--line); background:#191919; color:#ccc; border-radius:8px; padding:9px 4px; text-align:center; font-size:.68rem; font-weight:700; cursor:pointer; }
-    #toast { position:fixed; left:50%; bottom:22px; transform:translate(-50%,20px); background:white; color:#111; border-radius:30px; padding:10px 18px; font-weight:800; font-size:.8rem; opacity:0; pointer-events:none; transition:.2s; z-index:20; box-shadow:0 5px 25px #0009; }
-    #toast.show { opacity:1; transform:translate(-50%,0); }
-    @media (min-width:600px) { .chips { grid-template-columns:repeat(3,1fr); } }
+    :root{--bg:#070707;--card:#171717;--card2:#222;--line:#383838;--red:#e30613;--yellow:#ffd400;--blue:#43b9ff;--green:#35d07f;--muted:#aaa;--text:#fff}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",Arial,sans-serif;min-height:100vh}button,input,textarea{font:inherit}button{cursor:pointer;touch-action:manipulation}.app{width:min(780px,100%);margin:auto;padding:12px 12px 90px}header{display:flex;align-items:center;gap:11px;padding:8px 2px 14px}.mark{width:12px;height:38px;border-radius:4px;background:var(--red);box-shadow:6px 0 0 #8e0008;transform:skew(-8deg)}h1{font-size:1.16rem;margin:0}.subtitle{color:var(--muted);font-size:.76rem;margin-top:3px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:#101010;padding:5px;border-radius:12px;position:sticky;top:0;z-index:5}.tab{border:0;border-radius:9px;padding:10px 4px;color:#bbb;background:transparent;font-weight:800;font-size:.82rem}.tab.active{background:var(--red);color:#fff}.view{display:none;padding-top:12px}.view.active{display:block}.source-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px}.source-btn{border:1px solid var(--line);background:var(--card);color:#fff;border-radius:12px;padding:16px 7px;font-weight:850}.source-btn small{display:block;color:var(--muted);font-size:.69rem;margin-top:4px;font-weight:500}.source-btn.active{border-color:var(--red);background:#31080b;box-shadow:inset 0 0 0 1px var(--red)}.panel,.management{background:var(--card);border:1px solid #2c2c2c;border-radius:14px;padding:14px;margin-bottom:11px}.panel-title{font-size:.88rem;text-transform:uppercase;letter-spacing:.5px;margin:0 0 11px}.management{position:relative;border-left:4px solid var(--blue)}.management.cross{border-left-color:var(--green)}.management-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}.management-title{font-size:.84rem;font-weight:900}.remove{border:0;background:#2a2a2a;color:#ff9298;border-radius:7px;padding:5px 9px}.field-label,label{display:block;color:#ddd;font-size:.77rem;font-weight:750;margin:12px 0 6px}input,textarea{width:100%;border:1px solid var(--line);background:#0d0d0d;color:#fff;border-radius:9px;padding:11px;outline:0}input:focus,textarea:focus{border-color:var(--red)}textarea{min-height:56px;resize:vertical}.chips{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.chip{border:1px solid var(--line);background:var(--card2);color:#fff;border-radius:9px;padding:10px 5px;font-size:.73rem;font-weight:700}.chip.active{background:#3b0c0f;border-color:var(--red)}.origin-chips .chip.active{background:#0a3321;border-color:var(--green)}.help{color:var(--muted);font-size:.7rem;line-height:1.4;margin:7px 1px}.conditional{display:none}.conditional.show{display:block}.primary,.secondary{border-radius:10px;padding:12px;font-weight:850}.primary{width:100%;border:0;background:var(--red);color:#fff}.secondary{border:1px solid var(--line);background:#252525;color:#fff}.add-management{width:100%;margin:1px 0 12px;border:1px dashed #666;background:#141414;color:#fff;border-radius:11px;padding:12px;font-weight:800}.notice{color:var(--muted);font-size:.7rem;line-height:1.4;margin:10px 2px 0}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}.stat{background:var(--card);border:1px solid #292929;border-radius:11px;text-align:center;padding:11px 3px}.stat strong{display:block;font-size:1.35rem}.stat span{color:var(--muted);font-size:.59rem}.report{background:linear-gradient(145deg,#1a1a1a,#101010);border:1px solid #333;border-top:4px solid var(--red);border-radius:14px;padding:16px}.report h2{margin:0;font-size:1rem}.report-date{color:var(--muted);font-size:.75rem;margin-top:3px}.report-section{margin-top:16px}.report-section h3{color:var(--yellow);font-size:.78rem;text-transform:uppercase;margin:0 0 7px}.report-mini{color:#aaa;font-size:.65rem;font-weight:850;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 3px}.report-row{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid #292929;font-size:.81rem}.report-row:last-child{border-bottom:0}.report-row span:last-child{font-weight:850;text-align:right}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.actions .primary,.actions .secondary{font-size:.77rem}.empty{text-align:center;color:var(--muted);padding:28px 10px;font-size:.84rem}.history-head{display:flex;gap:8px;margin-bottom:10px}.history-head input{flex:1}.entry{background:var(--card);border:1px solid #292929;border-radius:12px;padding:12px;margin-bottom:8px}.entry-top{display:flex;justify-content:space-between;gap:8px}.badge{display:inline-block;padding:4px 7px;border-radius:20px;font-size:.64rem;font-weight:850;background:#342023;color:#ffadb2}.badge.own{background:#183426;color:#8ff0bb}.entry strong{display:block;margin-top:7px;font-size:.9rem}.entry-actions{display:flex;gap:5px}.icon-btn{background:#292929;border:0;color:#ddd;border-radius:7px;padding:6px 8px}.entry-item{margin-top:8px;padding:8px;background:#101010;border-radius:8px;font-size:.74rem;line-height:1.4}.entry-item b{color:var(--yellow)}.entry-item small{display:block;color:var(--muted);font-size:.69rem}.footer-tools{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:14px}.footer-tools button,.file-label{border:1px solid var(--line);background:#191919;color:#ccc;border-radius:8px;padding:9px 4px;text-align:center;font-size:.67rem;font-weight:700;cursor:pointer}.danger{color:#ff9198!important}#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:#fff;color:#111;border-radius:30px;padding:10px 18px;font-weight:850;font-size:.8rem;opacity:0;pointer-events:none;transition:.2s;z-index:20;box-shadow:0 5px 25px #0009}#toast.show{opacity:1;transform:translate(-50%,0)}
+    @media(min-width:600px){.chips{grid-template-columns:repeat(3,1fr)}}@media(max-width:430px){.stats{grid-template-columns:repeat(2,1fr)}}
   </style>
 </head>
 <body>
 <main class="app">
-  <header>
-    <div class="brand"><div class="mark"></div><div><h1>Derivaciones y oportunidades</h1><div class="subtitle">Registro interno · MediaMarkt Añaza</div></div></div>
-  </header>
+  <header><div class="mark"></div><div><h1>Actividad comercial</h1><div class="subtitle">Derivaciones, gestiones y captaciones</div></div></header>
+  <nav class="tabs"><button class="tab active" data-view="register">Registrar</button><button class="tab" data-view="report">Reporte</button><button class="tab" data-view="history">Historial</button></nav>
 
-  <nav class="tabs">
-    <button class="tab active" data-view="registro">Registrar</button>
-    <button class="tab" data-view="reporte">Reporte</button>
-    <button class="tab" data-view="historial">Historial</button>
-  </nav>
-
-  <section id="registro" class="view active">
-    <div class="type-grid">
-      <button class="type-btn active" data-type="Vendedor">Apoyo vendedor<small>Cliente derivado por un compañero</small></button>
-      <button class="type-btn" data-type="Captación">Captación propia<small>Cliente captado por mí</small></button>
+  <section id="register" class="view active">
+    <div class="source-grid">
+      <button class="source-btn active" data-source="seller">Apoyo vendedor<small>Un compañero me deriva al cliente</small></button>
+      <button class="source-btn" data-source="own">Captación propia<small>Yo inicio la conversación</small></button>
     </div>
-    <form id="entryForm" class="panel">
-      <h2 class="panel-title" id="formTitle">Nuevo apoyo de vendedor</h2>
-      <div id="sellerFields">
-        <label for="seller">Vendedor que lo deriva</label>
-        <input id="seller" list="sellerList" autocomplete="off" placeholder="Escribe el nombre del vendedor" required>
-        <datalist id="sellerList"></datalist>
-      </div>
-
-      <label>Servicios (puedes seleccionar varios)</label>
-      <div id="serviceChips" class="chips"></div>
-
-      <label id="statusLabel">Resultado de la derivación</label>
-      <div id="statusChips" class="chips"></div>
-      <div id="statusHelp" class="notice"></div>
-
-      <div id="reasonFields" class="conditional">
-        <label>¿Por qué no se tramita ahora?</label>
-        <div id="reasonChips" class="chips"></div>
-      </div>
-
-      <label for="details">Detalle breve (opcional)</label>
-      <textarea id="details" placeholder="Ej.: Tiene que traer factura / quiere consultarlo con su pareja"></textarea>
-
-      <button class="primary" type="submit" id="saveButton">Registrar derivación</button>
-      <div class="notice">Los datos se guardan en este dispositivo. Evita escribir nombres completos, teléfonos u otros datos personales del cliente.</div>
+    <form id="recordForm">
+      <div id="sellerPanel" class="panel"><h2 class="panel-title">Origen de la atención</h2><label for="seller">Vendedor que lo deriva</label><input id="seller" list="sellerList" autocomplete="off" placeholder="Escribe el nombre del vendedor" required><datalist id="sellerList"></datalist></div>
+      <div id="managements"></div>
+      <button id="addManagement" class="add-management" type="button">+ Añadir otra gestión o captación</button>
+      <button id="saveRecord" class="primary" type="submit">Registrar atención</button>
+      <div class="notice">Cada servicio lleva su propio resultado. Evita escribir nombres, teléfonos u otros datos personales del cliente.</div>
     </form>
   </section>
 
-  <section id="reporte" class="view">
-    <div class="panel">
-      <label for="reportDate" style="margin-top:0">Día del reporte</label>
-      <input id="reportDate" type="date">
-    </div>
-    <div id="stats" class="stats"></div>
-    <div id="reportCard" class="report"></div>
-    <div class="actions">
-      <button class="primary" id="copyReport">Copiar para Teams</button>
-      <button class="secondary" id="downloadImage">Descargar imagen</button>
-    </div>
+  <section id="report" class="view">
+    <div class="panel"><label for="reportDate" style="margin-top:0">Día del reporte</label><input id="reportDate" type="date"></div>
+    <div id="stats" class="stats"></div><div id="reportCard" class="report"></div>
+    <div class="actions"><button id="copyReport" class="primary">Copiar para Teams</button><button id="downloadImage" class="secondary">Descargar imagen</button></div>
   </section>
 
-  <section id="historial" class="view">
-    <div class="history-head"><input id="historyDate" type="date"><button class="secondary" id="todayHistory">Hoy</button></div>
-    <div id="historyList"></div>
-    <div class="footer-tools">
-      <button id="exportData">Exportar copia</button>
-      <label class="file-label">Importar copia<input id="importData" type="file" accept="application/json" hidden></label>
-      <button id="clearData" class="danger">Borrar todo</button>
-    </div>
+  <section id="history" class="view">
+    <div class="history-head"><input id="historyDate" type="date"><button id="todayHistory" class="secondary">Hoy</button></div><div id="historyList"></div>
+    <div class="footer-tools"><button id="exportData">Exportar copia</button><label class="file-label">Importar copia<input id="importData" type="file" accept="application/json" hidden></label><button id="clearData" class="danger">Borrar todo</button></div>
   </section>
 </main>
 <div id="toast">Registrado</div>
 
 <script>
-(() => {
+(()=>{
   'use strict';
-  const STORAGE_KEY = 'mm_derivaciones_v1';
-  const SELLERS_KEY = 'mm_derivaciones_vendedores_v1';
-  const services = ['Operadores','Luz','Lead'];
-  const statuses = {
-    'Vendedor': ['Contratado','Se lleva información','No contratado'],
-    'Captación': ['Interés alto','Interés medio','Interés bajo']
-  };
-  const reasons = ['Falta factura o documentación','Tiene que consultarlo','Quiere comparar o pensarlo','Tiene permanencia','Otro motivo'];
-  let records = loadJSON(STORAGE_KEY, []).map(r => {
-    if (r.type==='Derivación') return {...r,type:'Vendedor',status:r.status==='Contratado'?'Contratado':r.status==='No viable'?'No contratado':'Se lleva información'};
-    if (r.type==='Interesado') return {...r,type:'Captación',status:/baja/i.test(r.status)?'Interés bajo':/volverá|pendiente/i.test(r.status)?'Interés alto':'Interés medio',reason:r.reason||'Otro motivo'};
-    return r;
-  });
-  let currentType = 'Vendedor', selectedServices = [], selectedStatus = '', selectedReason = '', editingId = null;
-  const $ = id => document.getElementById(id);
-  const localISO = (date = new Date()) => {
-    const y = date.getFullYear(), m = String(date.getMonth()+1).padStart(2,'0'), d = String(date.getDate()).padStart(2,'0');
-    return `${y}-${m}-${d}`;
-  };
-  const esc = value => String(value ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  function loadJSON(key, fallback) { try { const value = JSON.parse(localStorage.getItem(key)); return value ?? fallback; } catch { return fallback; } }
-  function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
-  function prettyDate(iso) { if (!iso) return 'Sin fecha'; return new Date(iso+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}); }
-  function toast(message) { const el=$('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.remove('show'),1600); }
+  const STORAGE_KEY='mm_derivaciones_v2',OLD_KEY='mm_derivaciones_v1',SELLERS_KEY='mm_derivaciones_vendedores_v1';
+  const SERVICES=['Operadores','Luz','Lead'];
+  const REFERRED_RESULTS=['Contratado','Lead registrado','Información entregada','Estudio sin mejora','Interés alto','Interés medio','Interés bajo','No viable','Pendiente'];
+  const CAPTURE_RESULTS=['Contratado','Lead registrado','Información entregada','Estudio sin mejora','Interés alto','Interés medio','Interés bajo','No viable','Pendiente'];
+  const REASONS=['Falta factura o documentación','Tiene que consultarlo','Quiere comparar o pensarlo','Tiene permanencia','Otro motivo'];
+  let source='seller',editingId=null,nextItemId=1,records=loadRecords(),items=[];
+  const $=id=>document.getElementById(id),esc=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const localISO=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  function loadJSON(k,f){try{return JSON.parse(localStorage.getItem(k))??f}catch{return f}}
+  function itemOriginLabel(o){return o==='referred'?'Derivado por vendedor':o==='cross'?'Captado durante la atención':'Captación propia'}
+  function prettyDate(iso){return new Date(iso+'T12:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})}
+  function migrateOld(old){return old.map(r=>{const oldServices=Array.isArray(r.services)&&r.services.length?r.services:(r.service?[r.service]:['Operadores']);const own=r.type==='Captación'||r.type==='Interesado';return{id:r.id||String(Date.now()+Math.random()),date:r.date||localISO(),createdAt:r.createdAt||new Date().toISOString(),updatedAt:r.updatedAt||new Date().toISOString(),source:own?'own':'seller',seller:own?'':(r.seller||''),items:oldServices.map(service=>({id:nextItemId++,service:service==='Placas solares'?'Lead':service,origin:own?'own':'referred',result:own?(r.status||'Interés medio'):(r.status==='Se lleva información'?'Información entregada':r.status||'Pendiente'),reason:r.reason||'',details:r.details||''}))}})}
+  function loadRecords(){const current=loadJSON(STORAGE_KEY,null);if(Array.isArray(current))return current;const old=loadJSON(OLD_KEY,[]);const migrated=Array.isArray(old)?migrateOld(old):[];if(migrated.length)localStorage.setItem(STORAGE_KEY,JSON.stringify(migrated));return migrated}
+  function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(records))}
+  function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1600)}
+  function newItem(originValue){return{id:nextItemId++,service:'',origin:originValue||(source==='seller'?(items.length?'cross':'referred'):'own'),result:'',reason:'',details:''}}
 
-  document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab,.view').forEach(el=>el.classList.remove('active'));
-    btn.classList.add('active'); $(btn.dataset.view).classList.add('active');
-    if (btn.dataset.view==='reporte') renderReport();
-    if (btn.dataset.view==='historial') renderHistory();
-  }));
-  document.querySelectorAll('.type-btn').forEach(btn => btn.addEventListener('click', () => setType(btn.dataset.type)));
+  document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab,.view').forEach(x=>x.classList.remove('active'));b.classList.add('active');$(b.dataset.view).classList.add('active');if(b.dataset.view==='report')renderReport();if(b.dataset.view==='history')renderHistory()});
+  document.querySelectorAll('.source-btn').forEach(b=>b.onclick=()=>setSource(b.dataset.source));
+  function setSource(value,keep=false){source=value;document.querySelectorAll('.source-btn').forEach(b=>b.classList.toggle('active',b.dataset.source===value));$('sellerPanel').style.display=value==='seller'?'block':'none';$('seller').required=value==='seller';if(!keep){items=[newItem(value==='seller'?'referred':'own')]}else items.forEach(i=>{if(value==='own')i.origin='own';else if(i.origin==='own')i.origin='referred'});renderItems()}
 
-  function setType(type) {
-    currentType=type; selectedStatus='';
-    document.querySelectorAll('.type-btn').forEach(b=>b.classList.toggle('active',b.dataset.type===type));
-    $('formTitle').textContent = type==='Vendedor' ? 'Nuevo apoyo de vendedor' : 'Nueva captación propia';
-    $('saveButton').textContent = editingId ? 'Guardar cambios' : (type==='Vendedor' ? 'Registrar derivación' : 'Registrar captación');
-    $('sellerFields').style.display = type==='Vendedor' ? 'block' : 'none';
-    $('statusLabel').textContent = type==='Vendedor' ? 'Resultado de la derivación' : 'Grado de interés del cliente';
-    $('seller').required = type==='Vendedor';
-    renderStatusChips(); renderReasonChips(); updateConditional();
-    $('statusHelp').innerHTML = type==='Captación'
-      ? '<b>Alto:</b> quiere tramitar, pero le falta algo. · <b>Medio:</b> le interesa y se lleva la propuesta para valorarla. · <b>Bajo:</b> acepta la información sin una intención clara.'
-      : 'Indica cómo terminó la atención del cliente que te envió el vendedor.';
+  function renderItems(){
+    $('managements').innerHTML=items.map((item,index)=>{
+      const isCapture=item.origin!=='referred',results=isCapture?CAPTURE_RESULTS:REFERRED_RESULTS,showReason=isCapture&&(/Interés|Información/.test(item.result));
+      return `<article class="management ${isCapture?'cross':''}" data-item="${item.id}"><div class="management-head"><div class="management-title">${index+1}. ${item.origin==='referred'?'Servicio derivado':'Captación comercial'}</div>${items.length>1?`<button type="button" class="remove" data-remove="${item.id}">Eliminar</button>`:''}</div>${source==='seller'?`<span class="field-label">Procedencia de esta gestión</span><div class="chips origin-chips">${[['referred','Derivado por vendedor'],['cross','Captado por mí']].map(x=>chip(item.id,'origin',x[0],x[1],item.origin===x[0])).join('')}</div>`:''}<span class="field-label">Servicio</span><div class="chips">${SERVICES.map(s=>chip(item.id,'service',s,s,item.service===s)).join('')}</div><span class="field-label">Resultado de este servicio</span><div class="chips">${results.map(r=>chip(item.id,'result',r,r,item.result===r)).join('')}</div>${isCapture?`<div class="help"><b>Interés alto:</b> quiere tramitar pero le falta algo. <b>Medio:</b> se lleva la información para valorarla. <b>Bajo:</b> no muestra una intención clara.</div>`:''}<div class="conditional ${showReason?'show':''}"><span class="field-label">¿Por qué no se tramita ahora?</span><div class="chips">${REASONS.map(r=>chip(item.id,'reason',r,r,item.reason===r)).join('')}</div></div><label>Detalle breve (opcional)</label><textarea data-detail="${item.id}" placeholder="Ej.: la tarifa de luz no mejora / lead de punto de recarga">${esc(item.details)}</textarea></article>`}).join('');
+    document.querySelectorAll('[data-item-field]').forEach(b=>b.onclick=()=>updateItem(+b.dataset.itemId,b.dataset.itemField,b.dataset.value));
+    document.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>{items=items.filter(i=>i.id!==+b.dataset.remove);renderItems()});
+    document.querySelectorAll('[data-detail]').forEach(t=>t.oninput=()=>{const i=items.find(x=>x.id===+t.dataset.detail);if(i)i.details=t.value});
   }
-  function renderChips(items, container, onSelect, selected) {
-    container.innerHTML=''; items.forEach(item=>{
-      const b=document.createElement('button'); b.type='button'; b.className='chip'+(item===selected?' active':''); b.textContent=item;
-      b.addEventListener('click',()=>onSelect(item)); container.appendChild(b);
-    });
-  }
-  function renderServiceChips() {
-    const container=$('serviceChips'); container.innerHTML='';
-    services.forEach(item=>{
-      const b=document.createElement('button'); b.type='button'; b.className='chip'+(selectedServices.includes(item)?' active':''); b.textContent=item;
-      b.addEventListener('click',()=>{ selectedServices=selectedServices.includes(item)?selectedServices.filter(x=>x!==item):[...selectedServices,item]; renderServiceChips(); });
-      container.appendChild(b);
-    });
-  }
-  function renderStatusChips() { renderChips(statuses[currentType],$('statusChips'),item=>{ selectedStatus=item; renderStatusChips(); updateConditional(); },selectedStatus); }
-  function renderReasonChips() { renderChips(reasons,$('reasonChips'),item=>{ selectedReason=item; renderReasonChips(); },selectedReason); }
-  function updateConditional() { $('reasonFields').classList.toggle('show', currentType==='Captación'); }
-  function updateSellerList() {
-    const prior=loadJSON(SELLERS_KEY,[]); const names=[...new Set([...prior,...records.map(r=>r.seller).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));
-    $('sellerList').innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join('');
-  }
-  function rememberSeller(name) { if(!name)return; const list=loadJSON(SELLERS_KEY,[]); if(!list.some(n=>n.toLowerCase()===name.toLowerCase())) { list.push(name); localStorage.setItem(SELLERS_KEY,JSON.stringify(list)); } }
+  function chip(id,field,value,label,active){return `<button type="button" class="chip ${active?'active':''}" data-item-field="${field}" data-item-id="${id}" data-value="${esc(value)}">${esc(label)}</button>`}
+  function updateItem(id,field,value){const item=items.find(i=>i.id===id);if(!item)return;item[field]=value;if(field==='origin'){item.result='';item.reason=''}if(field==='result'&&!/Interés|Información/.test(value))item.reason='';renderItems()}
+  $('addManagement').onclick=()=>{items.push(newItem());renderItems();setTimeout(()=>document.querySelector(`[data-item="${items.at(-1).id}"]`)?.scrollIntoView({behavior:'smooth',block:'center'}),30)};
 
-  $('entryForm').addEventListener('submit', e => {
-    e.preventDefault(); const seller=$('seller').value.trim(), details=$('details').value.trim();
-    if (currentType==='Vendedor' && !seller) return toast('Escribe el vendedor');
-    if (!selectedServices.length) return toast('Selecciona al menos un servicio');
-    if (!selectedStatus) return toast('Selecciona la situación');
-    if (currentType==='Captación' && !selectedReason) return toast('Selecciona por qué no se tramita');
-    const existing=records.find(r=>r.id===editingId);
-    const record={ id:editingId||String(Date.now()), createdAt:existing?.createdAt||new Date().toISOString(), updatedAt:new Date().toISOString(), date:existing?.date||localISO(), type:currentType, seller:currentType==='Vendedor'?seller:'', services:[...selectedServices], status:selectedStatus, reason:currentType==='Captación'?selectedReason:'', details };
-    if(editingId) records=records.map(r=>r.id===editingId?record:r); else records.push(record);
-    rememberSeller(seller); save(); resetForm(); updateSellerList(); toast(editingId?'Cambios guardados':'✓ Registrado');
-  });
-  function resetForm() { editingId=null; $('entryForm').reset(); selectedServices=[]; selectedStatus=''; selectedReason=''; setType('Vendedor'); renderServiceChips(); }
+  $('recordForm').onsubmit=e=>{e.preventDefault();const seller=$('seller').value.trim();if(source==='seller'&&!seller)return toast('Escribe el vendedor');if(!items.length)return toast('Añade una gestión');for(const i of items){if(!i.service)return toast('Selecciona el servicio en cada gestión');if(!i.result)return toast('Selecciona el resultado de cada gestión');if(i.origin!=='referred'&&/Interés|Información/.test(i.result)&&!i.reason)return toast('Indica por qué queda pendiente')}const wasEditing=!!editingId,previous=records.find(r=>r.id===editingId),record={id:editingId||String(Date.now()),date:previous?.date||localISO(),createdAt:previous?.createdAt||new Date().toISOString(),updatedAt:new Date().toISOString(),source,seller:source==='seller'?seller:'',items:JSON.parse(JSON.stringify(items))};records=editingId?records.map(r=>r.id===editingId?record:r):[...records,record];rememberSeller(record.seller);save();resetForm();toast(wasEditing?'Cambios guardados':'✓ Atención registrada')};
+  function resetForm(){editingId=null;$('recordForm').reset();items=[];setSource('seller');$('saveRecord').textContent='Registrar atención';updateSellerList()}
+  function rememberSeller(n){if(!n)return;const list=loadJSON(SELLERS_KEY,[]);if(!list.some(x=>x.toLowerCase()===n.toLowerCase())){list.push(n);localStorage.setItem(SELLERS_KEY,JSON.stringify(list))}}
+  function updateSellerList(){const names=[...new Set([...loadJSON(SELLERS_KEY,[]),...records.map(r=>r.seller).filter(Boolean)])].sort((a,b)=>a.localeCompare(b));$('sellerList').innerHTML=names.map(n=>`<option value="${esc(n)}"></option>`).join('')}
 
-  $('reportDate').value=localISO(); $('historyDate').value=localISO();
-  $('reportDate').addEventListener('change',renderReport); $('historyDate').addEventListener('change',renderHistory);
-  $('todayHistory').addEventListener('click',()=>{ $('historyDate').value=localISO(); renderHistory(); });
-  function dayRecords(date) { return records.filter(r=>r.date===date); }
-  function countBy(list,key) { return list.reduce((a,r)=>{ const k=r[key]||'Sin indicar'; a[k]=(a[k]||0)+1; return a; },{}); }
-  function recordServices(r) { return Array.isArray(r.services) && r.services.length ? r.services : (r.service ? [r.service] : ['Sin indicar']); }
-  function countServices(list) { return list.reduce((a,r)=>{ recordServices(r).forEach(k=>a[k]=(a[k]||0)+1); return a; },{}); }
-  function sortedEntries(obj) { return Object.entries(obj).sort((a,b)=>b[1]-a[1] || a[0].localeCompare(b[0])); }
+  $('reportDate').value=$('historyDate').value=localISO();$('reportDate').onchange=renderReport;$('historyDate').onchange=renderHistory;$('todayHistory').onclick=()=>{$('historyDate').value=localISO();renderHistory()};
+  const dayRecords=date=>records.filter(r=>r.date===date),allItems=list=>list.flatMap(r=>r.items.map(i=>({...i,record:r}))),count=(array,getter)=>array.reduce((a,x)=>{const k=getter(x)||'Sin indicar';a[k]=(a[k]||0)+1;return a},{}),sorted=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]||a[0].localeCompare(b[0]));
+  const rows=o=>sorted(o).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
+  function renderReport(){const date=$('reportDate').value||localISO(),list=dayRecords(date),sellerRecords=list.filter(r=>r.source==='seller'),ownRecords=list.filter(r=>r.source==='own'),its=allItems(list),referred=its.filter(i=>i.origin==='referred'),captured=its.filter(i=>i.origin!=='referred'),sales=its.filter(i=>i.result==='Contratado').length,leads=its.filter(i=>i.result==='Lead registrado').length;$('stats').innerHTML=`<div class="stat"><strong>${sellerRecords.length}</strong><span>DERIVACIONES</span></div><div class="stat"><strong>${captured.length}</strong><span>CAPTACIONES</span></div><div class="stat"><strong>${sales}</strong><span>VENTAS</span></div><div class="stat"><strong>${leads}</strong><span>LEADS</span></div>`;if(!list.length){$('reportCard').innerHTML=`<h2>ACTIVIDAD COMERCIAL</h2><div class="report-date">${prettyDate(date)}</div><div class="empty">No hay registros para este día.</div>`;return}const sellers=rows(count(sellerRecords,r=>r.seller)),referredResults=rows(count(referred,i=>`${i.service} · ${i.result}`)),captureServices=rows(count(captured,i=>i.service)),captureResults=rows(count(captured,i=>i.result)),reasons=rows(count(captured.filter(i=>i.reason),i=>i.reason));$('reportCard').innerHTML=`<h2>ACTIVIDAD COMERCIAL</h2><div class="report-date">${prettyDate(date)}</div><div class="report-section"><h3>Apoyo de vendedores · ${sellerRecords.length}</h3><div class="report-mini">Clientes derivados</div>${sellers||'<div class="report-row"><span>Sin derivaciones</span><span>0</span></div>'}<div class="report-mini">Gestiones derivadas</div>${referredResults||'<div class="report-row"><span>Sin gestiones</span><span>0</span></div>'}</div><div class="report-section"><h3>Captación comercial · ${captured.length}</h3><div class="report-mini">Servicios captados</div>${captureServices||'<div class="report-row"><span>Sin captaciones</span><span>0</span></div>'}${captureResults?`<div class="report-mini">Resultados</div>${captureResults}`:''}${reasons?`<div class="report-mini">Motivos pendientes</div>${reasons}`:''}</div>`}
+  function reportText(){const date=$('reportDate').value||localISO(),list=dayRecords(date),sellerRecords=list.filter(r=>r.source==='seller'),its=allItems(list),referred=its.filter(i=>i.origin==='referred'),captured=its.filter(i=>i.origin!=='referred');if(!list.length)return`🔴 ACTIVIDAD COMERCIAL — ${prettyDate(date)}\n\nSin registros.`;let t=`🔴 ACTIVIDAD COMERCIAL — ${prettyDate(date)}\n\n🤝 APOYO DE VENDEDORES\nClientes derivados: ${sellerRecords.length}\n`;sorted(count(sellerRecords,r=>r.seller)).forEach(([n,c])=>t+=`• ${n}: ${c}\n`);t+='\nGESTIONES DERIVADAS\n';sorted(count(referred,i=>`${i.service} — ${i.result}`)).forEach(([n,c])=>t+=`• ${n}: ${c}\n`);t+=`\n🎯 CAPTACIÓN COMERCIAL\nOportunidades captadas: ${captured.length}\n`;sorted(count(captured,i=>`${i.service} — ${i.result}`)).forEach(([n,c])=>t+=`• ${n}: ${c}\n`);const reasons=sorted(count(captured.filter(i=>i.reason),i=>i.reason));if(reasons.length){t+='\nMOTIVOS PENDIENTES\n';reasons.forEach(([n,c])=>t+=`• ${n}: ${c}\n`)}return t.trim()}
+  $('copyReport').onclick=async()=>{try{await navigator.clipboard.writeText(reportText());toast('Copiado para Teams')}catch{const t=document.createElement('textarea');t.value=reportText();document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('Copiado para Teams')}};
+  function wrap(ctx,text,w){const words=text.split(/\s+/),out=[];let line='';for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>w&&line){out.push(line);line=word}else line=test}if(line)out.push(line);return out}
+  $('downloadImage').onclick=()=>{const sourceLines=reportText().replace(/[🔴🤝🎯•]/g,'').split('\n'),canvas=document.createElement('canvas'),ctx=canvas.getContext('2d'),width=1080,pad=72,lineH=42;ctx.font='28px Segoe UI';const lines=[];sourceLines.forEach(x=>x?wrap(ctx,x,width-pad*2).forEach(y=>lines.push(y)):lines.push(''));canvas.width=width;canvas.height=Math.max(600,pad*2+lines.length*lineH+70);const g=ctx.createLinearGradient(0,0,width,canvas.height);g.addColorStop(0,'#202020');g.addColorStop(1,'#090909');ctx.fillStyle=g;ctx.fillRect(0,0,width,canvas.height);ctx.fillStyle='#e30613';ctx.fillRect(0,0,width,18);let y=pad+25;lines.forEach((line,i)=>{const heading=i===0||/^(APOYO|GESTIONES|CAPTACIÓN|MOTIVOS)/.test(line);ctx.font=heading?'bold 30px Segoe UI':'28px Segoe UI';ctx.fillStyle=heading?(i===0?'#fff':'#ffd400'):'#e8e8e8';ctx.fillText(line,pad,y);y+=lineH});ctx.fillStyle='#777';ctx.font='22px Segoe UI';ctx.fillText('Registro interno · MediaMarkt Añaza',pad,canvas.height-45);const a=document.createElement('a');a.download=`actividad-comercial-${$('reportDate').value}.png`;a.href=canvas.toDataURL('image/png');a.click();toast('Imagen descargada')};
 
-  function renderReport() {
-    const date=$('reportDate').value||localISO(), list=dayRecords(date), support=list.filter(r=>r.type==='Vendedor'), own=list.filter(r=>r.type==='Captación');
-    const hired=support.filter(r=>r.status==='Contratado').length;
-    $('stats').innerHTML=`<div class="stat"><strong>${support.length}</strong><span>DERIVACIONES</span></div><div class="stat"><strong>${own.length}</strong><span>CAPTACIONES</span></div><div class="stat"><strong>${hired}</strong><span>CONTRATADAS</span></div>`;
-    if(!list.length) { $('reportCard').innerHTML=`<h2>ACTIVIDAD COMERCIAL</h2><div class="report-date">${prettyDate(date)}</div><div class="empty">No hay registros para este día.</div>`; return; }
-    const sellerRows=sortedEntries(countBy(support.filter(r=>r.seller),'seller')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
-    const supportResultRows=sortedEntries(countBy(support,'status')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
-    const interestRows=sortedEntries(countBy(own,'status')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
-    const ownServiceRows=sortedEntries(countServices(own)).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
-    const reasonRows=sortedEntries(countBy(own,'reason')).map(([n,c])=>`<div class="report-row"><span>${esc(n)}</span><span>${c}</span></div>`).join('');
-    $('reportCard').innerHTML=`<h2>ACTIVIDAD COMERCIAL</h2><div class="report-date">${prettyDate(date)}</div><div class="report-section"><h3>Apoyo de vendedores · ${support.length}</h3><div class="report-mini">Vendedores</div>${sellerRows||'<div class="report-row"><span>Sin derivaciones</span><span>0</span></div>'}${supportResultRows?`<div class="report-mini">Resultados</div>${supportResultRows}`:''}</div><div class="report-section"><h3>Captación propia · ${own.length}</h3><div class="report-mini">Grado de interés</div>${interestRows||'<div class="report-row"><span>Sin captaciones</span><span>0</span></div>'}${ownServiceRows?`<div class="report-mini">Servicios</div>${ownServiceRows}`:''}${reasonRows?`<div class="report-mini">Por qué queda pendiente</div>${reasonRows}`:''}</div>`;
-  }
-  function reportText() {
-    const date=$('reportDate').value||localISO(), list=dayRecords(date), support=list.filter(r=>r.type==='Vendedor'), own=list.filter(r=>r.type==='Captación'), hired=support.filter(r=>r.status==='Contratado').length;
-    if(!list.length) return `🔴 ACTIVIDAD COMERCIAL — ${prettyDate(date)}\n\nSin registros.`;
-    let text=`🔴 ACTIVIDAD COMERCIAL — ${prettyDate(date)}\n\n🤝 APOYO DE VENDEDORES\nDerivaciones recibidas: ${support.length}\nContratadas: ${hired}\n`;
-    sortedEntries(countBy(support.filter(r=>r.seller),'seller')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
-    sortedEntries(countBy(support,'status')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
-    text+=`\n🎯 CAPTACIÓN PROPIA\nClientes interesados: ${own.length}\n`;
-    sortedEntries(countBy(own,'status')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
-    text+='\nSERVICIOS CAPTADOS\n'; sortedEntries(countServices(own)).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
-    text+='\nMOTIVOS PENDIENTES\n'; sortedEntries(countBy(own,'reason')).forEach(([n,c])=>text+=`• ${n}: ${c}\n`);
-    return text.trim();
-  }
-  $('copyReport').addEventListener('click',async()=>{ try { await navigator.clipboard.writeText(reportText()); toast('Copiado para Teams'); } catch { const t=document.createElement('textarea');t.value=reportText();document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();toast('Copiado para Teams'); } });
-
-  function wrap(ctx,text,maxWidth) { const words=text.split(/\s+/), lines=[]; let line=''; for(const word of words){ const test=line?line+' '+word:word; if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word;}else line=test;} if(line)lines.push(line); return lines; }
-  $('downloadImage').addEventListener('click',()=>{
-    const lines=reportText().replace(/[🔴👥🟡✅•]/g,'').split('\n'), canvas=document.createElement('canvas'), ctx=canvas.getContext('2d'), width=1080, pad=72, lineH=42;
-    ctx.font='28px Segoe UI, Arial'; const wrapped=[]; lines.forEach(line=>{ if(!line){wrapped.push('');return;} wrap(ctx,line,width-pad*2).forEach(x=>wrapped.push(x)); });
-    canvas.width=width; canvas.height=Math.max(600,pad*2+wrapped.length*lineH+70); const g=ctx.createLinearGradient(0,0,width,canvas.height);g.addColorStop(0,'#202020');g.addColorStop(1,'#090909');ctx.fillStyle=g;ctx.fillRect(0,0,width,canvas.height);ctx.fillStyle='#e30613';ctx.fillRect(0,0,width,18);
-    ctx.fillStyle='#fff';ctx.font='28px Segoe UI, Arial';let y=pad+25;wrapped.forEach((line,i)=>{ const isHeading=i===0||/^(VENDEDORES|SERVICIOS|RESULTADOS|OPORTUNIDADES)/.test(line);ctx.font=isHeading?'bold 30px Segoe UI, Arial':'28px Segoe UI, Arial';ctx.fillStyle=isHeading?(i===0?'#fff':'#ffd400'):'#e8e8e8';ctx.fillText(line,pad,y);y+=lineH; });
-    ctx.fillStyle='#777';ctx.font='22px Segoe UI, Arial';ctx.fillText('Registro interno · MediaMarkt Añaza',pad,canvas.height-45);
-    const a=document.createElement('a');a.download=`reporte-derivaciones-${$('reportDate').value}.png`;a.href=canvas.toDataURL('image/png');a.click();toast('Imagen descargada');
-  });
-
-  function renderHistory() {
-    const list=dayRecords($('historyDate').value||localISO()).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
-    if(!list.length){$('historyList').innerHTML='<div class="empty">No hay registros este día.</div>';return;}
-    $('historyList').innerHTML=list.map(r=>`<article class="entry"><div class="entry-top"><div><span class="badge ${r.type==='Captación'?'pending':''}">${r.type==='Vendedor'?'Apoyo vendedor':'Captación propia'}</span><strong>${esc(recordServices(r).join(' + '))}</strong></div><div class="entry-actions"><button class="icon-btn" data-edit="${r.id}" title="Editar">✎</button><button class="icon-btn danger" data-delete="${r.id}" title="Eliminar">×</button></div></div><div class="entry-meta">${r.seller?'Vendedor: '+esc(r.seller)+' · ':''}${esc(r.status)}${r.reason?' · '+esc(r.reason):''}</div>${r.details?`<div class="entry-note">${esc(r.details)}</div>`:''}</article>`).join('');
-    $('historyList').querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>editRecord(b.dataset.edit)));
-    $('historyList').querySelectorAll('[data-delete]').forEach(b=>b.addEventListener('click',()=>deleteRecord(b.dataset.delete)));
-  }
-  function editRecord(id) { const r=records.find(x=>x.id===id);if(!r)return; editingId=id;currentType=r.type;selectedServices=recordServices(r);selectedStatus=r.status;selectedReason=r.reason||'';$('seller').value=r.seller||'';$('details').value=r.details||'';setType(r.type);selectedStatus=r.status;selectedReason=r.reason||'';renderStatusChips();renderReasonChips();selectedServices=recordServices(r);renderServiceChips();updateConditional();$('formTitle').textContent='Editar registro';$('saveButton').textContent='Guardar cambios';document.querySelector('[data-view="registro"]').click();window.scrollTo({top:0,behavior:'smooth'}); }
-  function deleteRecord(id) { if(!confirm('¿Eliminar este registro?'))return;records=records.filter(r=>r.id!==id);save();renderHistory();toast('Registro eliminado'); }
-
-  $('exportData').addEventListener('click',()=>{ const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),records},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`copia-derivaciones-${localISO()}.json`;a.click();URL.revokeObjectURL(a.href); });
-  $('importData').addEventListener('change',async e=>{ const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text()),incoming=Array.isArray(data)?data:data.records;if(!Array.isArray(incoming))throw new Error();const map=new Map(records.map(r=>[r.id,r]));incoming.forEach(r=>map.set(r.id||String(Date.now()+Math.random()),r));records=[...map.values()];save();updateSellerList();renderHistory();toast('Copia importada');}catch{alert('El archivo no es una copia válida.');}e.target.value=''; });
-  $('clearData').addEventListener('click',()=>{ if(confirm('¿Borrar definitivamente todos los registros de este dispositivo?')){records=[];save();renderHistory();toast('Datos borrados');} });
-
-  renderServiceChips(); renderStatusChips(); updateSellerList(); renderReport();
+  function renderHistory(){const list=dayRecords($('historyDate').value||localISO()).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));if(!list.length){$('historyList').innerHTML='<div class="empty">No hay registros este día.</div>';return}$('historyList').innerHTML=list.map(r=>`<article class="entry"><div class="entry-top"><div><span class="badge ${r.source==='own'?'own':''}">${r.source==='seller'?'Apoyo vendedor':'Captación propia'}</span><strong>${r.source==='seller'?'Vendedor: '+esc(r.seller):'Atención iniciada por mí'}</strong></div><div class="entry-actions"><button class="icon-btn" data-edit="${r.id}">✎</button><button class="icon-btn danger" data-delete="${r.id}">×</button></div></div>${r.items.map(i=>`<div class="entry-item"><b>${esc(i.service)} · ${esc(i.result)}</b><small>${esc(itemOriginLabel(i.origin))}${i.reason?' · '+esc(i.reason):''}</small>${i.details?esc(i.details):''}</div>`).join('')}</article>`).join('');document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editRecord(b.dataset.edit));document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteRecord(b.dataset.delete))}
+  function editRecord(id){const r=records.find(x=>x.id===id);if(!r)return;editingId=id;source=r.source;$('seller').value=r.seller||'';items=JSON.parse(JSON.stringify(r.items));nextItemId=Math.max(nextItemId,...items.map(i=>Number(i.id)||0))+1;setSource(source,true);$('saveRecord').textContent='Guardar cambios';document.querySelector('[data-view="register"]').click();window.scrollTo({top:0,behavior:'smooth'})}
+  function deleteRecord(id){if(!confirm('¿Eliminar esta atención completa?'))return;records=records.filter(r=>r.id!==id);save();renderHistory();toast('Atención eliminada')}
+  $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:2,exportedAt:new Date().toISOString(),records},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`copia-actividad-${localISO()}.json`;a.click();URL.revokeObjectURL(a.href)};
+  $('importData').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const data=JSON.parse(await file.text()),incoming=Array.isArray(data)?data:data.records;if(!Array.isArray(incoming))throw 0;const map=new Map(records.map(r=>[r.id,r]));incoming.forEach(r=>map.set(r.id||String(Date.now()+Math.random()),r));records=[...map.values()];save();updateSellerList();renderHistory();toast('Copia importada')}catch{alert('El archivo no es una copia válida.')}e.target.value=''};
+  $('clearData').onclick=()=>{if(confirm('¿Borrar definitivamente todas las atenciones de este dispositivo?')){records=[];save();renderHistory();toast('Datos borrados')}};
+  updateSellerList();setSource('seller');renderReport();
 })();
 </script>
 </body>
