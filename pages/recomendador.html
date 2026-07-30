@@ -163,8 +163,12 @@ function bind(step){
   document.querySelectorAll('[data-tv]').forEach(b=>b.addEventListener('click',()=>toggleTv(b.dataset.tv)));
 }
 function toggleTv(id){
-  const group=Object.values(TV_GROUPS).find(g=>g.includes(id));if(group)answers.tv=answers.tv.filter(x=>!group.includes(x));
-  if(answers.tv.includes(id))answers.tv=answers.tv.filter(x=>x!==id);else answers.tv.push(id);render();
+  const wasSelected=answers.tv.includes(id);
+  const group=Object.values(TV_GROUPS).find(g=>g.includes(id));
+  if(group)answers.tv=answers.tv.filter(x=>!group.includes(x));
+  else answers.tv=answers.tv.filter(x=>x!==id);
+  if(!wasSelected)answers.tv.push(id);
+  render();
 }
 
 function tvQuote(provider){
