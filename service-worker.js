@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v20-3-gestiones-flexibles';
+const CACHE_NAME = 'mm-ventas-v20-4-tv-toggle';
 const CORE = [
   './',
   './index.html',
