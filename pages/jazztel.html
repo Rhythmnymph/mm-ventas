@@ -261,6 +261,7 @@
 <div class="section" id="fixed-addons"><span class="label">Servicios añadidos · Línea fija</span><div class="toggle-group"><button id="caller-id-btn" class="toggle-btn" onclick="toggleCallerId()">Identificación de llamadas (1,77€)</button></div></div>
 <div class="section" id="adics"><span class="label">Líneas adicionales</span><div id="adic-list" class="adic-list"></div></div>
 <div class="section" id="tv-sec"><div class="toggle-group"><button id="tv-toggle" class="toggle-btn" onclick="togglePanel('tv')">+ TV en tienda</button><button id="post-toggle" class="toggle-btn" onclick="togglePanel('post')">+ Cliente ya activo</button></div><div id="tv-panel" class="tv-panel"><span class="label">Contratable en tienda</span><div class="tv-grid"><div class="tv-btn" id="tv-jazztel" onclick="toggleTV('jazztel',4.38,'Jazztel TV')">Jazztel TV (4,38€)</div></div></div><div id="post-panel" class="tv-panel"><span class="label">Tras la activación · TV con decodificador</span><div class="tv-grid"><div class="tv-btn" id="tv-orange" onclick="toggleOrange()">Orange TV Cine y Series (13,22€)</div><div class="tv-btn" id="tv-futbol" onclick="toggleFootball('football')">Todo Fútbol y Baloncesto (38,86€)</div><div class="tv-btn" id="tv-deporte" onclick="toggleFootball('sport')">Todo Deporte (47,74€)</div><div class="tv-btn" id="tv-netflix" onclick="toggleTV('netflix',7.95,'Netflix con anuncios')">Netflix c/anuncios (7,95€)</div><div class="tv-btn" id="tv-netflixstd" onclick="toggleTV('netflixstd',13.26,'Netflix estándar')">Netflix estándar (13,26€)</div><div class="tv-btn" id="tv-netflixpremium" onclick="toggleTV('netflixpremium',19.45,'Netflix Premium')">Netflix Premium (19,45€)</div><div class="tv-btn" id="tv-prime" onclick="toggleTV('prime',8.83,'Prime + Max')">Prime + Max (8,83€)</div><div class="tv-btn" id="tv-disney" onclick="toggleTV('disney',6.18,'Disney+ con anuncios')">Disney+ c/anuncios (6,18€)</div><div class="tv-btn" id="tv-disneystd" onclick="toggleTV('disneystd',9.72,'Disney+ estándar')">Disney+ estándar (9,72€)</div><div class="tv-btn" id="tv-disneypremium" onclick="toggleTV('disneypremium',14.14,'Disney+ Premium')">Disney+ Premium (14,14€)</div><div class="tv-btn" id="tv-motor" onclick="toggleTV('motor',8.83,'DAZN Motor')">DAZN Motor (8,83€*)</div><div class="tv-btn" id="tv-basket" onclick="toggleTV('basket',8.83,'DAZN Baloncesto')">DAZN Baloncesto (8,83€)</div></div><div class="subnote">Debe solicitarlo el cliente a atención al cliente cuando el servicio principal ya esté activo. Alta de decodificador: 8,80€. Solo para clientes particulares. No compatible con Jazztel TV contratada en tienda. DAZN Motor: 8,83€/mes durante 12 meses; después 17,68€/mes.</div></div></div>
+<div class="section"><span class="label">Servicio independiente compatible</span><div class="toggle-group"><button class="toggle-btn tv-btn" id="tv-movistar" onclick="toggleTV('movistar',9.99,'Movistar+ · suscripción independiente')">Movistar+ (9,99€)</button></div><div class="subnote">Se añade aparte de Jazztel y no requiere el decodificador de Jazztel.</div></div>
 <div class="section"><span class="label" style="text-align:center">¿Cuánto paga actualmente?</span><div style="text-align:center"><input id="current" type="number" class="price-input" placeholder="0" oninput="update()" inputmode="decimal"><span style="font-size:1.45rem;font-weight:900;color:var(--primary)">€</span></div></div>
 <div class="result"><span class="label">Ahorro estimado al año</span><div id="annual" class="annual">0€</div><div id="monthly" class="monthly">Esperando precio</div><div id="total-label" style="font-weight:850;margin-top:6px"></div><div id="summary" class="summary"></div><button class="action" onclick="openBreakdown()">Generar propuesta detallada</button></div>
 
@@ -470,9 +471,9 @@ function applyRecommendation(){
     if(state.type==='convergente'&&!PACKS[state.pack].prices[state.speed])state.speed='600';
     const included=state.type==='antidigi'?2:(state.type==='convergente'?PACKS[state.pack].lines:0),extra=Math.max(0,(Number(a.lines)||included)-included);
     if(state.type==='antidigi'||PACKS[state.pack]?.kind==='unlimited')state.qty.unl=extra;else state.qty[Number(a.data)<=80?'20':'50']=extra;
-    const tvPrices={netflix_ads:[7.95,'Netflix con anuncios'],netflix_standard:[13.26,'Netflix estándar'],netflix_premium:[19.45,'Netflix Premium'],prime_max:[8.83,'Prime + Max'],disney_ads:[6.18,'Disney+ con anuncios'],disney_standard:[9.72,'Disney+ estándar'],disney_premium:[14.14,'Disney+ Premium'],dazn_motor:[8.83,'DAZN Motor'],dazn_basket:[8.83,'DAZN Baloncesto']};
-    (a.tv||[]).forEach(id=>{if(id==='football')state.football='football';else if(id==='sport')state.football='sport';else if(id==='orange_tv')state.orange=true;else if(tvPrices[id]){const x=tvPrices[id];const key={netflix_ads:'netflix',netflix_standard:'netflixstd',netflix_premium:'netflixpremium',prime_max:'prime',disney_ads:'disney',disney_standard:'disneystd',disney_premium:'disneypremium',dazn_motor:'motor',dazn_basket:'basket'}[id];state.tv[key]={price:x[0],name:x[1]}}});
-    state.tvOpen=!!state.tv.jazztel;state.postOpen=!!(state.orange||state.football||Object.keys(state.tv).some(id=>id!=='jazztel'));
+    const tvPrices={movistar_plus:[9.99,'Movistar+ · suscripción independiente'],netflix_ads:[7.95,'Netflix con anuncios'],netflix_standard:[13.26,'Netflix estándar'],netflix_premium:[19.45,'Netflix Premium'],prime_max:[8.83,'Prime + Max'],disney_ads:[6.18,'Disney+ con anuncios'],disney_standard:[9.72,'Disney+ estándar'],disney_premium:[14.14,'Disney+ Premium'],dazn_motor:[8.83,'DAZN Motor'],dazn_basket:[8.83,'DAZN Baloncesto']};
+    (a.tv||[]).forEach(id=>{if(id==='football')state.football='football';else if(id==='sport')state.football='sport';else if(id==='orange_tv')state.orange=true;else if(tvPrices[id]){const x=tvPrices[id];const key={movistar_plus:'movistar',netflix_ads:'netflix',netflix_standard:'netflixstd',netflix_premium:'netflixpremium',prime_max:'prime',disney_ads:'disney',disney_standard:'disneystd',disney_premium:'disneypremium',dazn_motor:'motor',dazn_basket:'basket'}[id];state.tv[key]={price:x[0],name:x[1]}}});
+    state.tvOpen=!!state.tv.jazztel;state.postOpen=!!(state.orange||state.football||Object.keys(state.tv).some(id=>!['jazztel','movistar'].includes(id)));
     document.getElementById('current').value=a.currentPrice||'';
     localStorage.setItem('mmv_last_jazztel_transfer',transfer.createdAt);localStorage.setItem('mmv_jazztel_v2',JSON.stringify(state));
   }catch(e){console.error('No se pudo cargar la recomendación',e)}
@@ -520,6 +521,27 @@ function syncVisualState(){
   document.getElementById('tv-toggle').classList.toggle('active',state.tvOpen);
   document.getElementById('post-toggle').classList.toggle('active',state.postOpen);
 }
+// Movistar+ es una suscripción externa: se suma a la propuesta sin activar
+// el alta del decodificador ni las condiciones de la televisión Jazztel.
+const updateJazztel=update;
+update=function(){
+  const movistar=state.tv.movistar;
+  if(movistar)delete state.tv.movistar;
+  updateJazztel();
+  if(!movistar)return;
+  state.tv.movistar=movistar;
+  report.tv.push({name:movistar.name,detail:'Suscripción independiente compatible',price:movistar.price});
+  report.total+=movistar.price;
+  document.getElementById('tv-movistar').classList.add('selected');
+  document.getElementById('total-label').innerText=`Jazztel - Total: ${euro(report.total)}/mes`;
+  const cur=parseFloat(document.getElementById('current').value)||0,save=cur-report.total;
+  document.getElementById('annual').innerText=save>0?Math.round(save*12-report.upfront)+'€':'0€';
+  document.getElementById('annual').style.color=save>0?'var(--success)':'var(--error)';
+  document.getElementById('monthly').innerText=cur?save>0?`${euro(save)} de ahorro al mes`:'No hay mejora económica':'Esperando precio';
+  const tvLine=report.tv.map(x=>x.name).join(', ')||'Sin TV';
+  document.getElementById('summary').innerHTML=document.getElementById('summary').innerHTML.replace(/TV: .*?(?=<br>|$)/,`TV: ${tvLine}`);
+  try{localStorage.setItem('mmv_jazztel_v2',JSON.stringify(state))}catch(e){}
+};
 applyRecommendation();sync();syncVisualState();update();
 </script>
 </body>

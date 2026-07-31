@@ -85,6 +85,7 @@ const ORIGINS=[
   ['movistar','Movistar'],['o2','O2'],['orange','Orange'],['jazztel','Jazztel'],['simyo','Simyo'],['masmovil','MásMóvil'],['pepephone','Pepephone'],['otro','Otra compañía']
 ];
 const TV_OPTIONS=[
+  {id:'movistar_plus',name:'Movistar+',note:'9,99 €/mes · compatible con cualquier operador',provider:'Todas'},
   {id:'football',name:'Todo Fútbol y Baloncesto',note:'38,86 €/mes · solo Jazztel · tras la activación',provider:'Jazztel'},
   {id:'sport',name:'Todo Deporte',note:'Fútbol, baloncesto y motor · 47,74 €/mes · solo Jazztel',provider:'Jazztel'},
   {id:'orange_tv',name:'Orange TV Cine y Series',note:'13,22 €/mes · solo Jazztel',provider:'Jazztel'},
@@ -173,9 +174,9 @@ function toggleTv(id){
 
 function tvQuote(provider){
   const maps={
-    jazztel:{football:38.86,sport:47.74,orange_tv:13.22,netflix_ads:7.95,netflix_standard:13.26,netflix_premium:19.45,prime_max:8.83,disney_ads:6.18,disney_standard:9.72,disney_premium:14.14,dazn_motor:8.83,dazn_basket:8.83},
-    lowi:{netflix_ads:7.07,prime_max:8.85,disney_ads:5.31,lowi_tv:4.42},
-    simyo:{netflix_ads:7.07,simyo_sky:5.30}
+    jazztel:{movistar_plus:9.99,football:38.86,sport:47.74,orange_tv:13.22,netflix_ads:7.95,netflix_standard:13.26,netflix_premium:19.45,prime_max:8.83,disney_ads:6.18,disney_standard:9.72,disney_premium:14.14,dazn_motor:8.83,dazn_basket:8.83},
+    lowi:{movistar_plus:9.99,netflix_ads:7.07,prime_max:8.85,disney_ads:5.31,lowi_tv:4.42},
+    simyo:{movistar_plus:9.99,netflix_ads:7.07,simyo_sky:5.30}
   };
   const labels=Object.fromEntries(TV_OPTIONS.map(x=>[x.id,x.name]));let monthly=0;const included=[],missing=[];
   answers.tv.forEach(id=>{if(maps[provider][id]!=null){monthly+=maps[provider][id];included.push(labels[id])}else missing.push(labels[id])});
@@ -201,7 +202,7 @@ function quoteJazztel(){
 function quoteLowi(){
   if(['vodafone','lowi'].includes(answers.origin))return null;const lines=Number(answers.lines)||1,base=29.18+(Math.max(0,lines-1)*4.42),tv=tvQuote('lowi'),warnings=[];
   if(answers.fixed)warnings.push('No incluye teléfono fijo.');if(answers.unlimited||answers.data==='unlimited'||Number(answers.data)>100)warnings.push('La línea principal tiene 100 GB; no ofrece datos ilimitados.');if(tv.missing.length)warnings.push('Alternativa sin '+tv.missing.join(', ')+'.');
-  return {provider:'Lowi',accent:'#00ccff',pack:`Fibra 1 GB + ${lines} línea${lines>1?'s':''} · principal de 100 GB${lines>1?' y adicionales de 50 GB':''}`,total:base+tv.monthly,stay:'3 meses',warnings,tv,link:'multi.html'};
+  return {provider:'Lowi',accent:'#00ccff',pack:`Fibra 1 GB + ${lines} línea${lines>1?'s':''} · principal de 100 GB${lines>1?' y adicionales de 50 GB':''}`,total:base+tv.monthly,stay:'3 meses',warnings,tv,link:'lowi.html'};
 }
 function quoteSimyo(){
   if(answers.origin==='simyo')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),eligible=SIMYO_ANTI_ORIGINS.includes(answers.origin),anti=eligible&&answers.simyoStay==='12';let base,pack,stay,warnings=[];

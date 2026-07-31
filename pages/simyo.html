@@ -678,7 +678,7 @@ async function exportarPdfA4(idDocumento, nombreArchivo) {
 const BASE={estandar:{600:{50:28.29,120:31.83,300:37.13},1000:{50:30.06,120:33.59,300:38.90}},digi:{600:{250:22.54},1000:{250:24.31}}};
 const SOLO_FIBRA={300:22.98,600:24.75,1000:26.52},SEGUNDA={300:13.26,600:19.45,1000:21.21};
 const LINES={conv:[['8','8 GB',2.65,'std'],['50','50 GB',4.42,'std'],['75','75 GB Origen DIGI',2.65,'digi'],['100','100 GB',7.07,'std'],['150','150 GB',8.84,'std'],['250','250 GB Promo',6.63,'digi'],['300','300 GB',10.61,'std']],mobile:[['8','8 GB',4.42,'std'],['50','50 GB',6.63,'std'],['75','75 GB Origen DIGI',2.65,'digi'],['100','100 GB',8.84,'std'],['150','150 GB',12.38,'std'],['250','250 GB Promo',6.63,'digi'],['300','300 GB',17.69,'std']]};
-const TV={sky:{name:'TV + SkyShowtime',p:5.30},netflix:{name:'Netflix con anuncios',p:7.07}};
+const TV={sky:{name:'TV + SkyShowtime',p:5.30},netflix:{name:'Netflix con anuncios',p:7.07},movistar:{name:'Movistar+ · suscripción independiente',p:9.99}};
 let nextId=1,state={services:[]};const euro=v=>Number(v).toFixed(2).replace('.',',')+'€';const blank=()=>({'8':0,'50':0,'75':0,'100':0,'150':0,'250':0,'300':0});
 function addService(type){if(type==='segunda'&&state.services.filter(s=>s.type==='segunda').length>=2)return alert('Máximo 2 fibras de segunda residencia.');state.services.push({id:nextId++,type,collapsed:false,label:'',coverage:'directa',speed:type==='solo-fibra'||type==='segunda'?'600':'1000',mode:'estandar',main:'50',qty:blank(),tv:{}});render()}
 function S(id){return state.services.find(s=>s.id===id)}function name(s){return s.type==='convergente'?'Fibra + móvil':s.type==='solo-fibra'?'Solo fibra':s.type==='segunda'?'Segunda residencia':'Solo móvil'}function lines(s){return s.type==='solo-movil'?LINES.mobile:LINES.conv}
@@ -759,7 +759,7 @@ function applyRecommendation(){
     else{
       service.type='convergente';const data=Number(a.data)||50;service.main=service.mode==='digi'?'250':data<=50?'50':data<=120?'120':'300';
       const extras=Math.max(0,(Number(a.lines)||1)-1);service.qty[service.mode==='digi'?'250':(service.main==='300'?'300':'50')]=extras;
-      (a.tv||[]).forEach(id=>{if(id==='simyo_sky')service.tv.sky=TV.sky;if(id==='netflix_ads')service.tv.netflix=TV.netflix});
+      (a.tv||[]).forEach(id=>{if(id==='simyo_sky')service.tv.sky=TV.sky;if(id==='netflix_ads')service.tv.netflix=TV.netflix;if(id==='movistar_plus')service.tv.movistar=TV.movistar});
     }
     state={services:[service]};nextId=2;current.value=a.currentPrice||'';
     localStorage.setItem('mmv_last_simyo_transfer',transfer.createdAt);saveState();return true;
