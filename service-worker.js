@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v20-4-tv-toggle';
+const CACHE_NAME = 'mm-ventas-v21-1-lowi-renombrado';
 const CORE = [
   './',
   './index.html',
@@ -7,7 +7,7 @@ const CORE = [
   './assets/app-shell.css',
   './assets/mediamarkt-logo.png',
   './assets/mediamarkt-symbol.png',
-  './pages/multi.html',
+  './pages/lowi.html',
   './pages/recomendador.html',
   './pages/simyo.html',
   './pages/jazztel.html',
