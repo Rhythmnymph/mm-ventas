@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v21-1-lowi-fuera-derivaciones';
+const CACHE_NAME = 'mm-ventas-v21-1-colores';
 const CORE = [
   './',
   './index.html',
