@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#0019a5">
+  <title>O2 Pro · MM Ventas</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <style>
+    :root{--o2:#0019a5;--o2b:#1238ee;--cyan:#55dcff;--bg:#eef4ff;--card:#fff;--ink:#071550;--muted:#61709b;--stroke:#d8e2ff;--good:#00a86b}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-tap-highlight-color:transparent}
+    body{background:radial-gradient(circle at 90% 2%,rgba(85,220,255,.6),transparent 23%),linear-gradient(180deg,#f6f9ff,#e8f0ff)}button,input{font:inherit}
+    .app{max-width:780px;min-height:100dvh;margin:auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px 34px}
+    .top{display:flex;align-items:center;gap:12px;margin-bottom:12px}.back{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;text-decoration:none;background:#fff;color:var(--o2);font-size:1.8rem;font-weight:900;box-shadow:0 8px 25px rgba(0,25,165,.12)}
+    .top small{display:block;color:var(--muted);font-weight:850;letter-spacing:.1em;text-transform:uppercase}.top b{font-size:1.12rem}
+    .hero{position:relative;overflow:hidden;border-radius:30px;padding:24px 21px;background:linear-gradient(135deg,var(--o2),var(--o2b));color:#fff;box-shadow:0 20px 45px rgba(0,25,165,.24)}.hero:before,.hero:after{content:"";position:absolute;border-radius:50%;border:2px solid rgba(255,255,255,.2)}.hero:before{width:145px;height:145px;right:-35px;top:-58px}.hero:after{width:75px;height:75px;right:73px;bottom:-36px}.brand{font-size:2.4rem;font-weight:1000;letter-spacing:-.08em}.hero h1{font-size:1.65rem;margin:9px 0 5px;letter-spacing:-.04em}.hero p{margin:0;color:rgba(255,255,255,.8);font-weight:700;max-width:510px;line-height:1.35}
+    .section{margin-top:13px;padding:17px;border:1px solid var(--stroke);border-radius:25px;background:rgba(255,255,255,.88);box-shadow:0 13px 35px rgba(31,62,150,.08)}.section h2{margin:0 0 5px;font-size:1.1rem}.hint{color:var(--muted);font-size:.81rem;font-weight:700;line-height:1.35;margin-bottom:12px}
+    .tabs,.choices{display:grid;gap:8px}.tabs{grid-template-columns:repeat(3,1fr)}.choices.two{grid-template-columns:repeat(2,1fr)}.choice{border:1px solid var(--stroke);border-radius:17px;background:#f7f9ff;color:var(--ink);padding:12px;text-align:left;cursor:pointer;min-height:65px}.choice strong{display:block;font-size:.92rem}.choice span{display:block;color:var(--muted);font-size:.72rem;font-weight:700;margin-top:4px;line-height:1.25}.choice.active{border-color:var(--o2b);background:#edf1ff;box-shadow:inset 0 0 0 1px var(--o2b)}.tabs .choice{text-align:center;min-height:48px;padding:10px 5px}.tabs .choice strong{font-size:.78rem}
+    .addon-list{display:grid;gap:8px}.addon{display:flex;align-items:center;gap:10px;border:1px solid var(--stroke);border-radius:17px;padding:11px;background:#f9fbff}.addon .info{flex:1}.addon b{display:block;font-size:.87rem}.addon small{color:var(--muted);font-weight:700}.stepper{display:flex;align-items:center;gap:8px}.stepper button{width:35px;height:35px;border-radius:50%;border:0;background:var(--o2);color:#fff;font-size:1.25rem;font-weight:900;cursor:pointer}.stepper output{min-width:20px;text-align:center;font-weight:1000}
+    .toggle{display:flex;align-items:center;gap:10px;cursor:pointer}.toggle input{width:21px;height:21px;accent-color:var(--o2)}.second-options{display:none;margin-top:10px}.second-options.show{display:grid}
+    .total{position:sticky;bottom:10px;z-index:5;margin-top:14px;border-radius:25px;padding:17px 18px;background:#06145b;color:#fff;box-shadow:0 18px 45px rgba(0,15,95,.3)}.total-top{display:flex;justify-content:space-between;gap:15px;align-items:end}.total small{color:rgba(255,255,255,.65);font-weight:750}.amount{font-size:2.05rem;font-weight:1000;white-space:nowrap}.summary{margin-top:9px;color:rgba(255,255,255,.8);font-size:.78rem;font-weight:700;line-height:1.4}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.actions button{border:0;border-radius:14px;min-height:45px;font-weight:950;cursor:pointer}.details{background:rgba(255,255,255,.12);color:#fff}.pdf{background:#fff;color:var(--o2)}
+    dialog{width:min(690px,calc(100% - 24px));border:0;border-radius:25px;padding:0;box-shadow:0 30px 80px rgba(0,0,0,.32)}dialog::backdrop{background:rgba(0,8,55,.62)}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--o2);color:#fff}.modal-head button{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:50%;width:34px;height:34px;font-size:1.2rem}.modal-body{padding:17px}.line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e7ecfa;font-size:.86rem}.line b:last-child{white-space:nowrap}.legal{font-size:.7rem;color:#69748e;line-height:1.4;margin-top:13px}
+    #pdf-sheet{display:none;background:#fff;color:#17204c;padding:24px;font-family:Arial,sans-serif}.pdf-header{background:#0019a5;color:#fff;border-radius:16px;padding:18px}.pdf-title{font-size:25px;font-weight:bold}.pdf-sub{opacity:.8;margin-top:4px}.pdf-total{font-size:31px;font-weight:bold;margin:18px 0 4px}.pdf-table{width:100%;border-collapse:collapse;margin-top:15px}.pdf-table td{padding:10px 5px;border-bottom:1px solid #dfe5f5;font-size:13px}.pdf-table td:last-child{text-align:right;font-weight:bold}.pdf-note{font-size:10px;color:#68718a;line-height:1.45;margin-top:16px}
+    @media(max-width:520px){.choices.two{grid-template-columns:1fr}.section{padding:15px}.tabs .choice strong{font-size:.72rem}.addon{align-items:flex-start}.total{bottom:6px}}
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="top"><a class="back" id="backLink" href="../index.html" aria-label="Volver">‹</a><div><small>Calculadora profesional</small><b>O2 Pro</b></div></div>
+  <section class="hero"><div class="brand">O₂</div><h1>Una oferta completa, sin montar un puzle</h1><p>Elige el paquete principal y añade dentro de la misma propuesta las líneas y servicios compatibles.</p></section>
+
+  <section class="section">
+    <h2>¿Qué contrata como servicio principal?</h2><div class="hint">Este será el punto de partida de toda la oferta.</div>
+    <div class="tabs" id="serviceTabs"></div>
+  </section>
+
+  <section class="section">
+    <h2>Paquete principal</h2><div class="hint" id="packageHint"></div>
+    <div class="choices two" id="packageChoices"></div>
+  </section>
+
+  <section class="section" id="addonsSection">
+    <h2>Completa la oferta</h2><div class="hint">Todo lo que añadas formará parte de esta misma propuesta y del mismo total.</div>
+    <div class="addon-list" id="additionalLines"></div>
+    <label class="addon toggle" id="secondHomeToggle"><input type="checkbox" id="secondEnabled"><span class="info"><b>Añadir fibra de segunda residencia</b><small>Disponible para clientes O2 con fibra principal.</small></span></label>
+    <div class="choices two second-options" id="secondChoices"></div>
+  </section>
+
+  <section class="total"><div class="total-top"><div><small>Total mensual de la oferta</small><div class="amount" id="totalAmount">0,00 €</div></div><small>IGIC incluido</small></div><div class="summary" id="summary"></div><div class="actions"><button class="details" id="detailsBtn">Ver desglose</button><button class="pdf" id="pdfBtn">Guardar PDF</button></div></section>
+</main>
+
+<dialog id="detailDialog"><div class="modal-head"><b>Propuesta O2 completa</b><button id="closeDialog">×</button></div><div class="modal-body"><div id="detailRows"></div><div class="legal">Precios finales con IGIC según el tarifario facilitado. Sujeto a cobertura, disponibilidad, validación y condiciones de contratación de O2. Las líneas adicionales y la fibra de segunda residencia requieren una tarifa principal compatible.</div></div></dialog>
+
+<div id="pdf-sheet"><div class="pdf-header"><div class="pdf-title">Propuesta O2 · MediaMarkt Añaza</div><div class="pdf-sub">Oferta completa personalizada</div></div><div class="pdf-total" id="pdfTotal"></div><div>Precio mensual final con IGIC incluido</div><table class="pdf-table"><tbody id="pdfRows"></tbody></table><div class="pdf-note">Propuesta orientativa sujeta a cobertura, disponibilidad, validación y condiciones de contratación de O2. Precios con IGIC. Las plataformas incluidas corresponden al paquete oficial seleccionado.</div></div>
+
+<script>
+const TRANSFER_KEY='mmv_recomendacion_transfer_v19';
+const STORAGE_KEY='mmv_o2_state_v22';
+const SERVICES=[['convergent','Fibra + móvil'],['mobile','Solo móvil'],['fiber','Solo fibra']];
+const PACKAGES={
+  convergent:[
+    {id:'c600_60',name:'600 Mb + 60 GB',detail:'1 línea · llamadas ilimitadas',price:30.95,speed:600,data:60,lines:1,tv:[]},
+    {id:'c600_10_40',name:'600 Mb + 2 líneas',detail:'10 GB + 40 GB',price:30.95,speed:600,data:50,lines:2,tv:[]},
+    {id:'c1000_120',name:'1 Gb + 120 GB',detail:'1 línea · llamadas ilimitadas',price:33.60,speed:1000,data:120,lines:1,tv:[]},
+    {id:'c600_35_m',name:'600 Mb + 35 GB + Movistar Plus',detail:'Entretenimiento incluido',price:33.60,speed:600,data:35,lines:1,tv:['Movistar Plus']},
+    {id:'c600_60_md',name:'600 Mb + 60 GB + Movistar Plus + Disney+',detail:'Disney+ Estándar con anuncios',price:39.77,speed:600,data:60,lines:1,tv:['Movistar Plus','Disney+ Estándar con anuncios']},
+    {id:'c600_60_mn',name:'600 Mb + 60 GB + Movistar Plus + Netflix',detail:'Netflix Estándar con anuncios',price:41.56,speed:600,data:60,lines:1,tv:['Movistar Plus','Netflix Estándar con anuncios']},
+    {id:'c1000_350_m',name:'1 Gb + 350 GB + Movistar Plus',detail:'Entretenimiento incluido',price:44.21,speed:1000,data:350,lines:1,tv:['Movistar Plus']},
+    {id:'c600_60_mnd',name:'600 Mb + 60 GB + Movistar Plus + Netflix + Disney+',detail:'Ambas plataformas con anuncios',price:45.98,speed:600,data:60,lines:1,tv:['Movistar Plus','Netflix Estándar con anuncios','Disney+ Estándar con anuncios']},
+    {id:'c1000_375_md',name:'1 Gb + 375 GB + Movistar Plus + Disney+',detail:'Disney+ Estándar con anuncios',price:49.52,speed:1000,data:375,lines:1,tv:['Movistar Plus','Disney+ Estándar con anuncios']},
+    {id:'c1000_375_mn',name:'1 Gb + 375 GB + Movistar Plus + Netflix',detail:'Netflix Estándar con anuncios',price:51.29,speed:1000,data:375,lines:1,tv:['Movistar Plus','Netflix Estándar con anuncios']},
+    {id:'c1000_375_mnd',name:'1 Gb + 375 GB + Movistar Plus + Netflix + Disney+',detail:'Ambas plataformas con anuncios',price:54.83,speed:1000,data:375,lines:1,tv:['Movistar Plus','Netflix Estándar con anuncios','Disney+ Estándar con anuncios']}
+  ],
+  mobile:[
+    {id:'m50',name:'50 GB 5G',detail:'Llamadas ilimitadas',price:6.19,data:50,lines:1,tv:[]},
+    {id:'m100',name:'100 GB 5G',detail:'Llamadas ilimitadas',price:8.84,data:100,lines:1,tv:[]},
+    {id:'m150',name:'150 GB 5G',detail:'Llamadas ilimitadas',price:13.26,data:150,lines:1,tv:[]},
+    {id:'m300',name:'300 GB 5G',detail:'Llamadas ilimitadas',price:17.69,data:300,lines:1,tv:[]}
+  ],
+  fiber:[
+    {id:'f300',name:'Fibra 300 Mb',detail:'Llamadas ilimitadas a fijos y móviles',price:20.34,speed:300,lines:0,tv:[]},
+    {id:'f600',name:'Fibra 600 Mb',detail:'Llamadas ilimitadas a fijos y móviles',price:23.88,speed:600,lines:0,tv:[]},
+    {id:'f1000',name:'Fibra 1 Gb',detail:'Llamadas ilimitadas',price:27.41,speed:1000,lines:0,tv:[]}
+  ]
+};
+const ADDITIONALS=[{id:'a40',name:'Línea adicional 40 GB',price:4.42},{id:'a150',name:'Línea adicional 150 GB',price:8.84},{id:'a300',name:'Línea adicional 300 GB',price:13.26}];
+const SECOND=[{id:'s300',name:'Segunda residencia · 300 Mb',price:13.26},{id:'s600',name:'Segunda residencia · 600 Mb',price:17.69},{id:'s1000',name:'Segunda residencia · 1 Gb',price:23.88}];
+let state={service:'convergent',packageId:'c600_60',additionals:{a40:0,a150:0,a300:0},secondEnabled:false,secondId:'s300'};
+try{state={...state,...JSON.parse(localStorage.getItem(STORAGE_KEY)||'{}')}}catch(e){}
+
+function pack(){return PACKAGES[state.service].find(x=>x.id===state.packageId)||PACKAGES[state.service][0]}
+function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}}
+function money(v){return Number(v).toFixed(2).replace('.',',')+' €'}
+function total(){let value=pack().price;ADDITIONALS.forEach(a=>value+=(state.additionals[a.id]||0)*a.price);if(state.secondEnabled&&state.service!=='mobile')value+=(SECOND.find(x=>x.id===state.secondId)||SECOND[0]).price;return value}
+function rows(){const p=pack(),out=[{name:'Paquete principal · '+p.name,price:p.price}];ADDITIONALS.forEach(a=>{const qty=state.additionals[a.id]||0;if(qty)out.push({name:`${qty} × ${a.name}`,price:qty*a.price})});if(state.secondEnabled&&state.service!=='mobile'){const s=SECOND.find(x=>x.id===state.secondId)||SECOND[0];out.push({name:s.name,price:s.price})}return out}
+
+function render(){
+  document.getElementById('serviceTabs').innerHTML=SERVICES.map(s=>`<button class="choice ${state.service===s[0]?'active':''}" data-service="${s[0]}"><strong>${s[1]}</strong></button>`).join('');
+  const hints={convergent:'Selecciona la tarifa oficial que mejor encaja. Las plataformas indicadas ya están incluidas en ese precio.',mobile:'Precios de las líneas móviles convertidos de IVA a IGIC.',fiber:'Fibra principal con llamadas; después puedes completar la propuesta.'};
+  document.getElementById('packageHint').textContent=hints[state.service];
+  document.getElementById('packageChoices').innerHTML=PACKAGES[state.service].map(p=>`<button class="choice ${state.packageId===p.id?'active':''}" data-package="${p.id}"><strong>${p.name}</strong><span>${p.detail} · ${money(p.price)}/mes</span></button>`).join('');
+  document.getElementById('additionalLines').innerHTML=ADDITIONALS.map(a=>`<div class="addon"><div class="info"><b>${a.name}</b><small>${money(a.price)}/mes con IGIC</small></div><div class="stepper"><button data-minus="${a.id}" aria-label="Quitar">−</button><output>${state.additionals[a.id]||0}</output><button data-plus="${a.id}" aria-label="Añadir">+</button></div></div>`).join('');
+  const canSecond=state.service!=='mobile';document.getElementById('secondHomeToggle').style.display=canSecond?'flex':'none';document.getElementById('secondEnabled').checked=canSecond&&state.secondEnabled;
+  const second=document.getElementById('secondChoices');second.classList.toggle('show',canSecond&&state.secondEnabled);second.innerHTML=SECOND.map(s=>`<button class="choice ${state.secondId===s.id?'active':''}" data-second="${s.id}"><strong>${s.name}</strong><span>${money(s.price)}/mes con IGIC</span></button>`).join('');
+  document.getElementById('totalAmount').textContent=money(total());const p=pack(),extraCount=Object.values(state.additionals).reduce((a,b)=>a+b,0);document.getElementById('summary').textContent=`${p.name}${p.tv.length?' · '+p.tv.join(' + '):''}${extraCount?' · '+extraCount+' línea'+(extraCount>1?'s':'')+' adicional'+(extraCount>1?'es':''):''}${canSecond&&state.secondEnabled?' · segunda residencia':''}.`;
+  bind();save();
+}
+function bind(){
+  document.querySelectorAll('[data-service]').forEach(b=>b.onclick=()=>{state.service=b.dataset.service;state.packageId=PACKAGES[state.service][0].id;if(state.service==='mobile')state.secondEnabled=false;render()});
+  document.querySelectorAll('[data-package]').forEach(b=>b.onclick=()=>{state.packageId=b.dataset.package;render()});
+  document.querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>{const id=b.dataset.plus;state.additionals[id]=Math.min(5,(state.additionals[id]||0)+1);render()});
+  document.querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>{const id=b.dataset.minus;state.additionals[id]=Math.max(0,(state.additionals[id]||0)-1);render()});
+  document.querySelectorAll('[data-second]').forEach(b=>b.onclick=()=>{state.secondId=b.dataset.second;render()});
+}
+document.getElementById('secondEnabled').onchange=e=>{state.secondEnabled=e.target.checked;render()};
+document.getElementById('detailsBtn').onclick=()=>{document.getElementById('detailRows').innerHTML=rows().map(r=>`<div class="line"><span>${r.name}</span><b>${money(r.price)}/mes</b></div>`).join('')+`<div class="line"><b>Total mensual</b><b>${money(total())}</b></div>`;document.getElementById('detailDialog').showModal()};
+document.getElementById('closeDialog').onclick=()=>document.getElementById('detailDialog').close();
+document.getElementById('pdfBtn').onclick=()=>{document.getElementById('pdfTotal').textContent=money(total())+' /mes';document.getElementById('pdfRows').innerHTML=rows().map(r=>`<tr><td>${r.name}</td><td>${money(r.price)}/mes</td></tr>`).join('');const el=document.getElementById('pdf-sheet');el.style.display='block';if(window.html2pdf){html2pdf().set({margin:8,filename:`Propuesta_O2_MM_Anaza_${Date.now()}.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save().finally(()=>el.style.display='none')}else{window.print();el.style.display='none'}};
+
+function applyRecommendation(){
+  if(!new URLSearchParams(location.search).has('from'))return;
+  document.getElementById('backLink').href='recomendador.html';
+  try{
+    const transfer=JSON.parse(localStorage.getItem(TRANSFER_KEY)||'null');if(!transfer||transfer.provider!=='O2')return;
+    const a=transfer.answers||{},r=transfer.recommendation||{};state.service=a.service||'convergent';
+    if(state.service==='convergent'){
+      const wantedTv=a.tv||[],speed=Number(a.fiberSpeed)||600,data=a.unlimited?999:Number(a.data)||60,lines=Number(a.lines)||1;
+      let candidates=PACKAGES.convergent.filter(p=>p.speed>=speed&&p.data>=Math.min(data,375));if(!candidates.length)candidates=PACKAGES.convergent.filter(p=>p.speed>=speed);if(!candidates.length)candidates=PACKAGES.convergent;
+      const tvNames=[];if(wantedTv.includes('movistar_plus'))tvNames.push('Movistar Plus');if(wantedTv.includes('netflix_ads'))tvNames.push('Netflix Estándar con anuncios');if(wantedTv.includes('disney_ads'))tvNames.push('Disney+ Estándar con anuncios');
+      candidates.sort((x,y)=>{const xm=tvNames.filter(v=>x.tv.includes(v)).length,ym=tvNames.filter(v=>y.tv.includes(v)).length;return ym-xm||x.price-y.price});state.packageId=(r.o2PackageId&&PACKAGES.convergent.some(p=>p.id===r.o2PackageId))?r.o2PackageId:candidates[0].id;
+      const extraId=data<=50?'a40':data<=150?'a150':'a300';state.additionals={a40:0,a150:0,a300:0};state.additionals[extraId]=Math.max(0,lines-pack().lines);
+    }else if(state.service==='fiber'){const speed=Number(a.fiberSpeed)||600;state.packageId=(PACKAGES.fiber.find(p=>p.speed>=speed)||PACKAGES.fiber.at(-1)).id;state.additionals={a40:0,a150:0,a300:0}}
+    else{const need=a.usage==='router'?300:(Number(a.data)||100);state.packageId=(PACKAGES.mobile.find(p=>p.data>=need)||PACKAGES.mobile.at(-1)).id;state.additionals={a40:0,a150:0,a300:0}}
+  }catch(e){}
+}
+applyRecommendation();render();
+</script>
+</body>
+</html>

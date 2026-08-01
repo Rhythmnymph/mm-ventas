@@ -85,15 +85,15 @@ const ORIGINS=[
   ['movistar','Movistar'],['o2','O2'],['orange','Orange'],['jazztel','Jazztel'],['simyo','Simyo'],['masmovil','MásMóvil'],['pepephone','Pepephone'],['otro','Otra compañía']
 ];
 const TV_OPTIONS=[
-  {id:'movistar_plus',name:'Movistar+',note:'9,99 €/mes · compatible con cualquier operador',provider:'Todas'},
+  {id:'movistar_plus',name:'Movistar+',note:'9,99 €/mes como extra; también incluido en paquetes oficiales O2',provider:'Todas'},
   {id:'football',name:'Todo Fútbol y Baloncesto',note:'38,86 €/mes · solo Jazztel · tras la activación',provider:'Jazztel'},
   {id:'sport',name:'Todo Deporte',note:'Fútbol, baloncesto y motor · 47,74 €/mes · solo Jazztel',provider:'Jazztel'},
   {id:'orange_tv',name:'Orange TV Cine y Series',note:'13,22 €/mes · solo Jazztel',provider:'Jazztel'},
-  {id:'netflix_ads',name:'Netflix con anuncios',note:'Disponible con Jazztel, Lowi y Simyo',provider:'Varias'},
+  {id:'netflix_ads',name:'Netflix con anuncios',note:'Disponible con Jazztel, Lowi, Simyo y en paquetes O2',provider:'Varias'},
   {id:'netflix_standard',name:'Netflix estándar',note:'13,26 €/mes con Jazztel',provider:'Jazztel'},
   {id:'netflix_premium',name:'Netflix Premium',note:'19,45 €/mes con Jazztel',provider:'Jazztel'},
   {id:'prime_max',name:'Prime + Max',note:'8,83 €/mes con Jazztel; equivalente separado en Lowi',provider:'Varias'},
-  {id:'disney_ads',name:'Disney+ con anuncios',note:'Disponible con Jazztel y Lowi',provider:'Varias'},
+  {id:'disney_ads',name:'Disney+ con anuncios',note:'Disponible con Jazztel, Lowi y en paquetes O2',provider:'Varias'},
   {id:'disney_standard',name:'Disney+ estándar',note:'9,72 €/mes con Jazztel',provider:'Jazztel'},
   {id:'disney_premium',name:'Disney+ Premium',note:'14,14 €/mes con Jazztel',provider:'Jazztel'},
   {id:'dazn_motor',name:'DAZN Motor',note:'8,83 €/mes durante 12 meses; después 17,68 €',provider:'Jazztel'},
@@ -210,8 +210,47 @@ function quoteSimyo(){
   if(answers.fixed)warnings.push('No incluye teléfono fijo.');if(answers.unlimited||answers.data==='unlimited')warnings.push('No ofrece datos ilimitados.');const tv=tvQuote('simyo');if(tv.missing.length)warnings.push('Alternativa sin '+tv.missing.join(', ')+'.');
   return {provider:'Simyo',accent:'#ff6600',pack,total:base+tv.monthly,stay,warnings,tv,link:'simyo.html'};
 }
+function quoteO2(){
+  if(answers.origin==='o2')return null;
+  const requested=answers.tv||[],wanted=[];
+  if(requested.includes('movistar_plus'))wanted.push('movistar_plus');
+  if(requested.includes('netflix_ads'))wanted.push('netflix_ads');
+  if(requested.includes('disney_ads'))wanted.push('disney_ads');
+  const unsupported=requested.filter(x=>!['movistar_plus','netflix_ads','disney_ads'].includes(x));
+  const packages=[
+    {id:'c600_60',speed:600,data:60,lines:1,tv:[],name:'Fibra 600 MB + 60 GB',price:30.95},
+    {id:'c600_10_40',speed:600,data:50,lines:2,tv:[],name:'Fibra 600 MB + 2 líneas · 10 GB + 40 GB',price:30.95},
+    {id:'c1000_120',speed:1000,data:120,lines:1,tv:[],name:'Fibra 1 GB + 120 GB',price:33.60},
+    {id:'c600_35_m',speed:600,data:35,lines:1,tv:['movistar_plus'],name:'Fibra 600 MB + 35 GB + Movistar Plus',price:33.60},
+    {id:'c600_60_md',speed:600,data:60,lines:1,tv:['movistar_plus','disney_ads'],name:'Fibra 600 MB + 60 GB + Movistar Plus + Disney+',price:39.77},
+    {id:'c600_60_mn',speed:600,data:60,lines:1,tv:['movistar_plus','netflix_ads'],name:'Fibra 600 MB + 60 GB + Movistar Plus + Netflix',price:41.56},
+    {id:'c1000_350_m',speed:1000,data:350,lines:1,tv:['movistar_plus'],name:'Fibra 1 GB + 350 GB + Movistar Plus',price:44.21},
+    {id:'c600_60_mnd',speed:600,data:60,lines:1,tv:['movistar_plus','netflix_ads','disney_ads'],name:'Fibra 600 MB + 60 GB + Movistar Plus + Netflix + Disney+',price:45.98},
+    {id:'c1000_375_md',speed:1000,data:375,lines:1,tv:['movistar_plus','disney_ads'],name:'Fibra 1 GB + 375 GB + Movistar Plus + Disney+',price:49.52},
+    {id:'c1000_375_mn',speed:1000,data:375,lines:1,tv:['movistar_plus','netflix_ads'],name:'Fibra 1 GB + 375 GB + Movistar Plus + Netflix',price:51.29},
+    {id:'c1000_375_mnd',speed:1000,data:375,lines:1,tv:['movistar_plus','netflix_ads','disney_ads'],name:'Fibra 1 GB + 375 GB + Movistar Plus + Netflix + Disney+',price:54.83}
+  ];
+  const needSpeed=Number(answers.fiberSpeed)||600,needData=answers.unlimited?999:Number(answers.data)||60,needLines=Number(answers.lines)||1;
+  const extraPrice=needData<=50?4.42:needData<=150?8.84:13.26;
+  const scored=packages.map(p=>{
+    const missingTv=wanted.filter(x=>!p.tv.includes(x)).length,unwantedTv=p.tv.filter(x=>!wanted.includes(x)).length;
+    const speedShort=p.speed<needSpeed?1:0,dataShort=p.data<Math.min(needData,375)?1:0;
+    const projected=p.price+Math.max(0,needLines-p.lines)*extraPrice;
+    return {p,score:missingTv*10000+speedShort*5000+dataShort*2500+unwantedTv*120+projected};
+  }).sort((a,b)=>a.score-b.score);
+  const p=scored[0].p,extraCount=Math.max(0,needLines-p.lines);
+  const labels={movistar_plus:'Movistar+',netflix_ads:'Netflix con anuncios',disney_ads:'Disney+ con anuncios'};
+  const included=wanted.filter(x=>p.tv.includes(x)).map(x=>labels[x]),missing=wanted.filter(x=>!p.tv.includes(x)).map(x=>labels[x]);
+  const warnings=[];
+  if(p.speed<needSpeed)warnings.push(`Esta tarifa se queda en ${p.speed} MB.`);
+  if(p.data<Math.min(needData,375))warnings.push(`La línea principal incluye ${p.data} GB.`);
+  if(answers.unlimited)warnings.push('O2 no ofrece datos ilimitados en estas tarifas.');
+  if(missing.length||unsupported.length){const unsupportedLabels=TV_OPTIONS.filter(x=>unsupported.includes(x.id)).map(x=>x.name);warnings.push('No reúne '+[...missing,...unsupportedLabels].join(', ')+'.')}
+  const tv={monthly:0,included:p.tv.map(x=>labels[x]),missing:[...missing],upfront:0};
+  return {provider:'O2',accent:'#1238ee',pack:p.name+(extraCount?` + ${extraCount} línea${extraCount>1?'s':''} adicional${extraCount>1?'es':''}`:''),total:p.price+extraCount*extraPrice,stay:'Sin permanencia',warnings,tv,link:'o2.html',o2PackageId:p.id};
+}
 function convergentResult(){
-  const jazz=quoteJazztel(),lowi=quoteLowi(),simyo=quoteSimyo(),all=[jazz,lowi,simyo].filter(Boolean);const current=Number(answers.currentPrice)||0;
+  const jazz=quoteJazztel(),lowi=quoteLowi(),simyo=quoteSimyo(),o2=quoteO2(),all=[jazz,lowi,simyo,o2].filter(Boolean);const current=Number(answers.currentPrice)||0;
   const jazzOnly=['football','sport','orange_tv','netflix_standard','netflix_premium','disney_standard','disney_premium','dazn_motor','dazn_basket'].some(x=>answers.tv.includes(x));
   const lowiOnly=answers.tv.includes('lowi_tv'),simyoOnly=answers.tv.includes('simyo_sky');const premium=!!jazz&&jazz.equivalent&&current>jazz.total;
   let primary=null,reasons=[];
@@ -222,12 +261,13 @@ function convergentResult(){
   return {primary,alternatives:all.filter(x=>x!==primary),premium,current};
 }
 function mobileResult(){
-  if(answers.usage==='router')return {primary:{provider:'Simyo',accent:'#ff6600',pack:'Línea para router · 300 GB',total:17.69,stay:'Sin permanencia',warnings:[],link:'simyo.html',reason:'Recomendación principal para evitar que un router se quede corto de datos.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Línea para router · 150 GB',total:12.38,stay:'Sin permanencia',warnings:['Opción mínima recomendada para router.'],link:'simyo.html'}]};
-  if(answers.mobileAction==='new'&&answers.temporary)return {primary:{provider:'Simyo Prepago',accent:'#ff6600',pack:'Línea temporal de menos de 3 meses',total:null,stay:'Sin contrato',warnings:['Elegir el bono de prepago disponible que mejor encaje.'],link:'simyo.html',reason:'Recomendación principal por tratarse de un uso temporal.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Contrato · 150 GB + llamadas',total:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html'}]};
-  if(answers.mobileAction==='port'&&answers.origin==='simyo')return {primary:{provider:'Aviso',accent:'#e30613',pack:'No se puede portar de Simyo a Simyo',total:null,stay:'',warnings:['Puede mantenerse la tarifa actual o tramitar un alta nueva.'],link:'simyo.html',reason:'La compañía de origen y destino es la misma.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Alta nueva · 150 GB + llamadas',total:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html'}]};
-  const port=answers.mobileAction==='port';return {primary:{provider:'Simyo',accent:'#ff6600',pack:port?'Portabilidad · 100 GB + llamadas':'Alta nueva · 150 GB + llamadas',total:port?8.84:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html',reason:port?'Tarifa estratégica de portabilidad.':'Tarifa estratégica de alta nueva.'},alternatives:[]};
+  const o2Mobile=(gb)=>answers.origin==='o2'?null:{provider:'O2',accent:'#1238ee',pack:`Solo móvil · ${gb} GB 5G`,total:{50:6.19,100:8.84,150:13.26,300:17.69}[gb],stay:'Sin permanencia',warnings:[],link:'o2.html'};
+  if(answers.usage==='router')return {primary:{provider:'Simyo',accent:'#ff6600',pack:'Línea para router · 300 GB',total:17.69,stay:'Sin permanencia',warnings:[],link:'simyo.html',reason:'Recomendación principal para evitar que un router se quede corto de datos.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Línea para router · 150 GB',total:12.38,stay:'Sin permanencia',warnings:['Opción mínima recomendada para router.'],link:'simyo.html'},o2Mobile(300)].filter(Boolean)};
+  if(answers.mobileAction==='new'&&answers.temporary)return {primary:{provider:'Simyo Prepago',accent:'#ff6600',pack:'Línea temporal de menos de 3 meses',total:null,stay:'Sin contrato',warnings:['Elegir el bono de prepago disponible que mejor encaje.'],link:'simyo.html',reason:'Recomendación principal por tratarse de un uso temporal.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Contrato · 150 GB + llamadas',total:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html'},o2Mobile(150)].filter(Boolean)};
+  if(answers.mobileAction==='port'&&answers.origin==='simyo')return {primary:{provider:'Aviso',accent:'#e30613',pack:'No se puede portar de Simyo a Simyo',total:null,stay:'',warnings:['Puede mantenerse la tarifa actual o tramitar un alta nueva.'],link:'simyo.html',reason:'La compañía de origen y destino es la misma.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Alta nueva · 150 GB + llamadas',total:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html'},o2Mobile(100)].filter(Boolean)};
+  const port=answers.mobileAction==='port';return {primary:{provider:'Simyo',accent:'#ff6600',pack:port?'Portabilidad · 100 GB + llamadas':'Alta nueva · 150 GB + llamadas',total:port?8.84:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html',reason:port?'Tarifa estratégica de portabilidad.':'Tarifa estratégica de alta nueva.'},alternatives:[o2Mobile(port?100:150)].filter(Boolean)};
 }
-function fiberResult(){const speed=String(answers.fiberSpeed),jazz={300:17.64,600:22.95,1000:27.37}[speed],simyo={300:22.98,600:24.75,1000:26.52}[speed];const j={provider:'Jazztel',accent:'#ffd23f',pack:`Solo fibra ${speed==='1000'?'1 GB':speed+' MB'}`,total:jazz,stay:'3 meses',warnings:[],link:'jazztel.html'},s={provider:'Simyo',accent:'#ff6600',pack:`Solo fibra ${speed==='1000'?'1 GB':speed+' MB'}`,total:simyo,stay:'3 meses',warnings:[],link:'simyo.html'};return simyo<jazz?{primary:{...s,reason:'Es la opción de solo fibra más económica para esta velocidad.'},alternatives:[j]}:{primary:{...j,reason:'Es la opción de solo fibra más económica para esta velocidad.'},alternatives:[s]}}
+function fiberResult(){const speed=String(answers.fiberSpeed),jazztel={300:17.64,600:22.95,1000:27.37}[speed],simyo={300:22.98,600:24.75,1000:26.52}[speed],o2price={300:20.34,600:23.88,1000:27.41}[speed];const label=speed==='1000'?'1 GB':speed+' MB',j={provider:'Jazztel',accent:'#ffd23f',pack:`Solo fibra ${label}`,total:jazztel,stay:'3 meses',warnings:[],link:'jazztel.html'},s={provider:'Simyo',accent:'#ff6600',pack:`Solo fibra ${label}`,total:simyo,stay:'3 meses',warnings:[],link:'simyo.html'},o=answers.origin==='o2'?null:{provider:'O2',accent:'#1238ee',pack:`Solo fibra ${label}`,total:o2price,stay:'Sin permanencia',warnings:[],link:'o2.html'};return simyo<jazztel?{primary:{...s,reason:'Es la opción de solo fibra más económica para esta velocidad.'},alternatives:[j,o].filter(Boolean)}:{primary:{...j,reason:'Es la opción de solo fibra más económica para esta velocidad.'},alternatives:[s,o].filter(Boolean)}}
 
 function renderResult(){
   const data=answers.service==='convergent'?convergentResult():answers.service==='fiber'?fiberResult():mobileResult();
