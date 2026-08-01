@@ -5,7 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <meta name="theme-color" content="#0019a5">
   <title>O2 Pro · MM Ventas</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root{--o2:#0019a5;--o2b:#1238ee;--cyan:#55dcff;--bg:#eef4ff;--card:#fff;--ink:#071550;--muted:#61709b;--stroke:#d8e2ff;--good:#00a86b}
     *{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-tap-highlight-color:transparent}
@@ -21,6 +22,7 @@
     .total{position:sticky;bottom:10px;z-index:5;margin-top:14px;border-radius:25px;padding:17px 18px;background:#06145b;color:#fff;box-shadow:0 18px 45px rgba(0,15,95,.3)}.total-top{display:flex;justify-content:space-between;gap:15px;align-items:end}.total small{color:rgba(255,255,255,.65);font-weight:750}.amount{font-size:2.05rem;font-weight:1000;white-space:nowrap}.summary{margin-top:9px;color:rgba(255,255,255,.8);font-size:.78rem;font-weight:700;line-height:1.4}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.actions button{border:0;border-radius:14px;min-height:45px;font-weight:950;cursor:pointer}.details{background:rgba(255,255,255,.12);color:#fff}.pdf{background:#fff;color:var(--o2)}
     dialog{width:min(690px,calc(100% - 24px));border:0;border-radius:25px;padding:0;box-shadow:0 30px 80px rgba(0,0,0,.32)}dialog::backdrop{background:rgba(0,8,55,.62)}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--o2);color:#fff}.modal-head button{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:50%;width:34px;height:34px;font-size:1.2rem}.modal-body{padding:17px}.line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e7ecfa;font-size:.86rem}.line b:last-child{white-space:nowrap}.legal{font-size:.7rem;color:#69748e;line-height:1.4;margin-top:13px}
     #pdf-sheet{display:none;background:#fff;color:#17204c;padding:24px;font-family:Arial,sans-serif}.pdf-header{background:#0019a5;color:#fff;border-radius:16px;padding:18px}.pdf-title{font-size:25px;font-weight:bold}.pdf-sub{opacity:.8;margin-top:4px}.pdf-total{font-size:31px;font-weight:bold;margin:18px 0 4px}.pdf-table{width:100%;border-collapse:collapse;margin-top:15px}.pdf-table td{padding:10px 5px;border-bottom:1px solid #dfe5f5;font-size:13px}.pdf-table td:last-child{text-align:right;font-weight:bold}.pdf-note{font-size:10px;color:#68718a;line-height:1.45;margin-top:16px}
+    #pdf-sheet.pdf-export-document{display:block;width:190mm;min-width:190mm;max-width:190mm;margin:0;padding:5mm;box-sizing:border-box;background:#fff;color:#17204c;position:absolute;left:0;top:0;z-index:2147483647;overflow:visible}
     @media(max-width:520px){.choices.two{grid-template-columns:1fr}.section{padding:15px}.tabs .choice strong{font-size:.72rem}.addon{align-items:flex-start}.total{bottom:6px}}
   </style>
 </head>
@@ -115,7 +117,34 @@ function bind(){
 document.getElementById('secondEnabled').onchange=e=>{state.secondEnabled=e.target.checked;render()};
 document.getElementById('detailsBtn').onclick=()=>{document.getElementById('detailRows').innerHTML=rows().map(r=>`<div class="line"><span>${r.name}</span><b>${money(r.price)}/mes</b></div>`).join('')+`<div class="line"><b>Total mensual</b><b>${money(total())}</b></div>`;document.getElementById('detailDialog').showModal()};
 document.getElementById('closeDialog').onclick=()=>document.getElementById('detailDialog').close();
-document.getElementById('pdfBtn').onclick=()=>{document.getElementById('pdfTotal').textContent=money(total())+' /mes';document.getElementById('pdfRows').innerHTML=rows().map(r=>`<tr><td>${r.name}</td><td>${money(r.price)}/mes</td></tr>`).join('');const el=document.getElementById('pdf-sheet');el.style.display='block';if(window.html2pdf){html2pdf().set({margin:8,filename:`Propuesta_O2_MM_Anaza_${Date.now()}.pdf`,image:{type:'jpeg',quality:.98},html2canvas:{scale:2},jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}}).from(el).save().finally(()=>el.style.display='none')}else{window.print();el.style.display='none'}};
+async function exportarPdfO2(){
+  if(!window.html2canvas||!window.jspdf?.jsPDF){alert('No se pudo cargar el generador de PDF.');return}
+  const documento=document.getElementById('pdf-sheet');
+  document.getElementById('pdfTotal').textContent=money(total())+' /mes';
+  document.getElementById('pdfRows').innerHTML=rows().map(r=>`<tr><td>${r.name}</td><td>${money(r.price)}/mes</td></tr>`).join('');
+  documento.classList.add('pdf-export-document');
+  document.body.appendChild(documento);
+  try{
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    const canvas=await html2canvas(documento,{scale:2,logging:false,useCORS:true,allowTaint:false,backgroundColor:'#ffffff',width:documento.scrollWidth,height:documento.scrollHeight,windowWidth:documento.scrollWidth,scrollX:0,scrollY:0});
+    if(!canvas.width||!canvas.height)throw new Error('La propuesta no se pudo renderizar.');
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({unit:'mm',format:'a4',orientation:'portrait',compress:true});
+    const margen=10,anchoUtil=190,altoUtil=277;
+    const altoPaginaPx=Math.floor(canvas.width*altoUtil/anchoUtil);
+    let desplazamientoY=0,pagina=0;
+    while(desplazamientoY<canvas.height){
+      const altoCorte=Math.min(altoPaginaPx,canvas.height-desplazamientoY);
+      const corte=document.createElement('canvas');corte.width=canvas.width;corte.height=altoCorte;
+      const ctx=corte.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,corte.width,corte.height);ctx.drawImage(canvas,0,desplazamientoY,canvas.width,altoCorte,0,0,canvas.width,altoCorte);
+      if(pagina>0)pdf.addPage('a4','portrait');
+      pdf.addImage(corte.toDataURL('image/jpeg',.98),'JPEG',margen,margen,anchoUtil,altoCorte*anchoUtil/canvas.width,undefined,'FAST');
+      desplazamientoY+=altoCorte;pagina++;
+    }
+    pdf.save(`Propuesta_O2_MM_Anaza_${Date.now()}.pdf`);
+  }catch(error){console.error('Error al generar el PDF:',error);alert('No se pudo generar el PDF. Inténtalo de nuevo.')}finally{documento.classList.remove('pdf-export-document')}
+}
+document.getElementById('pdfBtn').onclick=exportarPdfO2;
 
 function applyRecommendation(){
   if(!new URLSearchParams(location.search).has('from'))return;
