@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v21-1-colores';
+const CACHE_NAME = 'mm-ventas-v22-o2';
 const CORE = [
   './',
   './index.html',
@@ -11,6 +11,7 @@ const CORE = [
   './pages/recomendador.html',
   './pages/simyo.html',
   './pages/jazztel.html',
+  './pages/o2.html',
   './pages/luz.html',
   './pages/derivaciones.html'
 ];
