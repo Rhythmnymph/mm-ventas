@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v22-o2';
+const CACHE_NAME = 'mm-ventas-v22-1-pdf-o2';
 const CORE = [
   './',
   './index.html',
