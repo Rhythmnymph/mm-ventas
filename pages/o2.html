@@ -21,8 +21,10 @@
     .toggle{display:flex;align-items:center;gap:10px;cursor:pointer}.toggle input{width:21px;height:21px;accent-color:var(--o2)}.second-options{display:none;margin-top:10px}.second-options.show{display:grid}
     .total{position:sticky;bottom:10px;z-index:5;margin-top:14px;border-radius:25px;padding:17px 18px;background:#06145b;color:#fff;box-shadow:0 18px 45px rgba(0,15,95,.3)}.total-top{display:flex;justify-content:space-between;gap:15px;align-items:end}.total small{color:rgba(255,255,255,.65);font-weight:750}.amount{font-size:2.05rem;font-weight:1000;white-space:nowrap}.summary{margin-top:9px;color:rgba(255,255,255,.8);font-size:.78rem;font-weight:700;line-height:1.4}.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.actions button{border:0;border-radius:14px;min-height:45px;font-weight:950;cursor:pointer}.details{background:rgba(255,255,255,.12);color:#fff}.pdf{background:#fff;color:var(--o2)}
     dialog{width:min(690px,calc(100% - 24px));border:0;border-radius:25px;padding:0;box-shadow:0 30px 80px rgba(0,0,0,.32)}dialog::backdrop{background:rgba(0,8,55,.62)}.modal-head{display:flex;justify-content:space-between;align-items:center;padding:16px 18px;background:var(--o2);color:#fff}.modal-head button{border:0;background:rgba(255,255,255,.15);color:#fff;border-radius:50%;width:34px;height:34px;font-size:1.2rem}.modal-body{padding:17px}.line{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid #e7ecfa;font-size:.86rem}.line b:last-child{white-space:nowrap}.legal{font-size:.7rem;color:#69748e;line-height:1.4;margin-top:13px}
-    #pdf-sheet{display:none;background:#fff;color:#17204c;padding:24px;font-family:Arial,sans-serif}.pdf-header{background:#0019a5;color:#fff;border-radius:16px;padding:18px}.pdf-title{font-size:25px;font-weight:bold}.pdf-sub{opacity:.8;margin-top:4px}.pdf-total{font-size:31px;font-weight:bold;margin:18px 0 4px}.pdf-table{width:100%;border-collapse:collapse;margin-top:15px}.pdf-table td{padding:10px 5px;border-bottom:1px solid #dfe5f5;font-size:13px}.pdf-table td:last-child{text-align:right;font-weight:bold}.pdf-note{font-size:10px;color:#68718a;line-height:1.45;margin-top:16px}
-    #pdf-sheet.pdf-export-document{display:block;width:190mm;min-width:190mm;max-width:190mm;margin:0;padding:5mm;box-sizing:border-box;background:#fff;color:#17204c;position:absolute;left:0;top:0;z-index:2147483647;overflow:visible}
+    #pdf-sheet{display:none;background:#fff;color:#101a46;font-family:Arial,sans-serif}
+    #pdf-sheet.pdf-export-document{display:block;width:190mm;min-width:190mm;max-width:190mm;margin:0;padding:0;box-sizing:border-box;background:#fff;position:absolute;left:0;top:0;z-index:2147483647;overflow:visible}
+    .pdf-page{min-height:257mm;padding:11mm 12mm 9mm;display:flex;flex-direction:column;background:linear-gradient(180deg,#f4f8ff 0,#fff 35%)}
+    .pdf-head{position:relative;overflow:hidden;display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:20px 22px;border-radius:22px;background:linear-gradient(135deg,#0019a5,#1947ff);color:#fff}.pdf-head:before,.pdf-head:after{content:"";position:absolute;border:2px solid rgba(255,255,255,.18);border-radius:50%}.pdf-head:before{width:130px;height:130px;right:-45px;top:-65px}.pdf-head:after{width:58px;height:58px;right:96px;bottom:-35px}.pdf-head-main,.pdf-head-side{position:relative;z-index:1}.pdf-brand{font-size:35px;font-weight:1000;letter-spacing:-.08em;line-height:1}.pdf-title{font-size:20px;font-weight:800;margin-top:7px}.pdf-sub{font-size:11px;opacity:.82;margin-top:4px}.pdf-head-side{text-align:right;font-size:10px;line-height:1.45;opacity:.92}.pdf-kicker{margin:17px 0 5px;color:#0019a5;font-size:10px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.pdf-package{font-size:22px;font-weight:900;line-height:1.16;letter-spacing:-.025em}.pdf-package-detail{margin-top:5px;color:#5e698c;font-size:11px;line-height:1.4}.pdf-total-card{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:15px;padding:17px 19px;border-radius:18px;background:#071654;color:#fff}.pdf-total-label{font-size:10px;font-weight:800;color:rgba(255,255,255,.68);text-transform:uppercase;letter-spacing:.08em}.pdf-total{font-size:31px;font-weight:1000;line-height:1.05;margin-top:4px}.pdf-total-note{max-width:185px;text-align:right;color:rgba(255,255,255,.72);font-size:10px;line-height:1.45}.pdf-section-title{margin:18px 0 9px;font-size:13px;font-weight:900;color:#101a46}.pdf-feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pdf-feature{min-height:67px;padding:12px;border:1px solid #dce6ff;border-radius:14px;background:#fff}.pdf-feature-label{color:#6c7698;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.pdf-feature-value{margin-top:6px;color:#071654;font-size:15px;font-weight:900;line-height:1.2}.pdf-tv{display:flex;flex-wrap:wrap;gap:7px}.pdf-chip{padding:7px 10px;border-radius:99px;background:#eaf0ff;color:#0019a5;font-size:10px;font-weight:900}.pdf-empty{color:#737c98;font-size:10px}.pdf-detail-box{overflow:hidden;border:1px solid #dce6ff;border-radius:15px;background:#fff}.pdf-table{width:100%;border-collapse:collapse}.pdf-table td{padding:10px 13px;border-bottom:1px solid #e6ebf7;font-size:11px;line-height:1.35}.pdf-table tr:last-child td{border-bottom:0}.pdf-table td:last-child{text-align:right;font-weight:900;white-space:nowrap;color:#071654}.pdf-table .pdf-row-main td{font-weight:800}.pdf-bottom{margin-top:auto;padding-top:17px}.pdf-help{padding:11px 14px;border-radius:13px;background:#eef3ff;color:#27335f;font-size:10px;font-weight:700;line-height:1.45}.pdf-help b{color:#0019a5}.pdf-footer{display:flex;justify-content:space-between;gap:16px;margin-top:10px;color:#717990;font-size:8.5px;line-height:1.45}.pdf-footer .pdf-note{max-width:76%}.pdf-page-number{white-space:nowrap;text-align:right}
     @media(max-width:520px){.choices.two{grid-template-columns:1fr}.section{padding:15px}.tabs .choice strong{font-size:.72rem}.addon{align-items:flex-start}.total{bottom:6px}}
   </style>
 </head>
@@ -53,7 +55,7 @@
 
 <dialog id="detailDialog"><div class="modal-head"><b>Propuesta O2 completa</b><button id="closeDialog">×</button></div><div class="modal-body"><div id="detailRows"></div><div class="legal">Precios finales con IGIC según el tarifario facilitado. Sujeto a cobertura, disponibilidad, validación y condiciones de contratación de O2. Las líneas adicionales y la fibra de segunda residencia requieren una tarifa principal compatible.</div></div></dialog>
 
-<div id="pdf-sheet"><div class="pdf-header"><div class="pdf-title">Propuesta O2 · MediaMarkt Añaza</div><div class="pdf-sub">Oferta completa personalizada</div></div><div class="pdf-total" id="pdfTotal"></div><div>Precio mensual final con IGIC incluido</div><table class="pdf-table"><tbody id="pdfRows"></tbody></table><div class="pdf-note">Propuesta orientativa sujeta a cobertura, disponibilidad, validación y condiciones de contratación de O2. Precios con IGIC. Las plataformas incluidas corresponden al paquete oficial seleccionado.</div></div>
+<div id="pdf-sheet"><div class="pdf-page"><header class="pdf-head"><div class="pdf-head-main"><div class="pdf-brand">O₂</div><div class="pdf-title">Tu propuesta personalizada</div><div class="pdf-sub">Preparada en MediaMarkt Añaza</div></div><div class="pdf-head-side"><div id="pdfDate"></div><div>Precios finales con IGIC</div></div></header><div class="pdf-kicker">Paquete recomendado</div><div class="pdf-package" id="pdfPackage"></div><div class="pdf-package-detail" id="pdfPackageDetail"></div><section class="pdf-total-card"><div><div class="pdf-total-label">Total mensual</div><div class="pdf-total" id="pdfTotal"></div></div><div class="pdf-total-note">Una única propuesta con el paquete principal y todos los complementos seleccionados.</div></section><div class="pdf-section-title">Qué incluye tu oferta</div><div class="pdf-feature-grid" id="pdfFeatures"></div><div id="pdfTvBlock"><div class="pdf-section-title">Entretenimiento incluido</div><div class="pdf-tv" id="pdfTv"></div></div><div class="pdf-section-title">Desglose mensual</div><div class="pdf-detail-box"><table class="pdf-table"><tbody id="pdfRows"></tbody></table></div><div class="pdf-bottom"><div class="pdf-help"><b>¿Quieres contratarla?</b> Te ayudamos a comprobar la cobertura y a tramitar el alta en MediaMarkt Añaza.</div><footer class="pdf-footer"><div class="pdf-note">Propuesta orientativa sujeta a cobertura, disponibilidad, validación y condiciones de contratación de O2. Las líneas adicionales y la fibra de segunda residencia requieren una tarifa principal compatible.</div><div class="pdf-page-number">O2 Pro · MM Ventas</div></footer></div></div></div>
 
 <script>
 const TRANSFER_KEY='mmv_recomendacion_transfer_v19';
@@ -95,6 +97,25 @@ function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catc
 function money(v){return Number(v).toFixed(2).replace('.',',')+' €'}
 function total(){let value=pack().price;ADDITIONALS.forEach(a=>value+=(state.additionals[a.id]||0)*a.price);if(state.secondEnabled&&state.service!=='mobile')value+=(SECOND.find(x=>x.id===state.secondId)||SECOND[0]).price;return value}
 function rows(){const p=pack(),out=[{name:'Paquete principal · '+p.name,price:p.price}];ADDITIONALS.forEach(a=>{const qty=state.additionals[a.id]||0;if(qty)out.push({name:`${qty} × ${a.name}`,price:qty*a.price})});if(state.secondEnabled&&state.service!=='mobile'){const s=SECOND.find(x=>x.id===state.secondId)||SECOND[0];out.push({name:s.name,price:s.price})}return out}
+function speedLabel(speed){return speed===1000?'1 Gb':speed+' Mb'}
+function pdfFeatures(){
+  const p=pack();
+  if(state.service==='convergent')return [
+    ['Fibra',speedLabel(p.speed)],
+    ['Líneas móviles',p.lines+' '+(p.lines===1?'línea':'líneas')],
+    ['Datos y llamadas',p.id==='c600_10_40'?'10 GB + 40 GB':p.data+' GB · ilimitadas']
+  ];
+  if(state.service==='mobile')return [
+    ['Red móvil','5G'],
+    ['Datos',p.data+' GB'],
+    ['Llamadas','Ilimitadas']
+  ];
+  return [
+    ['Fibra',speedLabel(p.speed)],
+    ['Telefonía fija','Llamadas incluidas'],
+    ['Modalidad','Solo fibra']
+  ];
+}
 
 function render(){
   document.getElementById('serviceTabs').innerHTML=SERVICES.map(s=>`<button class="choice ${state.service===s[0]?'active':''}" data-service="${s[0]}"><strong>${s[1]}</strong></button>`).join('');
@@ -120,8 +141,15 @@ document.getElementById('closeDialog').onclick=()=>document.getElementById('deta
 async function exportarPdfO2(){
   if(!window.html2canvas||!window.jspdf?.jsPDF){alert('No se pudo cargar el generador de PDF.');return}
   const documento=document.getElementById('pdf-sheet');
+  const p=pack();
+  document.getElementById('pdfDate').textContent='Generada el '+new Intl.DateTimeFormat('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date());
+  document.getElementById('pdfPackage').textContent=p.name;
+  document.getElementById('pdfPackageDetail').textContent=p.detail;
   document.getElementById('pdfTotal').textContent=money(total())+' /mes';
-  document.getElementById('pdfRows').innerHTML=rows().map(r=>`<tr><td>${r.name}</td><td>${money(r.price)}/mes</td></tr>`).join('');
+  document.getElementById('pdfFeatures').innerHTML=pdfFeatures().map(f=>`<div class="pdf-feature"><div class="pdf-feature-label">${f[0]}</div><div class="pdf-feature-value">${f[1]}</div></div>`).join('');
+  const tvBlock=document.getElementById('pdfTvBlock');tvBlock.style.display=p.tv.length?'block':'none';
+  document.getElementById('pdfTv').innerHTML=p.tv.map(v=>`<span class="pdf-chip">${v}</span>`).join('');
+  document.getElementById('pdfRows').innerHTML=rows().map((r,i)=>`<tr class="${i===0?'pdf-row-main':''}"><td>${r.name}</td><td>${money(r.price)}/mes</td></tr>`).join('')+`<tr class="pdf-row-main"><td>Total mensual con IGIC</td><td>${money(total())}/mes</td></tr>`;
   documento.classList.add('pdf-export-document');
   document.body.appendChild(documento);
   try{
