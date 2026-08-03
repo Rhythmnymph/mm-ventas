@@ -491,6 +491,19 @@ main{
   page-break-inside:avoid;
 }
 
+/* V23 · propuesta comercial A4 */
+.pdf-export-document.doc{min-height:257mm!important;padding:11mm 12mm 9mm!important;background:linear-gradient(180deg,#fff7ef 0,#fff 35%)!important;color:#20150d!important}
+.pdf-export-document .doc-brand-row{display:none!important}
+.pdf-export-document .doc-header{position:relative;overflow:hidden;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:18px!important;margin:0 0 18px!important;padding:20px 22px!important;border:0!important;border-radius:22px!important;background:linear-gradient(135deg,#bd4d00,#ff7900)!important;color:#fff!important}
+.pdf-export-document .doc-header:before,.pdf-export-document .doc-header:after{content:"";position:absolute;border:2px solid rgba(255,255,255,.18);border-radius:50%}.pdf-export-document .doc-header:before{width:130px;height:130px;right:-45px;top:-65px}.pdf-export-document .doc-header:after{width:58px;height:58px;right:96px;bottom:-35px}
+.pdf-export-document .doc-header>div{position:relative;z-index:1}.pdf-export-document .doc-main-title{color:#fff!important;font-size:35px!important;font-weight:1000!important;letter-spacing:-.04em!important;line-height:1!important}.pdf-export-document .doc-main-title:before{content:"Simyo";font-size:35px}.pdf-export-document .doc-main-title{font-size:0!important}.pdf-export-document .doc-operator{margin-top:9px!important;color:#fff!important;font-size:15px!important;font-weight:900!important}.pdf-export-document .doc-operator:after{content:"\A Preparada en MediaMarkt Añaza";white-space:pre;color:rgba(255,255,255,.82);font-size:10px;line-height:1.6;font-weight:700}
+.pdf-export-document .doc-side-title{color:rgba(255,255,255,.9)!important;font-size:10px!important;line-height:1.5!important;text-transform:none!important}
+.pdf-export-document .doc-section{margin:0 0 18px!important;padding:0!important;break-inside:avoid!important}.pdf-export-document .doc-section-title{margin:0 0 9px!important;padding:0!important;border:0!important;color:#a84400!important;font-size:13px!important;font-weight:950!important;letter-spacing:0!important;text-transform:none!important}
+.pdf-export-document .doc-table{overflow:hidden;margin:0!important;border:1px solid #f2dfce!important;border-radius:15px!important;border-collapse:separate!important;border-spacing:0!important;background:#fff!important}.pdf-export-document .doc-table th{padding:9px 12px!important;border-bottom:1px solid #f0e0d3!important;background:#fff8f2!important;color:#806b5d!important;font-size:9px!important;letter-spacing:.05em!important}.pdf-export-document .doc-table td{padding:10px 12px!important;border-bottom:1px solid #f3e7dc!important;color:#281b13!important;font-size:11px!important;line-height:1.35!important}.pdf-export-document .doc-table tr:last-child td{border-bottom:0!important}.pdf-export-document .doc-service-subtotal{margin:0!important;padding:9px 12px!important;border-radius:0 0 13px 13px!important;background:#fff1e5!important;color:#7e3400!important;font-size:10px!important}
+.pdf-export-document .doc-footer-summary{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:18px!important;margin:16px 0 0!important;padding:17px 19px!important;border:0!important;border-radius:18px!important;background:#542000!important;color:#fff!important}.pdf-export-document .doc-total-label{color:rgba(255,255,255,.72)!important;font-size:10px!important;letter-spacing:.08em!important;text-transform:uppercase!important}.pdf-export-document .doc-total-price{color:#fff!important;font-size:31px!important;line-height:1.05!important}.pdf-export-document .doc-saving{color:rgba(255,255,255,.78)!important;font-size:9.5px!important}
+.pdf-export-document .doc-promo{margin-top:14px!important;padding:11px 14px!important;border:0!important;border-radius:13px!important;background:#fff0df!important;color:#7c3300!important}.pdf-export-document .doc-promo-title{font-size:9px!important;letter-spacing:.08em!important;text-transform:uppercase!important}.pdf-export-document .doc-promo-value{font-size:14px!important;font-weight:950!important}
+.pdf-export-document .doc-legal{margin-top:16px!important;padding-top:10px!important;border-top:1px solid #eadfd5!important;color:#74665d!important;font-size:8.5px!important;line-height:1.45!important;text-align:left!important}
+
 </style>
 </head>
 <body>
@@ -515,7 +528,7 @@ main{
       <div class="doc-header">
         <div>
           <div class="doc-main-title">MediaMarkt Añaza</div>
-          <div class="doc-operator">Propuesta Simyo</div>
+          <div class="doc-operator">Tu propuesta personalizada</div>
         </div>
         <div class="doc-side-title">Estudio de servicios<br>y propuesta económica</div>
       </div>
@@ -641,7 +654,7 @@ async function exportarPdfA4(idDocumento, nombreArchivo) {
         let desplazamientoY = 0;
         let numeroPagina = 0;
 
-        while (desplazamientoY < canvas.height) {
+        while (desplazamientoY < canvas.height - 8) {
             const altoCorte = Math.min(altoPaginaPx, canvas.height - desplazamientoY);
             const paginaCanvas = document.createElement('canvas');
             paginaCanvas.width = canvas.width;

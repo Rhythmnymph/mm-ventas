@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Lowi Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --bg: #0d0101;
@@ -79,6 +81,26 @@
         .doc-legal { font-size: 0.75rem; color: #555; text-align: justify; margin-top: 25px; border-top: 2px solid #e30613; padding-top: 12px; line-height: 1.4; }
         
         .pdf-btn { background-color: #000; color: #fff; width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem; }
+
+        /* V23 · propuesta comercial A4 */
+        .pdf-export-document.doc-proposal{width:190mm!important;min-width:190mm!important;max-width:190mm!important;min-height:257mm!important;padding:11mm 12mm 9mm!important;box-sizing:border-box!important;background:linear-gradient(180deg,#fff4f4 0,#fff 35%)!important;color:#16070a!important;font-family:Arial,sans-serif!important}
+        .pdf-export-document .mm-v17-brand{display:none!important}
+        .pdf-export-document .doc-header{position:relative;overflow:hidden;display:flex!important;justify-content:space-between!important;align-items:flex-start!important;gap:18px!important;margin:0 0 18px!important;padding:20px 22px!important;border:0!important;border-radius:22px!important;background:linear-gradient(135deg,#a6000b,#ec1020)!important;color:#fff!important}
+        .pdf-export-document .doc-header:before,.pdf-export-document .doc-header:after{content:"";position:absolute;border:2px solid rgba(255,255,255,.17);border-radius:50%}
+        .pdf-export-document .doc-header:before{width:130px;height:130px;right:-45px;top:-65px}.pdf-export-document .doc-header:after{width:58px;height:58px;right:96px;bottom:-35px}
+        .pdf-export-document .doc-brand{position:relative;z-index:1;color:#fff!important;font-size:35px!important;font-weight:1000!important;letter-spacing:-.05em!important;line-height:1!important;text-transform:none!important}
+        .pdf-export-document .doc-brand:after{content:"Tu propuesta personalizada\A Preparada en MediaMarkt Añaza";white-space:pre;display:block;margin-top:8px;font-size:15px;line-height:1.55;letter-spacing:0;font-weight:850}
+        .pdf-export-document .doc-title{position:relative;z-index:1;color:rgba(255,255,255,.9)!important;font-size:10px!important;line-height:1.5!important;text-transform:none!important}
+        .pdf-export-document .doc-section{margin:0 0 18px!important;padding:0!important;break-inside:avoid!important}
+        .pdf-export-document .doc-section-title{margin:0 0 9px!important;padding:0!important;border:0!important;color:#8e0009!important;font-size:13px!important;font-weight:950!important;letter-spacing:0!important;text-transform:none!important}
+        .pdf-export-document .doc-table{overflow:hidden;margin:0!important;border:1px solid #f0d7da!important;border-radius:15px!important;border-collapse:separate!important;border-spacing:0!important;background:#fff!important}
+        .pdf-export-document .doc-table th{padding:9px 12px!important;border-bottom:1px solid #f1dfe1!important;background:#fff7f7!important;color:#7c6064!important;font-size:9px!important;letter-spacing:.05em!important}
+        .pdf-export-document .doc-table td{padding:10px 12px!important;border-bottom:1px solid #f3e5e7!important;color:#241014!important;font-size:11px!important;line-height:1.35!important}.pdf-export-document .doc-table tr:last-child td{border-bottom:0!important}
+        .pdf-export-document .doc-footer-summary{display:flex!important;justify-content:space-between!important;align-items:center!important;gap:18px!important;margin:16px 0 0!important;padding:17px 19px!important;border:0!important;border-radius:18px!important;background:#4b0006!important;color:#fff!important}
+        .pdf-export-document .doc-total-label{color:rgba(255,255,255,.72)!important;font-size:10px!important;letter-spacing:.08em!important;text-transform:uppercase!important}.pdf-export-document .doc-total-price{color:#fff!important;font-size:31px!important;line-height:1.05!important}
+        .pdf-export-document #pdf-ahorro-nota{color:rgba(255,255,255,.78)!important;font-size:9.5px!important;max-width:390px!important}
+        .pdf-export-document .doc-promo{margin-top:14px!important;padding:11px 14px!important;border:0!important;border-radius:13px!important;background:#fff0f1!important;color:#6f0008!important}.pdf-export-document .doc-promo-title{font-size:9px!important;letter-spacing:.08em!important;text-transform:uppercase!important}.pdf-export-document .doc-promo-value{font-size:14px!important;font-weight:950!important}
+        .pdf-export-document .doc-legal{margin-top:16px!important;padding-top:10px!important;border-top:1px solid #ead9db!important;color:#726064!important;font-size:8.5px!important;line-height:1.45!important;text-align:left!important}
     
 .mm-app-topbar{
     position:sticky;top:0;z-index:9999;
@@ -219,8 +241,8 @@
             <button class="modal-close" onclick="cerrarDesglose()">×</button>
             <div id="contenido-pdf" class="doc-proposal">
                 <div class="mm-v17-brand"><img src="../assets/mediamarkt-logo.png" alt="MediaMarkt"></div><div class="doc-header">
-                    <div class="doc-brand">MediaMarkt Añaza</div>
-                    <div class="doc-title">Estudio de Servicios<br>y Propuesta Económica</div>
+                    <div class="doc-brand">Lowi</div>
+                    <div class="doc-title">Precios finales con IGIC<br>Oferta personalizada</div>
                 </div>
                 
                 <div class="doc-section">
@@ -685,16 +707,23 @@
             document.getElementById('modal-desglose').style.display = "none";
         }
 
-        function generarPDF() {
-            const elemento = document.getElementById('contenido-pdf');
-            const opt = {
-                margin:       [0.4, 0.4, 0.4, 0.4],
-                filename:     `Propuesta_MediaMarkt_Anaza_${Date.now()}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2.5, logging: false, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(elemento).save();
+        async function generarPDF() {
+            if(!window.html2canvas||!window.jspdf?.jsPDF){alert('No se pudo cargar el generador de PDF.');return}
+            const elemento=document.getElementById('contenido-pdf');
+            const marcador=document.createComment('pdf-placeholder');
+            const estiloOriginal=elemento.getAttribute('style');
+            elemento.parentNode.insertBefore(marcador,elemento);
+            elemento.classList.add('pdf-export-document');
+            document.body.appendChild(elemento);
+            await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+            try{
+                const canvas=await html2canvas(elemento,{scale:2,logging:false,useCORS:true,allowTaint:false,backgroundColor:'#fff',width:elemento.scrollWidth,height:elemento.scrollHeight,windowWidth:elemento.scrollWidth,scrollX:0,scrollY:0});
+                if(!canvas.width||!canvas.height)throw new Error('El documento no se pudo renderizar');
+                const {jsPDF}=window.jspdf,pdf=new jsPDF({unit:'mm',format:'a4',orientation:'portrait',compress:true});
+                const margen=10,anchoUtil=190,altoUtil=277,altoPaginaPx=Math.floor(canvas.width*altoUtil/anchoUtil);let y=0,pagina=0;
+                while(y<canvas.height-8){const alto=Math.min(altoPaginaPx,canvas.height-y),c=document.createElement('canvas');c.width=canvas.width;c.height=alto;const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(canvas,0,y,canvas.width,alto,0,0,canvas.width,alto);if(pagina++)pdf.addPage('a4','portrait');pdf.addImage(c.toDataURL('image/jpeg',.98),'JPEG',margen,margen,anchoUtil,alto*anchoUtil/canvas.width,undefined,'FAST');y+=alto}
+                pdf.save(`Propuesta_Lowi_MediaMarkt_${Date.now()}.pdf`);
+            }catch(error){console.error('Error al generar el PDF:',error);alert('No se pudo generar el PDF. Inténtalo de nuevo.')}finally{elemento.classList.remove('pdf-export-document');if(estiloOriginal===null)elemento.removeAttribute('style');else elemento.setAttribute('style',estiloOriginal);marcador.parentNode.replaceChild(elemento,marcador)}
         }
 
         applyRecommendation();
