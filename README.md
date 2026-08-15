@@ -1,3 +1,3 @@
-# MM Ventas V20
+# MM Ventas V25
 
 PWA interna para calculadoras de venta y recomendación estratégica guiada.
