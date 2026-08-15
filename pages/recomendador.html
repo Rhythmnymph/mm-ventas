@@ -107,7 +107,7 @@ const TV_OPTIONS=[
 const TV_GROUPS={orange_tv:['football','sport','orange_tv'],lowi_dazn:['lowi_dazn_football','lowi_dazn_premium'],netflix:['netflix_ads','netflix_standard','netflix_premium'],disney:['disney_ads','disney_standard','disney_premium']};
 const RECOMMENDER_KEY='mmv_recomendador_v19';
 const TRANSFER_KEY='mmv_recomendacion_transfer_v19';
-const defaultAnswers=()=>({service:null,usage:null,mobileAction:null,origin:null,temporary:null,fiberSpeed:'600',currentPrice:'',lines:2,data:'120',fixed:false,unlimited:false,wantsTv:false,tv:[],simyoStay:'3'});
+const defaultAnswers=()=>({service:null,usage:null,mobileAction:null,mobileData:'150',origin:null,temporary:null,fiberSpeed:'600',currentPrice:'',lines:2,data:'50',fixed:false,unlimited:false,wantsTv:false,tv:[],simyoStay:'3'});
 let answers=defaultAnswers(),index=0;
 try{const saved=JSON.parse(localStorage.getItem(RECOMMENDER_KEY)||'null');if(saved&&saved.answers){answers={...answers,...saved.answers};index=Number(saved.index)||0}}catch(e){}
 const screen=document.getElementById('screen');
@@ -117,10 +117,11 @@ function steps(){
   const s=[{id:'service',title:'¿Qué necesita el cliente?',help:'Elige el servicio principal para adaptar las siguientes preguntas.',type:'choices',cols:'three',options:[['mobile','Solo móvil','Una o varias líneas sin fibra'],['fiber','Solo fibra','Internet en una vivienda'],['convergent','Fibra + móvil','Paquete convergente completo']]}];
   if(answers.service==='mobile'){
     s.push({id:'usage',title:'¿Dónde se utilizará la línea?',help:'Para router priorizaremos bonos grandes de datos.',type:'choices',cols:'two',options:[['phone','En un móvil','Uso personal con llamadas'],['router','En un router','300 GB recomendados; 150 GB como mínimo']]});
+    if(answers.usage)s.push({id:'mobileData',title:'¿Cuántos datos necesita?',help:answers.usage==='router'?'Para router ofrecemos como mínimo 150 GB.':'Elige el bono que mejor encaje con su consumo.',type:'choices',cols:'two',options:answers.usage==='router'?[['150','150 GB','Uso frecuente'],['300','300 GB','Uso intensivo']]:[['50','50 GB','Uso moderado'],['100','100 GB','Uso habitual'],['150','150 GB','Uso alto'],['300','300 GB','Uso intensivo']]});
     if(answers.usage==='phone'){
       s.push({id:'mobileAction',title:'¿Conserva el número?',help:'La estrategia de solo móvil cambia entre portabilidad y alta nueva.',type:'choices',cols:'two',options:[['port','Portabilidad','Conservar el número actual'],['new','Alta nueva','Crear un número nuevo']]});
       if(answers.mobileAction==='port')s.push(originStep());
-      if(answers.mobileAction==='new')s.push({id:'temporary',title:'¿La línea estará activa menos de 3 meses?',help:'Para usos muy cortos conviene ofrecer prepago.',type:'choices',cols:'two',options:[[true,'Sí','Recomendar modalidad prepago'],[false,'No','Recomendar contrato de 150 GB']]});
+      if(answers.mobileAction==='new')s.push({id:'temporary',title:'¿La línea estará activa menos de 3 meses?',help:'Para usos muy cortos conviene ofrecer prepago.',type:'choices',cols:'two',options:[[true,'Sí','Recomendar modalidad prepago'],[false,'No','Recomendar contrato']]});
     }
   }
   if(answers.service==='fiber')s.push(speedStep(true));
@@ -129,9 +130,8 @@ function steps(){
       {id:'currentPrice',title:'¿Cuánto paga actualmente por todo?',help:'Incluye fibra, líneas y televisión. Si no lo sabe, puede dejarlo en 0 €.',type:'price'},
       {id:'lines',title:'¿Cuántas líneas móviles necesita?',help:'Las líneas incluidas y adicionales cambian el paquete recomendado.',type:'choices',cols:'three',options:[[1,'1 línea',''],[2,'2 líneas',''],[3,'3 líneas',''],[4,'4 o más','Se calcularán 4 líneas']]},
       speedStep(false),
-      {id:'data',title:'¿Cuántos datos necesita?',help:'Elegiremos una tarifa que iguale o supere esta necesidad.',type:'choices',cols:'two',options:[['50','Hasta 50 GB','Uso moderado'],['80','Hasta 80 GB','Dos líneas de uso medio'],['120','Hasta 120 GB','Uso alto compartido'],['300','250–300 GB','Uso muy alto']]},
       {id:'fixed',title:'¿Necesita teléfono fijo?',help:'Si lo necesita, Jazztel tendrá prioridad.',type:'choices',cols:'two',options:[[true,'Sí','Debe incluir teléfono fijo'],[false,'No','No es necesario']]},
-      {id:'unlimited',title:'¿Necesita datos ilimitados?',help:'Esta respuesta prevalece sobre la cantidad aproximada de gigas.',type:'choices',cols:'two',options:[[true,'Sí','Priorizar paquetes ilimitados'],[false,'No','Basta con un bono de datos']]},
+      {id:'unlimited',title:'¿Necesita datos ilimitados?',help:'No hace falta que el cliente conozca su consumo exacto.',type:'choices',cols:'two',options:[[true,'Sí','Priorizar paquetes ilimitados'],[false,'No','Basta con un bono de datos']]},
       {id:'wantsTv',title:'¿Quiere televisión o streaming?',help:'La selección puede orientar la compañía, pero nunca ocultará alternativas.',type:'choices',cols:'two',options:[[true,'Sí','Elegir contenidos'],[false,'No','Continuar sin televisión']]});
     if(answers.wantsTv)s.push({id:'tv',title:'¿Qué contenidos le interesan?',help:'Puedes elegir varios. Si ninguna compañía los reúne todos, te mostraremos las diferencias.',type:'tv'});
     if(SIMYO_ANTI_ORIGINS.includes(answers.origin))s.push({id:'simyoStay',title:'Si se valora Simyo, ¿qué permanencia acepta?',help:'La promoción cambia según el compromiso elegido.',type:'choices',cols:'two',options:[['12','12 meses','Tarifa Anti-Digi'],['3','3 meses','Tarifa estándar']]});
@@ -189,30 +189,30 @@ function tvQuote(provider){
   return {monthly,included,missing,upfront:decoder?8.90:0};
 }
 function quoteJazztel(){
-  if(answers.origin==='jazztel')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),needUnlimited=answers.unlimited||answers.data==='unlimited';let base=0,pack='',actualSpeed=speed,extras=0;
+  if(answers.origin==='jazztel')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),needUnlimited=!!answers.unlimited,plannedData=50;let base=0,pack='',actualSpeed=speed,extras=0;
   if(answers.origin==='digi'){
     base=speed==='1000'?37.98:30.91;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas ilimitadas Anti-Digi`;extras=Math.max(0,lines-2)*8.84;
-  }else if(needUnlimited||Number(answers.data)>120){
+  }else if(needUnlimited){
     if(lines===1){base=44.17;actualSpeed='600';pack='Fibra 600 MB + fijo + 1 línea ilimitada'}else{base=speed==='1000'?60.09:53.02;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas ilimitadas`;extras=Math.max(0,lines-2)*8.84}
-  }else if(lines<=2&&Number(answers.data)<=80&&speed==='600'){
+  }else if(lines<=2&&plannedData<=80&&speed==='600'){
     base=33.56;pack='Fibra 600 MB + fijo + 2 líneas · 80 GB compartidos';
-  }else if(lines===1&&Number(answers.data)<=50){
+  }else if(lines===1&&plannedData<=50){
     base=35.33;actualSpeed='600';pack='Fibra 600 MB + fijo + 1 línea · 50 GB';
   }else{
-    base=speed==='1000'?46.82:39.75;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas · 120 GB compartidos`;extras=Math.max(0,lines-2)*(Number(answers.data)<=80?5.31:7.96);
+    base=speed==='1000'?46.82:39.75;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas · 120 GB compartidos`;extras=Math.max(0,lines-2)*(plannedData<=80?5.31:7.96);
   }
   const tv=tvQuote('jazztel'),total=base+extras+tv.monthly;const warnings=[];if(actualSpeed!==speed)warnings.push('Este paquete está disponible con 600 MB.');if(tv.missing.length)warnings.push('Sin '+tv.missing.join(', ')+'.');if(tv.upfront)warnings.push('Alta de decodificador: 8,90 € una sola vez. Promoción de contratación hasta el 31 de diciembre; precio promocional indicado hasta 2027.');if(answers.tv.includes('dazn_motor'))warnings.push('DAZN Motor pasa a 17,68 €/mes después de 12 meses.');
   return {provider:'Jazztel',accent:'#ffd23f',pack,total,stay:'12 meses',warnings,tv,equivalent:actualSpeed===speed&&tv.missing.length===0,link:'jazztel.html'};
 }
 function quoteLowi(){
   if(['vodafone','lowi'].includes(answers.origin))return null;const lines=Number(answers.lines)||1,base=29.18+(Math.max(0,lines-1)*4.42),tv=tvQuote('lowi'),warnings=[];
-  if(answers.fixed)warnings.push('No incluye teléfono fijo.');if(answers.unlimited||answers.data==='unlimited'||Number(answers.data)>100)warnings.push('La línea principal tiene 100 GB; no ofrece datos ilimitados.');if(tv.missing.length)warnings.push('Alternativa sin '+tv.missing.join(', ')+'.');
+  if(answers.fixed)warnings.push('No incluye teléfono fijo.');if(answers.unlimited)warnings.push('La línea principal tiene 100 GB; no ofrece datos ilimitados.');if(tv.missing.length)warnings.push('Alternativa sin '+tv.missing.join(', ')+'.');
   return {provider:'Lowi',accent:'#00ccff',pack:`Fibra 1 GB + ${lines} línea${lines>1?'s':''} · principal de 100 GB${lines>1?' y adicionales de 50 GB':''}`,total:base+tv.monthly,stay:'3 meses',warnings,tv,link:'lowi.html'};
 }
 function quoteSimyo(){
   if(answers.origin==='simyo')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),eligible=SIMYO_ANTI_ORIGINS.includes(answers.origin),anti=eligible&&answers.simyoStay==='12';let base,pack,stay,warnings=[];
-  if(anti){base=(speed==='1000'?24.31:22.54)+Math.max(0,lines-1)*6.63;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + ${lines} línea${lines>1?'s':''} de 250 GB Anti-Digi`;stay='12 meses'}else{const data=answers.data==='unlimited'?300:Math.min(300,Math.max(50,Number(answers.data)||50));const bucket=data<=50?50:data<=120?120:300;const prices={600:{50:28.29,120:31.83,300:37.13},1000:{50:30.06,120:33.59,300:38.90}};base=prices[speed][bucket]+Math.max(0,lines-1)*(bucket===300?10.61:4.42);pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + ${lines} línea${lines>1?'s':''} · principal de ${bucket} GB`;stay='3 meses'}
-  if(answers.fixed)warnings.push('No incluye teléfono fijo.');if(answers.unlimited||answers.data==='unlimited')warnings.push('No ofrece datos ilimitados.');const tv=tvQuote('simyo');if(tv.missing.length)warnings.push('Alternativa sin '+tv.missing.join(', ')+'.');
+  if(anti){base=(speed==='1000'?24.31:22.54)+Math.max(0,lines-1)*6.63;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + ${lines} línea${lines>1?'s':''} de 250 GB Anti-Digi`;stay='12 meses'}else{const data=answers.unlimited?300:50;const bucket=data<=50?50:data<=120?120:300;const prices={600:{50:28.29,120:31.83,300:37.13},1000:{50:30.06,120:33.59,300:38.90}};base=prices[speed][bucket]+Math.max(0,lines-1)*(bucket===300?10.61:4.42);pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + ${lines} línea${lines>1?'s':''} · principal de ${bucket} GB`;stay='3 meses'}
+  if(answers.fixed)warnings.push('No incluye teléfono fijo.');if(answers.unlimited)warnings.push('No ofrece datos ilimitados.');const tv=tvQuote('simyo');if(tv.missing.length)warnings.push('Alternativa sin '+tv.missing.join(', ')+'.');
   return {provider:'Simyo',accent:'#ff6600',pack,total:base+tv.monthly,stay,warnings,tv,link:'simyo.html'};
 }
 function quoteO2(){
@@ -235,7 +235,7 @@ function quoteO2(){
     {id:'c1000_375_mn',speed:1000,data:375,lines:1,tv:['movistar_plus','netflix_ads'],name:'Fibra 1 GB + 375 GB + Movistar Plus + Netflix',price:51.29},
     {id:'c1000_375_mnd',speed:1000,data:375,lines:1,tv:['movistar_plus','netflix_ads','disney_ads'],name:'Fibra 1 GB + 375 GB + Movistar Plus + Netflix + Disney+',price:54.83}
   ];
-  const needSpeed=Number(answers.fiberSpeed)||600,needData=answers.unlimited?999:Number(answers.data)||60,needLines=Number(answers.lines)||1;
+  const needSpeed=Number(answers.fiberSpeed)||600,needData=answers.unlimited?999:0,needLines=Number(answers.lines)||1;
   const extraPrice=needData<=50?4.42:needData<=150?8.84:13.26;
   const scored=packages.map(p=>{
     const missingTv=wanted.filter(x=>!p.tv.includes(x)).length,unwantedTv=p.tv.filter(x=>!wanted.includes(x)).length;
@@ -266,11 +266,13 @@ function convergentResult(){
   return {primary,alternatives:all.filter(x=>x!==primary),premium,current};
 }
 function mobileResult(){
-  const o2Mobile=(gb)=>answers.origin==='o2'?null:{provider:'O2',accent:'#1238ee',pack:`Solo móvil · ${gb} GB 5G`,total:{50:6.19,100:8.84,150:13.26,300:17.69}[gb],stay:'Sin permanencia',warnings:[],link:'o2.html'};
-  if(answers.usage==='router')return {primary:{provider:'Simyo',accent:'#ff6600',pack:'Línea para router · 300 GB',total:17.69,stay:'Sin permanencia',warnings:[],link:'simyo.html',reason:'Recomendación principal para evitar que un router se quede corto de datos.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Línea para router · 150 GB',total:12.38,stay:'Sin permanencia',warnings:['Opción mínima recomendada para router.'],link:'simyo.html'},o2Mobile(300)].filter(Boolean)};
-  if(answers.mobileAction==='new'&&answers.temporary)return {primary:{provider:'Simyo Prepago',accent:'#ff6600',pack:'Línea temporal de menos de 3 meses',total:null,stay:'Sin contrato',warnings:['Elegir el bono de prepago disponible que mejor encaje.'],link:'simyo.html',reason:'Recomendación principal por tratarse de un uso temporal.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Contrato · 150 GB + llamadas',total:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html'},o2Mobile(150)].filter(Boolean)};
-  if(answers.mobileAction==='port'&&answers.origin==='simyo')return {primary:{provider:'Aviso',accent:'#e30613',pack:'No se puede portar de Simyo a Simyo',total:null,stay:'',warnings:['Puede mantenerse la tarifa actual o tramitar un alta nueva.'],link:'simyo.html',reason:'La compañía de origen y destino es la misma.'},alternatives:[{provider:'Simyo',accent:'#ff6600',pack:'Alta nueva · 150 GB + llamadas',total:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html'},o2Mobile(100)].filter(Boolean)};
-  const port=answers.mobileAction==='port';return {primary:{provider:'Simyo',accent:'#ff6600',pack:port?'Portabilidad · 100 GB + llamadas':'Alta nueva · 150 GB + llamadas',total:port?8.84:12.38,stay:'Sin permanencia',warnings:[],link:'simyo.html',reason:port?'Tarifa estratégica de portabilidad.':'Tarifa estratégica de alta nueva.'},alternatives:[o2Mobile(port?100:150)].filter(Boolean)};
+  const gb=Number(answers.mobileData)||(answers.usage==='router'?300:150),simyoPrices={50:6.63,100:8.84,150:12.38,300:17.69};
+  const o2Mobile=(amount)=>answers.origin==='o2'?null:{provider:'O2',accent:'#1238ee',pack:`Solo móvil · ${amount} GB 5G`,total:{50:6.19,100:8.84,150:13.26,300:17.69}[amount],stay:'Sin permanencia',warnings:[],link:'o2.html'};
+  const simyo=(label,amount=gb)=>({provider:'Simyo',accent:'#ff6600',pack:`${label} · ${amount} GB${answers.usage==='phone'?' + llamadas':''}`,total:simyoPrices[amount],stay:'Sin permanencia',warnings:[],link:'simyo.html'});
+  if(answers.usage==='router'){const other=gb===300?150:300,primary={...simyo('Línea para router'),reason:gb===300?'Recomendación principal para un uso intensivo en router.':'Recomendación principal respetando el mínimo de 150 GB para router.'};return {primary,alternatives:[simyo('Alternativa para router',other),o2Mobile(gb)].filter(Boolean)}}
+  if(answers.mobileAction==='new'&&answers.temporary)return {primary:{provider:'Simyo Prepago',accent:'#ff6600',pack:`Línea temporal · necesidad aproximada de ${gb} GB`,total:null,stay:'Sin contrato',warnings:['Elegir el bono de prepago disponible que mejor encaje.'],link:'simyo.html',reason:'Recomendación principal por tratarse de un uso temporal.'},alternatives:[simyo('Contrato'),o2Mobile(gb)].filter(Boolean)};
+  if(answers.mobileAction==='port'&&answers.origin==='simyo')return {primary:{provider:'Aviso',accent:'#e30613',pack:'No se puede portar de Simyo a Simyo',total:null,stay:'',warnings:['Puede mantenerse la tarifa actual o tramitar un alta nueva.'],link:'simyo.html',reason:'La compañía de origen y destino es la misma.'},alternatives:[simyo('Alta nueva'),o2Mobile(gb)].filter(Boolean)};
+  const port=answers.mobileAction==='port',primary={...simyo(port?'Portabilidad':'Alta nueva'),reason:port?'Tarifa Simyo ajustada a los datos solicitados.':'Alta nueva Simyo ajustada a los datos solicitados.'};return {primary,alternatives:[o2Mobile(gb)].filter(Boolean)};
 }
 function fiberResult(){const speed=String(answers.fiberSpeed),jazztel={300:17.64,600:22.95,1000:27.37}[speed],simyo={300:22.98,600:24.75,1000:26.52}[speed],o2price={300:20.34,600:23.88,1000:27.41}[speed];const label=speed==='1000'?'1 GB':speed+' MB',j={provider:'Jazztel',accent:'#ffd23f',pack:`Solo fibra ${label}`,total:jazztel,stay:'3 meses',warnings:[],link:'jazztel.html'},s={provider:'Simyo',accent:'#ff6600',pack:`Solo fibra ${label}`,total:simyo,stay:'3 meses',warnings:[],link:'simyo.html'},o=answers.origin==='o2'?null:{provider:'O2',accent:'#1238ee',pack:`Solo fibra ${label}`,total:o2price,stay:'Sin permanencia',warnings:[],link:'o2.html'};return simyo<jazztel?{primary:{...s,reason:'Es la opción de solo fibra más económica para esta velocidad.'},alternatives:[j,o].filter(Boolean)}:{primary:{...j,reason:'Es la opción de solo fibra más económica para esta velocidad.'},alternatives:[s,o].filter(Boolean)}}
 
@@ -285,7 +287,7 @@ function renderResult(){
   }));
 }
 function cardHtml(x,primary){const warnings=x.warnings||[];return `<article class="result-card ${primary?'primary':''}" style="--accent:${x.accent}">${primary?'<span class="tag">Recomendación principal</span>':''}<div class="brand">${x.provider}</div><div class="pack">${x.pack}</div><div class="price">${x.total==null?'Consultar':money(x.total)}${x.total==null?'':' <small>/mes</small>'}</div><div class="conditions">${x.stay||''}${x.tv&&x.tv.included.length?` · TV incluida en el cálculo: ${x.tv.included.join(', ')}`:''}</div>${x.reason?`<div class="reason">${x.reason}</div>`:''}${warnings.length?`<div class="warning">${warnings.join(' ')}</div>`:''}<a class="open-calc" href="${x.link}?from=recomendador" data-open-provider="${x.provider}" data-open-pack="${x.pack.replace(/"/g,'&quot;')}">Abrir propuesta configurada</a></article>`}
-function summaryHtml(data){if(answers.service!=='convergent')return '';const current=Number(answers.currentPrice)||0;return `<div class="summary"><b>Necesidades:</b> ${answers.lines} línea${answers.lines>1?'s':''}, fibra ${answers.fiberSpeed==='1000'?'1 GB':answers.fiberSpeed+' MB'}, ${answers.unlimited?'datos ilimitados':answers.data+' GB'}, ${answers.fixed?'con':'sin'} fijo${answers.tv.length?', TV: '+TV_OPTIONS.filter(x=>answers.tv.includes(x.id)).map(x=>x.name).join(', '):', sin TV'}.<br><b>Precio actual:</b> ${current?money(current):'no indicado'}${data.premium?' · El cliente paga más que la propuesta equivalente de Jazztel.':''}</div>`}
+function summaryHtml(data){if(answers.service!=='convergent')return '';const current=Number(answers.currentPrice)||0;return `<div class="summary"><b>Necesidades:</b> ${answers.lines} línea${answers.lines>1?'s':''}, fibra ${answers.fiberSpeed==='1000'?'1 GB':answers.fiberSpeed+' MB'}, ${answers.unlimited?'datos ilimitados':'bono de datos'}, ${answers.fixed?'con':'sin'} fijo${answers.tv.length?', TV: '+TV_OPTIONS.filter(x=>answers.tv.includes(x.id)).map(x=>x.name).join(', '):', sin TV'}.<br><b>Precio actual:</b> ${current?money(current):'no indicado'}${data.premium?' · El cliente paga más que la propuesta equivalente de Jazztel.':''}</div>`}
 function money(v){return Number(v).toFixed(2).replace('.',',')+' €'}
 render();
 </script>
