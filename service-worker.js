@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v25-tv-promociones';
+const CACHE_NAME = 'mm-ventas-v25-1-datos-coherentes';
 const CORE = [
   './',
   './index.html',
