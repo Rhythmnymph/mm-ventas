@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v23-pdfs-profesionales';
+const CACHE_NAME = 'mm-ventas-v25-tv-promociones';
 const CORE = [
   './',
   './index.html',
