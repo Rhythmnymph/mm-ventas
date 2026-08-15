@@ -44,6 +44,7 @@
         .tv-grid { display: flex; flex-wrap: wrap; gap: 6px; }
         .tv-btn { background-color: #1a0505; border: 1px solid #4a1010; color: var(--text-dim); padding: 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; cursor: pointer; flex-grow: 1; text-align: center; }
         .tv-btn.selected { background-color: rgba(255, 204, 0, 0.2); border-color: var(--warning); color: var(--warning); }
+        .subnote { margin-top: 8px; color: var(--text-dim); font-size: 0.72rem; line-height: 1.4; }
         
         .input-container { text-align: center; padding: 5px 0; }
         .price-input { width: 70%; background: transparent; border: none; border-bottom: 2px solid #4a1010; color: white; font-size: 2.5rem; font-weight: 800; text-align: center; outline: none; padding: 2px; }
@@ -215,7 +216,10 @@
                 <div class="tv-btn" id="btn-lowi-prime" onclick="toggleTV('lowi', 'prime', 3.54)">Prime c/anuncios (3.54€)</div>
                 <div class="tv-btn" id="btn-lowi-disney" onclick="toggleTV('lowi', 'disney', 5.31)">Disney+ c/anuncios (5.31€)</div>
                 <div class="tv-btn" id="btn-lowi-max" onclick="toggleTV('lowi', 'max', 5.31)">Max c/anuncios (5.31€)</div>
+                <div class="tv-btn" id="btn-lowi-daznfutbol" onclick="toggleTV('lowi', 'daznfutbol', 17.68)">DAZN Fútbol (17.68€)</div>
+                <div class="tv-btn" id="btn-lowi-daznpremium" onclick="toggleTV('lowi', 'daznpremium', 28.29)">DAZN Premium (28.29€)</div>
             </div>
+            <div class="subnote">Precios DAZN con el descuento de Lowi ya aplicado. DAZN Fútbol y DAZN Premium son alternativas entre sí.</div>
         </div>
     </div>
 
@@ -318,9 +322,15 @@
                 estado.tvSeleccionada = { lowi: {}, simyo: {}, jazz: {} };
                 const map = {
                     lowi_tv: [4.42, 'TV Canales'], netflix_ads: [7.07, 'Netflix con anuncios'],
-                    prime_max: [8.85, 'Prime + Max'], disney_ads: [5.31, 'Disney+ con anuncios']
+                    prime_max: [8.85, 'Prime + Max'], disney_ads: [5.31, 'Disney+ con anuncios'],
+                    lowi_dazn_football: [17.68, 'DAZN Fútbol'], lowi_dazn_premium: [28.29, 'DAZN Premium']
                 };
-                (a.tv || []).forEach(id => { if (map[id]) estado.tvSeleccionada.lowi[id === 'lowi_tv' ? 'base' : id === 'netflix_ads' ? 'netflix' : id === 'prime_max' ? 'prime' : 'disney'] = { precio: map[id][0], nombre: map[id][1] }; });
+                const targets = { lowi_tv:'tv', netflix_ads:'netflix', prime_max:'prime', disney_ads:'disney', lowi_dazn_football:'daznfutbol', lowi_dazn_premium:'daznpremium' };
+                (a.tv || []).forEach(id => { if (map[id]) estado.tvSeleccionada.lowi[targets[id]] = { precio: map[id][0], nombre: map[id][1] }; });
+                if ((a.tv || []).includes('prime_max')) {
+                    estado.tvSeleccionada.lowi.prime = { precio: 3.54, nombre: 'Prime con anuncios' };
+                    estado.tvSeleccionada.lowi.max = { precio: 5.31, nombre: 'Max con anuncios' };
+                }
                 document.getElementById('input-cliente').value = a.currentPrice || '';
                 localStorage.setItem('mmv_last_multi_transfer', transfer.createdAt);
             } catch (e) { console.error('No se pudo cargar la recomendación', e); }
@@ -372,6 +382,7 @@
             document.getElementById('panel-tv').style.display = estado.tvPanel ? 'block' : 'none';
             document.getElementById('grid-lowi').style.display = 'flex';
             document.getElementById('tgl-movistar').classList.toggle('active-movistar', estado.hasMovistar);
+            actualizarIndicadorTV();
         }
 
         function toggleAntiDigi() {
@@ -461,6 +472,9 @@
             if (currentObj[service]) {
                 delete currentObj[service];
             } else {
+                if (op === 'lowi' && ['daznfutbol','daznpremium'].includes(service)) {
+                    ['daznfutbol','daznpremium'].filter(x => x !== service).forEach(x => delete currentObj[x]);
+                }
                 if (op === 'jazz') {
                     const groups = [['netflix','netflixstd','netflixpremium'],['disney','disneystd','disneypremium']];
                     groups.forEach(g => { if (g.includes(service)) g.filter(x => x !== service).forEach(x => delete currentObj[x]); });
@@ -475,7 +489,18 @@
             actualizar();
         }
 
+        function actualizarIndicadorTV() {
+            const servicios = Object.values(estado.tvSeleccionada.lowi);
+            const total = servicios.reduce((s, item) => s + Number(item.precio || 0), 0);
+            const boton = document.getElementById('tgl-tv');
+            boton.classList.toggle('active-warning', estado.tvPanel || servicios.length > 0);
+            boton.innerText = servicios.length
+                ? `${estado.tvPanel ? '−' : '+'} ${servicios.length} servicio${servicios.length > 1 ? 's' : ''} · +${total.toFixed(2).replace('.', ',')}€/mes`
+                : `${estado.tvPanel ? '−' : '+'} Plataformas / TV`;
+        }
+
         function actualizar() {
+            actualizarIndicadorTV();
             dataReporte = {
                 operador: estado.op.toUpperCase(),
                 fibraVelocidad: "1 Gbps Simétrica",
@@ -570,7 +595,7 @@
                 let itemTV = estado.tvSeleccionada[familiaTV][s];
                 
                 totalTV += itemTV.precio;
-                const nota = s === 'daznmotor' ? '8,83€/mes durante 12 meses; después 17,68€/mes' : 'Cuota recurrente mensual';
+                const nota = s === 'daznmotor' ? '8,83€/mes durante 12 meses; después 17,68€/mes' : ['daznfutbol','daznpremium'].includes(s) ? 'Precio mensual con descuento Lowi aplicado' : 'Cuota recurrente mensual';
                 dataReporte.tv.push({ nombre: itemTV.nombre, precio: itemTV.precio, nota });
             }
 

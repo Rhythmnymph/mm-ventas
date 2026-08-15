@@ -86,8 +86,9 @@ const ORIGINS=[
 ];
 const TV_OPTIONS=[
   {id:'movistar_plus',name:'Movistar+',note:'9,99 €/mes como extra; también incluido en paquetes oficiales O2',provider:'Todas'},
-  {id:'football',name:'Todo Fútbol y Baloncesto',note:'38,86 €/mes · solo Jazztel · tras la activación',provider:'Jazztel'},
-  {id:'sport',name:'Todo Deporte',note:'Fútbol, baloncesto y motor · 47,74 €/mes · solo Jazztel',provider:'Jazztel'},
+  {id:'jazztel_tv',name:'Jazztel TV',note:'4,38 €/mes · combinable con plataformas y DAZN',provider:'Jazztel'},
+  {id:'football',name:'Todo Fútbol y Baloncesto',note:'26,52 €/mes en promoción · solo Jazztel · tras la activación',provider:'Jazztel'},
+  {id:'sport',name:'Todo Deporte',note:'Fútbol, baloncesto y motor · 35,36 €/mes en promoción · solo Jazztel',provider:'Jazztel'},
   {id:'orange_tv',name:'Orange TV Cine y Series',note:'13,22 €/mes · solo Jazztel',provider:'Jazztel'},
   {id:'netflix_ads',name:'Netflix con anuncios',note:'Disponible con Jazztel, Lowi, Simyo y en paquetes O2',provider:'Varias'},
   {id:'netflix_standard',name:'Netflix estándar',note:'13,26 €/mes con Jazztel',provider:'Jazztel'},
@@ -99,9 +100,11 @@ const TV_OPTIONS=[
   {id:'dazn_motor',name:'DAZN Motor',note:'8,83 €/mes durante 12 meses; después 17,68 €',provider:'Jazztel'},
   {id:'dazn_basket',name:'DAZN Baloncesto',note:'8,83 €/mes con Jazztel',provider:'Jazztel'},
   {id:'lowi_tv',name:'TV Canales',note:'4,42 €/mes · solo Lowi',provider:'Lowi'},
+  {id:'lowi_dazn_football',name:'DAZN Fútbol',note:'17,68 €/mes con descuento Lowi aplicado',provider:'Lowi'},
+  {id:'lowi_dazn_premium',name:'DAZN Premium',note:'28,29 €/mes con descuento Lowi aplicado',provider:'Lowi'},
   {id:'simyo_sky',name:'TV + SkyShowtime',note:'5,30 €/mes · solo Simyo',provider:'Simyo'}
 ];
-const TV_GROUPS={football:['football','sport'],netflix:['netflix_ads','netflix_standard','netflix_premium'],disney:['disney_ads','disney_standard','disney_premium']};
+const TV_GROUPS={orange_tv:['football','sport','orange_tv'],lowi_dazn:['lowi_dazn_football','lowi_dazn_premium'],netflix:['netflix_ads','netflix_standard','netflix_premium'],disney:['disney_ads','disney_standard','disney_premium']};
 const RECOMMENDER_KEY='mmv_recomendador_v19';
 const TRANSFER_KEY='mmv_recomendacion_transfer_v19';
 const defaultAnswers=()=>({service:null,usage:null,mobileAction:null,origin:null,temporary:null,fiberSpeed:'600',currentPrice:'',lines:2,data:'120',fixed:false,unlimited:false,wantsTv:false,tv:[],simyoStay:'3'});
@@ -168,20 +171,22 @@ function toggleTv(id){
   const group=Object.values(TV_GROUPS).find(g=>g.includes(id));
   if(group)answers.tv=answers.tv.filter(x=>!group.includes(x));
   else answers.tv=answers.tv.filter(x=>x!==id);
+  if(id==='jazztel_tv')answers.tv=answers.tv.filter(x=>!['football','sport','orange_tv'].includes(x));
+  if(['football','sport','orange_tv'].includes(id))answers.tv=answers.tv.filter(x=>x!=='jazztel_tv');
   if(!wasSelected)answers.tv.push(id);
   render();
 }
 
 function tvQuote(provider){
   const maps={
-    jazztel:{movistar_plus:9.99,football:38.86,sport:47.74,orange_tv:13.22,netflix_ads:7.95,netflix_standard:13.26,netflix_premium:19.45,prime_max:8.83,disney_ads:6.18,disney_standard:9.72,disney_premium:14.14,dazn_motor:8.83,dazn_basket:8.83},
-    lowi:{movistar_plus:9.99,netflix_ads:7.07,prime_max:8.85,disney_ads:5.31,lowi_tv:4.42},
+    jazztel:{movistar_plus:9.99,jazztel_tv:4.38,football:26.52,sport:35.36,orange_tv:13.22,netflix_ads:7.95,netflix_standard:13.26,netflix_premium:19.45,prime_max:8.83,disney_ads:6.18,disney_standard:9.72,disney_premium:14.14,dazn_motor:8.83,dazn_basket:8.83},
+    lowi:{movistar_plus:9.99,netflix_ads:7.07,prime_max:8.85,disney_ads:5.31,lowi_tv:4.42,lowi_dazn_football:17.68,lowi_dazn_premium:28.29},
     simyo:{movistar_plus:9.99,netflix_ads:7.07,simyo_sky:5.30}
   };
   const labels=Object.fromEntries(TV_OPTIONS.map(x=>[x.id,x.name]));let monthly=0;const included=[],missing=[];
   answers.tv.forEach(id=>{if(maps[provider][id]!=null){monthly+=maps[provider][id];included.push(labels[id])}else missing.push(labels[id])});
-  const decoder=['football','sport','orange_tv'].some(x=>answers.tv.includes(x))&&provider==='jazztel';
-  return {monthly,included,missing,upfront:decoder?8.80:0};
+  const decoder=['football','sport'].some(x=>answers.tv.includes(x))&&provider==='jazztel';
+  return {monthly,included,missing,upfront:decoder?8.90:0};
 }
 function quoteJazztel(){
   if(answers.origin==='jazztel')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),needUnlimited=answers.unlimited||answers.data==='unlimited';let base=0,pack='',actualSpeed=speed,extras=0;
@@ -196,7 +201,7 @@ function quoteJazztel(){
   }else{
     base=speed==='1000'?46.82:39.75;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas · 120 GB compartidos`;extras=Math.max(0,lines-2)*(Number(answers.data)<=80?5.31:7.96);
   }
-  const tv=tvQuote('jazztel'),total=base+extras+tv.monthly;const warnings=[];if(actualSpeed!==speed)warnings.push('Este paquete está disponible con 600 MB.');if(tv.missing.length)warnings.push('Sin '+tv.missing.join(', ')+'.');if(tv.upfront)warnings.push('Alta de decodificador: 8,80 € una sola vez.');if(answers.tv.includes('dazn_motor'))warnings.push('DAZN Motor pasa a 17,68 €/mes después de 12 meses.');
+  const tv=tvQuote('jazztel'),total=base+extras+tv.monthly;const warnings=[];if(actualSpeed!==speed)warnings.push('Este paquete está disponible con 600 MB.');if(tv.missing.length)warnings.push('Sin '+tv.missing.join(', ')+'.');if(tv.upfront)warnings.push('Alta de decodificador: 8,90 € una sola vez. Promoción de contratación hasta el 31 de diciembre; precio promocional indicado hasta 2027.');if(answers.tv.includes('dazn_motor'))warnings.push('DAZN Motor pasa a 17,68 €/mes después de 12 meses.');
   return {provider:'Jazztel',accent:'#ffd23f',pack,total,stay:'12 meses',warnings,tv,equivalent:actualSpeed===speed&&tv.missing.length===0,link:'jazztel.html'};
 }
 function quoteLowi(){
@@ -251,8 +256,8 @@ function quoteO2(){
 }
 function convergentResult(){
   const jazz=quoteJazztel(),lowi=quoteLowi(),simyo=quoteSimyo(),o2=quoteO2(),all=[jazz,lowi,simyo,o2].filter(Boolean);const current=Number(answers.currentPrice)||0;
-  const jazzOnly=['football','sport','orange_tv','netflix_standard','netflix_premium','disney_standard','disney_premium','dazn_motor','dazn_basket'].some(x=>answers.tv.includes(x));
-  const lowiOnly=answers.tv.includes('lowi_tv'),simyoOnly=answers.tv.includes('simyo_sky');const premium=!!jazz&&jazz.equivalent&&current>jazz.total;
+  const jazzOnly=['jazztel_tv','football','sport','orange_tv','netflix_standard','netflix_premium','disney_standard','disney_premium','dazn_motor','dazn_basket'].some(x=>answers.tv.includes(x));
+  const lowiOnly=['lowi_tv','lowi_dazn_football','lowi_dazn_premium'].some(x=>answers.tv.includes(x)),simyoOnly=answers.tv.includes('simyo_sky');const premium=!!jazz&&jazz.equivalent&&current>jazz.total;
   let primary=null,reasons=[];
   if(jazz&&(answers.fixed||answers.unlimited||answers.origin==='digi'||answers.origin==='avatel'||jazzOnly||premium)){primary=jazz;if(answers.fixed)reasons.push('necesita teléfono fijo');if(answers.unlimited)reasons.push('necesita datos ilimitados');if(answers.origin==='digi')reasons.push('tiene oferta Anti-Digi');if(answers.origin==='avatel')reasons.push('origen Avatel');if(jazzOnly)reasons.push('ha elegido contenido exclusivo de Jazztel');if(premium)reasons.push(`Jazztel cubre los servicios por ${money(jazz.total)}, menos de lo que paga ahora`)}
   if(!primary&&lowiOnly&&lowi)primary=lowi;if(!primary&&simyoOnly&&simyo)primary=simyo;if(!primary&&lowi)primary=lowi;if(!primary&&simyo)primary=simyo;if(!primary&&jazz)primary=jazz;
