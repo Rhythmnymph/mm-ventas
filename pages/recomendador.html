@@ -189,17 +189,15 @@ function tvQuote(provider){
   return {monthly,included,missing,upfront:decoder?8.90:0};
 }
 function quoteJazztel(){
-  if(answers.origin==='jazztel')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),needUnlimited=!!answers.unlimited,plannedData=50;let base=0,pack='',actualSpeed=speed,extras=0;
+  if(answers.origin==='jazztel')return null;const lines=Number(answers.lines)||1,speed=String(answers.fiberSpeed),needUnlimited=!!answers.unlimited;let base=0,pack='',actualSpeed=speed,extras=0;
   if(answers.origin==='digi'){
     base=speed==='1000'?37.98:30.91;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas ilimitadas Anti-Digi`;extras=Math.max(0,lines-2)*8.84;
   }else if(needUnlimited){
-    if(lines===1){base=44.17;actualSpeed='600';pack='Fibra 600 MB + fijo + 1 línea ilimitada'}else{base=speed==='1000'?60.09:53.02;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas ilimitadas`;extras=Math.max(0,lines-2)*8.84}
-  }else if(lines<=2&&plannedData<=80&&speed==='600'){
-    base=33.56;pack='Fibra 600 MB + fijo + 2 líneas · 80 GB compartidos';
-  }else if(lines===1&&plannedData<=50){
-    base=35.33;actualSpeed='600';pack='Fibra 600 MB + fijo + 1 línea · 50 GB';
+    if(lines===1){base=speed==='1000'?42.40:35.33;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 1 línea ilimitada`}else{base=speed==='1000'?51.25:44.17;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas ilimitadas`;extras=Math.max(0,lines-2)*8.84}
+  }else if(lines<=2){
+    base=speed==='1000'?40.63:33.56;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas · 80 GB compartidos`;
   }else{
-    base=speed==='1000'?46.82:39.75;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas · 120 GB compartidos`;extras=Math.max(0,lines-2)*(plannedData<=80?5.31:7.96);
+    base=speed==='1000'?46.82:39.75;pack=`Fibra ${speed==='1000'?'1 GB':'600 MB'} + fijo + 2 líneas · 120 GB compartidos`;extras=Math.max(0,lines-2)*5.31;
   }
   const tv=tvQuote('jazztel'),total=base+extras+tv.monthly;const warnings=[];if(actualSpeed!==speed)warnings.push('Este paquete está disponible con 600 MB.');if(tv.missing.length)warnings.push('Sin '+tv.missing.join(', ')+'.');if(tv.upfront)warnings.push('Alta de decodificador: 8,90 € una sola vez. Promoción de contratación hasta el 31 de diciembre; precio promocional indicado hasta 2027.');if(answers.tv.includes('dazn_motor'))warnings.push('DAZN Motor pasa a 17,68 €/mes después de 12 meses.');
   return {provider:'Jazztel',accent:'#ffd23f',pack,total,stay:'12 meses',warnings,tv,equivalent:actualSpeed===speed&&tv.missing.length===0,link:'jazztel.html'};

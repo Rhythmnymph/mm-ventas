@@ -267,7 +267,7 @@
 <div class="topbar"><a class="back" id="backLink" href="../index.html" aria-label="Volver">‹</a><div><div class="top-sub">Calculadora dedicada</div><div class="top-title">Jazztel Pro</div></div></div>
 <div class="header">Calculadora <span>Jazztel</span> Pro</div>
 <div class="section"><span class="label">Tipo de contratación</span><div class="toggle-group"><button id="t-conv" class="toggle-btn active" onclick="setTipo('convergente')">Fibra + Móvil</button><button id="t-anti" class="toggle-btn" onclick="setTipo('antidigi')">Anti-DIGI</button><button id="t-fibra" class="toggle-btn" onclick="setTipo('solofibra')">Solo Fibra</button><button id="t-seg" class="toggle-btn" onclick="setTipo('segunda')">2ª Residencia</button></div>
-<div id="pack-block"><span class="label" style="margin-top:15px">Tarifa principal</span><div class="toggle-group"><button id="p-eco80" class="toggle-btn" onclick="setPack('eco80')">2 líneas · 80 GB Eco</button><button id="p-one50" class="toggle-btn" onclick="setPack('one50')">1 línea · 50 GB</button><button id="p-duo120" class="toggle-btn active" onclick="setPack('duo120')">2 líneas · 120 GB</button><button id="p-oneunl" class="toggle-btn" onclick="setPack('oneunl')">1 línea · Ilimitados</button><button id="p-duounl" class="toggle-btn" onclick="setPack('duounl')">2 líneas · Ilimitados</button></div></div>
+<div id="pack-block"><span class="label" style="margin-top:15px">Tarifa principal</span><div class="toggle-group"><button id="p-eco80" class="toggle-btn" onclick="setPack('eco80')">2 líneas · 80 GB Eco</button><button id="p-duo120" class="toggle-btn active" onclick="setPack('duo120')">2 líneas · 120 GB</button><button id="p-oneunl" class="toggle-btn" onclick="setPack('oneunl')">1 línea · Ilimitados</button><button id="p-duounl" class="toggle-btn" onclick="setPack('duounl')">2 líneas · Ilimitados</button></div></div>
 <div id="speed-block"><span class="label" style="margin-top:15px">Velocidad de fibra</span><div class="toggle-group"><button id="v300" class="toggle-btn" onclick="setVel('300')">300 MB</button><button id="v600" class="toggle-btn active" onclick="setVel('600')">600 MB</button><button id="v1000" class="toggle-btn" onclick="setVel('1000')">1 GB</button></div><div id="speed-note" class="subnote"></div></div>
 <div id="base-note" class="subnote">Incluye 2 líneas móviles y 120 GB compartidos.</div>
 <div id="second-extra" style="margin-top:12px"><span class="label">Servicios adicionales de fibra</span><div class="toggle-group"><button id="second-btn" class="toggle-btn" onclick="toggleSecond()">+ 2ª residencia 600 MB (13,22€)</button></div></div></div>
@@ -463,9 +463,9 @@ async function exportarPdfA4(idDocumento, nombreArchivo) {
     }
 }
 
-const PACKS={eco80:{name:'Jazz Duo 5G - 80GB Eco',lines:2,data:'80 GB compartidos (40 GB por línea)',kind:'shared',prices:{600:33.56,1000:40.63}},one50:{name:'Jazz ONE 5G - 50GB',lines:1,data:'50 GB',kind:'shared',prices:{600:35.33,1000:42.40}},duo120:{name:'Jazz Duo 5G - 120GB',lines:2,data:'120 GB compartidos (60 GB por línea)',kind:'shared',prices:{600:39.75,1000:46.82}},oneunl:{name:'Ilimitado 5G',lines:1,data:'Datos ilimitados',kind:'unlimited',prices:{600:44.17,1000:51.24}},duounl:{name:'Doblemente Ilimitado 5G',lines:2,data:'Datos ilimitados',kind:'unlimited',prices:{600:53.02,1000:60.09}}};
+const PACKS={eco80:{name:'Jazz Duo 5G - 80GB Eco',lines:2,data:'80 GB compartidos (40 GB por línea)',kind:'shared',prices:{600:33.56,1000:40.63}},duo120:{name:'Jazz Duo 5G - 120GB',lines:2,data:'120 GB compartidos (60 GB por línea)',kind:'shared',prices:{600:39.75,1000:46.82}},oneunl:{name:'Ilimitado 5G',lines:1,data:'Datos ilimitados',kind:'unlimited',prices:{600:35.33,1000:42.40}},duounl:{name:'Doblemente Ilimitado 5G',lines:2,data:'Datos ilimitados',kind:'unlimited',prices:{600:44.17,1000:51.25}}};
 const FIBER={300:17.64,600:22.95,1000:27.37},ANTI={600:30.91,1000:37.98},SECOND=13.22,CALLER_ID=1.77;const ADICS={shared:[{id:'20',name:'Línea adicional 20 GB',detail:'20 GB + llamadas ilimitadas',price:5.31},{id:'50',name:'Línea adicional 50 GB',detail:'50 GB + llamadas ilimitadas',price:7.96}],unlimited:[{id:'unl',name:'Línea adicional ilimitada',detail:'Datos y llamadas ilimitadas',price:8.84}]};
-let state={type:'convergente',pack:'duo120',speed:'600',qty:{20:0,50:0,unl:0},tv:{},tvOpen:false,postOpen:false,orange:false,football:false,second:false,callerId:false};try{Object.assign(state,JSON.parse(localStorage.getItem('mmv_jazztel_v2')||'{}'));if(state.football===true)state.football='football'}catch(e){}
+let state={type:'convergente',pack:'duo120',speed:'600',qty:{20:0,50:0,unl:0},tv:{},tvOpen:false,postOpen:false,orange:false,football:false,second:false,callerId:false};try{Object.assign(state,JSON.parse(localStorage.getItem('mmv_jazztel_v2')||'{}'));if(state.pack==='one50')state.pack='oneunl';if(!PACKS[state.pack])state.pack='duo120';if(state.football===true)state.football='football'}catch(e){}
 let report={};const euro=v=>Number(v).toFixed(2).replace('.',',')+'€';
 function applyRecommendation(){
   const params=new URLSearchParams(location.search);if(params.get('from')!=='recomendador')return;
@@ -478,7 +478,7 @@ function applyRecommendation(){
     if(a.service==='fiber')state.type='solofibra';
     else if(a.origin==='digi')state.type='antidigi';
     else if(/80 GB/i.test(packText))state.pack='eco80';
-    else if(/1 línea.*50 GB/i.test(packText))state.pack='one50';
+    else if(/1 línea.*50 GB/i.test(packText))state.pack='oneunl';
     else if(/1 línea ilimitada/i.test(packText))state.pack='oneunl';
     else if(/2 líneas ilimitadas/i.test(packText))state.pack='duounl';
     if(state.type==='convergente'&&!PACKS[state.pack].prices[state.speed])state.speed='600';
