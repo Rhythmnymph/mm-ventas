@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v25-1-datos-coherentes';
+const CACHE_NAME = 'mm-ventas-v25-2-jazztel-ilimitados';
 const CORE = [
   './',
   './index.html',
