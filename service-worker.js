@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v25-2-jazztel-ilimitados';
+const CACHE_NAME = 'mm-ventas-v25-4-luz-canarias-comparador';
 const CORE = [
   './',
   './index.html',
@@ -37,3 +37,4 @@ self.addEventListener('fetch', event => {
     }).catch(() => caches.match(req).then(cached => cached || caches.match('./index.html')))
   );
 });
+
