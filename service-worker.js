@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mm-ventas-v25-4-luz-canarias-comparador';
+const CACHE_NAME = 'mm-ventas-v25-5-version-visible';
 const CORE = [
   './',
   './index.html',
@@ -37,4 +37,5 @@ self.addEventListener('fetch', event => {
     }).catch(() => caches.match(req).then(cached => cached || caches.match('./index.html')))
   );
 });
+
 
